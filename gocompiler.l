@@ -14,7 +14,7 @@
 %}
 
 digit   [0-9]
-letter  [a-zA-Z] | "_"
+letter  [a-zA-Z]|"_"
 escape  \\z
 
 %X COMMENT STRING
@@ -91,7 +91,7 @@ type                                { reserved(); }
 
 {digit}+                            { printf("NATURAL(%s)\n", yytext); }
 {digit}*"."{digit}+                 { printf("DECIMAL(%s)\n", yytext); }
-{letter}+({letter}|{digit})*        { printf("IDENTIFIER(%s)\n", yytext); }
+{letter}({letter}|{digit})*         { printf("IDENTIFIER(%s)\n", yytext); }
 
 " "+                                { ; }
 "\t"+                               { ; }
