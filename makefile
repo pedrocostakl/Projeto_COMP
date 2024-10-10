@@ -1,8 +1,8 @@
 # Define variables
 LEX=lex
 CC=cc
-TARGET=lexer
-LEX_FILE=lexer.l
+TARGET=gocompiler
+LEX_FILE=gocompiler.l
 LEX_OUTPUT=lex.yy.c
 
 # Default rule, executed when `make` is run

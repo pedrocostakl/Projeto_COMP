@@ -21,8 +21,8 @@ escape  \\z
 
 %%
 
-/* Reserved keywords */
-else                                { printf("ELSE\n"); }
+
+else                                { printf("ELSE\n"); } /* Reserved keywords */
 for                                 { printf("FOR\n"); }
 if                                  { printf("IF\n"); }
 package                             { printf("PACKAGE\n"); }
@@ -30,8 +30,8 @@ return                              { printf("RETURN\n"); }
 var                                 { printf("VAR\n"); }
 func                                { printf("FUNC\n"); }
 
-/* Operators and punctuation */
-"+"                                 { printf("PLUS\n"); }
+
+"+"                                 { printf("PLUS\n"); } /* Operators and punctuation */
 "-"                                 { printf("MINUS\n"); }
 "*"                                 { printf("START\n"); }
 "/"                                 { printf("DIV\n"); }
@@ -43,32 +43,32 @@ func                                { printf("FUNC\n"); }
 "_"                                 { printf("BLANKID\n"); }
 ">"                                 { printf("GT\n"); }
 "<"                                 { printf("LT\n"); }
-"%"                                 { printf("MOD\n); }
+"%"                                 { printf("MOD\n"); }
 "!"                                 { printf("NOT\n"); }
 "{"                                 { printf("LBRACE\n"); }
 "}"                                 { printf("RBRACE\n"); }
 "["                                 { printf("LSQ\n"); }
 "]"                                 { printf("RSQ\n"); }
-==                                  { printf("EQUAL\n"); }
->=                                  { printf("GE\n"); }
-<=                                  { printf("LE\n); }
-!=                                  { printf("NE\n); }
-&&                                  { printf("AND\n); }
-||                                  { printf(OR\n); }
+"=="                                  { printf("EQUAL\n"); }
+">="                                  { printf("GE\n"); }
+"<="                                  { printf("LE\n"); }
+"!="                                  { printf("NE\n"); }
+"&&"                                  { printf("AND\n"); }
+"||"                                  { printf("OR\n"); }
 
-/* Types */
-int                                 { printf("INT\n"); }
+
+int                                 { printf("INT\n"); } /* Types */
 float32                             { printf("FLOAT32\n"); }
 bool                                { printf("BOOL\n"); }
 string                              { printf("STRING\n"); }
 
-/* Functions */
-fmt.Println                         { printf("PRINT\n"); }
+
+fmt.Println                         { printf("PRINT\n"); } /* Functions */
 strconv.Atoi                        { printf("PARSEINT\n"); }
 os.Args                             { printf("ARGS\n"); }
 
-/* Reserved keywords */
-break                               { reserved(); }
+
+break                               { reserved(); } /* Reserved keywords */
 case                                { reserved(); }
 chan                                { reserved(); }
 const                               { reserved(); }
@@ -86,8 +86,8 @@ select                              { reserved(); }
 struct                              { reserved(); }
 switch                              { reserved(); }
 type                                { reserved(); }
-++                                  { reserved(); }
---                                  { reserved(); }
+"++"                                  { reserved(); }
+"--"                                  { reserved(); }
 
 integer                             { printf("INTEGER\n"); }
 double                              { printf("DOUBLE\n"); }
@@ -140,6 +140,6 @@ void newline() {
     column = 1;
 }
 
-void reserved() {
+void reserved(){
     printf("RESERVED\n");
 }
