@@ -89,11 +89,6 @@ type                                { reserved(); }
 "++"                                  { reserved(); }
 "--"                                  { reserved(); }
 
-integer                             { printf("INTEGER\n"); }
-double                              { printf("DOUBLE\n"); }
-
-
-
 {digit}+                            { printf("NATURAL(%s)\n", yytext); }
 {digit}*"."{digit}+                 { printf("DECIMAL(%s)\n", yytext); }
 {letter}+({letter}|{digit})*        { printf("IDENTIFIER(%s)\n", yytext); }
