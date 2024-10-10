@@ -21,7 +21,7 @@ escape  \\z
 
 %%
 
-/* Reserved keywords */
+
 else                                { printf("ELSE\n"); }
 for                                 { printf("FOR\n"); }
 if                                  { printf("IF\n"); }
@@ -30,7 +30,7 @@ return                              { printf("RETURN\n"); }
 var                                 { printf("VAR\n"); }
 func                                { printf("FUNC\n"); }
 
-/* Operators and punctuation */
+
 "+"                                 { printf("PLUS\n"); }
 "-"                                 { printf("MINUS\n"); }
 "*"                                 { printf("START\n"); }
@@ -56,18 +56,18 @@ func                                { printf("FUNC\n"); }
 &&                                  { printf("AND\n); }
 ||                                  { printf(OR\n); }
 
-/* Types */
+
 int                                 { printf("INT\n"); }
 float32                             { printf("FLOAT32\n"); }
 bool                                { printf("BOOL\n"); }
 string                              { printf("STRING\n"); }
 
-/* Functions */
+
 fmt.Println                         { printf("PRINT\n"); }
 strconv.Atoi                        { printf("PARSEINT\n"); }
 os.Args                             { printf("ARGS\n"); }
 
-/* Reserved keywords */
+
 break                               { reserved(); }
 case                                { reserved(); }
 chan                                { reserved(); }
@@ -88,11 +88,6 @@ switch                              { reserved(); }
 type                                { reserved(); }
 ++                                  { reserved(); }
 --                                  { reserved(); }
-
-integer                             { printf("INTEGER\n"); }
-double                              { printf("DOUBLE\n"); }
-
-
 
 {digit}+                            { printf("NATURAL(%s)\n", yytext); }
 {digit}*"."{digit}+                 { printf("DECIMAL(%s)\n", yytext); }
