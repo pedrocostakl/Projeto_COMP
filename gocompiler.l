@@ -33,7 +33,7 @@ func                                { printf("FUNC\n"); }
 
 "+"                                 { printf("PLUS\n"); } /* Operators and punctuation */
 "-"                                 { printf("MINUS\n"); }
-"*"                                 { printf("START\n"); }
+"*"                                 { printf("STAR\n"); }
 "/"                                 { printf("DIV\n"); }
 "("                                 { printf("LPAR\n"); }
 ")"                                 { printf("RPAR\n"); }
@@ -49,7 +49,7 @@ func                                { printf("FUNC\n"); }
 "}"                                 { printf("RBRACE\n"); }
 "["                                 { printf("LSQ\n"); }
 "]"                                 { printf("RSQ\n"); }
-"=="                                  { printf("EQUAL\n"); }
+"=="                                  { printf("EQ\n"); }
 ">="                                  { printf("GE\n"); }
 "<="                                  { printf("LE\n"); }
 "!="                                  { printf("NE\n"); }
@@ -65,7 +65,7 @@ string                              { printf("STRING\n"); }
 
 fmt.Println                         { printf("PRINT\n"); } /* Functions */
 strconv.Atoi                        { printf("PARSEINT\n"); }
-os.Args                             { printf("ARGS\n"); }
+os.Args                             { printf("CMDARGS\n"); }
 
 
 break                               { reserved(); } /* Reserved keywords */
@@ -89,8 +89,19 @@ type                                { reserved(); }
 "++"                                  { reserved(); }
 "--"                                  { reserved(); }
 
-{digit}+                            { printf("NATURAL(%s)\n", yytext); }
 {digit}*"."{digit}+                 { printf("DECIMAL(%s)\n", yytext); }
+{digit}+"."{digit}*                 { printf("DECIMAL(%s)\n", yytext); }
+{digit}*"."{digit}*[e|E][-|+]?{digit}+                 { printf("DECIMAL(%s)\n", yytext); }
+{digit}+[e|E][-|+]?{digit}+                 { printf("DECIMAL(%s)\n", yytext); }
+
+
+
+[0][1-8]*[0-8]*                          { printf("NATURAL(%s)\n", yytext); }
+[1-9]{digit}*                            { printf("NATURAL(%s)\n", yytext); } /*naturals nao começam com 0 devido aos octais*/
+[0x|0X]([a-fA-F])+                  { printf("NATURAL(%s)\n", yytext); }
+
+
+
 {letter}({letter}|{digit})*         { printf("IDENTIFIER(%s)\n", yytext); }
 
 " "+                                { ; }
@@ -107,7 +118,7 @@ type                                { reserved(); }
 <STRING>\"                          { BEGIN(INITIAL); }
 <STRING>\\[fnrt\\\"]                { ; }
 <STRING>\\[^fnrt\\\"]               { printf("Line %d, column %d: invalid escape sequence (%s)\n", line, tok_column, yytext); }
-<STRING>[^\\\n]*                    { printf("STRLIT(%s)\n", yytext); }
+<STRING>[^\\\n"]*                    { printf("STRLIT(%s)\n", yytext); }
 <STRING>\n                          { newline(); BEGIN(INITIAL); }
 
 .                                   { printf("Line %d, column %d: unrecognized character (%s)\n", line, tok_column, yytext); }
