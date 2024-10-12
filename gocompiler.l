@@ -22,7 +22,7 @@ escape  \\z
 
 %%
 
-
+"//".*                             { /* Ignore the comment until the end of the line */ }
 else                                { if (print_tokens) printf("ELSE\n"); } /* Reserved keywords */
 for                                 { if (print_tokens) printf("FOR\n"); }
 if                                  { if (print_tokens) printf("IF\n"); }
@@ -122,7 +122,7 @@ type                                { reserved(); }
 <STRING>[^\\\n"]*                    { if (print_tokens) printf("STRLIT(%s)\n", yytext); }
 <STRING>\n                          { newline(); BEGIN(INITIAL); }
 
-.                                   { printf("Line %d, column %d: unrecognized character (%s)\n", line, tok_column, yytext); }
+.                                   { printf("Line %d, column %d: illegal character (%s)\n", line, tok_column, yytext); }
 
 %%
 
