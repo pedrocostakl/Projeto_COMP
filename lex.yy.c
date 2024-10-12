@@ -671,6 +671,7 @@ char *yytext;
     int line = 1;
     int column = 1;
     int tok_column = 1;
+    int print_tokens = 0;  /* Global flag to print tokens if -l is passed */
 
     void user_action();
     void newline();
@@ -678,9 +679,9 @@ char *yytext;
 
     #define YY_USER_ACTION user_action();
 
-#line 682 "lex.yy.c"
+#line 683 "lex.yy.c"
 
-#line 684 "lex.yy.c"
+#line 685 "lex.yy.c"
 
 #define INITIAL 0
 #define COMMENT 1
@@ -899,11 +900,11 @@ YY_DECL
 		}
 
 	{
-#line 22 "gocompiler.l"
+#line 23 "gocompiler.l"
 
 
 
-#line 907 "lex.yy.c"
+#line 908 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -962,419 +963,419 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 25 "gocompiler.l"
-{ printf("ELSE\n"); } /* Reserved keywords */
+#line 26 "gocompiler.l"
+{ if (print_tokens) printf("ELSE\n"); } /* Reserved keywords */
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 26 "gocompiler.l"
-{ printf("FOR\n"); }
+#line 27 "gocompiler.l"
+{ if (print_tokens) printf("FOR\n"); }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 27 "gocompiler.l"
-{ printf("IF\n"); }
+#line 28 "gocompiler.l"
+{ if (print_tokens) printf("IF\n"); }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 28 "gocompiler.l"
-{ printf("PACKAGE\n"); }
+#line 29 "gocompiler.l"
+{ if (print_tokens) printf("PACKAGE\n"); }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 29 "gocompiler.l"
-{ printf("RETURN\n"); }
+#line 30 "gocompiler.l"
+{ if (print_tokens) printf("RETURN\n"); }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 30 "gocompiler.l"
-{ printf("VAR\n"); }
+#line 31 "gocompiler.l"
+{ if (print_tokens) printf("VAR\n"); }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 31 "gocompiler.l"
-{ printf("FUNC\n"); }
+#line 32 "gocompiler.l"
+{ if (print_tokens) printf("FUNC\n"); }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 34 "gocompiler.l"
-{ printf("PLUS\n"); } /* Operators and punctuation */
+#line 35 "gocompiler.l"
+{ if (print_tokens) printf("PLUS\n"); } /* Operators and punctuation */
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 35 "gocompiler.l"
-{ printf("MINUS\n"); }
+#line 36 "gocompiler.l"
+{ if (print_tokens) printf("MINUS\n"); }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 36 "gocompiler.l"
-{ printf("STAR\n"); }
+#line 37 "gocompiler.l"
+{ if (print_tokens) printf("STAR\n"); }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 37 "gocompiler.l"
-{ printf("DIV\n"); }
+#line 38 "gocompiler.l"
+{ if (print_tokens) printf("DIV\n"); }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 38 "gocompiler.l"
-{ printf("LPAR\n"); }
+#line 39 "gocompiler.l"
+{ if (print_tokens) printf("LPAR\n"); }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 39 "gocompiler.l"
-{ printf("RPAR\n"); }
+#line 40 "gocompiler.l"
+{ if (print_tokens) printf("RPAR\n"); }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 40 "gocompiler.l"
-{ printf("ASSIGN\n"); }
+#line 41 "gocompiler.l"
+{ if (print_tokens) printf("ASSIGN\n"); }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 41 "gocompiler.l"
-{ printf("COMMA\n"); }
+#line 42 "gocompiler.l"
+{ if (print_tokens) printf("COMMA\n"); }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 42 "gocompiler.l"
-{ printf("SEMICOLON\n"); }
+#line 43 "gocompiler.l"
+{ if (print_tokens) printf("SEMICOLON\n"); }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 43 "gocompiler.l"
-{ printf("BLANKID\n"); }
+#line 44 "gocompiler.l"
+{ if (print_tokens) printf("BLANKID\n"); }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 44 "gocompiler.l"
-{ printf("GT\n"); }
+#line 45 "gocompiler.l"
+{ if (print_tokens) printf("GT\n"); }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 45 "gocompiler.l"
-{ printf("LT\n"); }
+#line 46 "gocompiler.l"
+{ if (print_tokens) printf("LT\n"); }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 46 "gocompiler.l"
-{ printf("MOD\n"); }
+#line 47 "gocompiler.l"
+{ if (print_tokens) printf("MOD\n"); }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 47 "gocompiler.l"
-{ printf("NOT\n"); }
+#line 48 "gocompiler.l"
+{ if (print_tokens) printf("NOT\n"); }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 48 "gocompiler.l"
-{ printf("LBRACE\n"); }
+#line 49 "gocompiler.l"
+{ if (print_tokens) printf("LBRACE\n"); }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 49 "gocompiler.l"
-{ printf("RBRACE\n"); }
+#line 50 "gocompiler.l"
+{if (print_tokens)  printf("RBRACE\n"); }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 50 "gocompiler.l"
-{ printf("LSQ\n"); }
+#line 51 "gocompiler.l"
+{ if (print_tokens) printf("LSQ\n"); }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 51 "gocompiler.l"
-{ printf("RSQ\n"); }
+#line 52 "gocompiler.l"
+{ if (print_tokens) printf("RSQ\n"); }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 52 "gocompiler.l"
-{ printf("EQ\n"); }
+#line 53 "gocompiler.l"
+{ if (print_tokens) printf("EQ\n"); }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 53 "gocompiler.l"
-{ printf("GE\n"); }
+#line 54 "gocompiler.l"
+{ if (print_tokens) printf("GE\n"); }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 54 "gocompiler.l"
-{ printf("LE\n"); }
+#line 55 "gocompiler.l"
+{ if (print_tokens) printf("LE\n"); }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 55 "gocompiler.l"
-{ printf("NE\n"); }
+#line 56 "gocompiler.l"
+{ if (print_tokens) printf("NE\n"); }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 56 "gocompiler.l"
-{ printf("AND\n"); }
+#line 57 "gocompiler.l"
+{ if (print_tokens) printf("AND\n"); }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 57 "gocompiler.l"
-{ printf("OR\n"); }
+#line 58 "gocompiler.l"
+{ if (print_tokens) printf("OR\n"); }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 60 "gocompiler.l"
-{ printf("INT\n"); } /* Types */
+#line 61 "gocompiler.l"
+{ if (print_tokens) printf("INT\n"); } /* Types */
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 61 "gocompiler.l"
-{ printf("FLOAT32\n"); }
+#line 62 "gocompiler.l"
+{ if (print_tokens) printf("FLOAT32\n"); }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 62 "gocompiler.l"
-{ printf("BOOL\n"); }
+#line 63 "gocompiler.l"
+{ if (print_tokens) printf("BOOL\n"); }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 63 "gocompiler.l"
-{ printf("STRING\n"); }
+#line 64 "gocompiler.l"
+{ if (print_tokens) printf("STRING\n"); }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 66 "gocompiler.l"
-{ printf("PRINT\n"); } /* Functions */
+#line 67 "gocompiler.l"
+{ if (print_tokens) printf("PRINT\n"); } /* Functions */
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 67 "gocompiler.l"
-{ printf("PARSEINT\n"); }
+#line 68 "gocompiler.l"
+{ if (print_tokens) printf("PARSEINT\n"); }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 68 "gocompiler.l"
-{ printf("CMDARGS\n"); }
+#line 69 "gocompiler.l"
+{ if (print_tokens) printf("CMDARGS\n"); }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 71 "gocompiler.l"
+#line 72 "gocompiler.l"
 { reserved(); } /* Reserved keywords */
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 72 "gocompiler.l"
+#line 73 "gocompiler.l"
 { reserved(); }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 73 "gocompiler.l"
+#line 74 "gocompiler.l"
 { reserved(); }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 74 "gocompiler.l"
+#line 75 "gocompiler.l"
 { reserved(); }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 75 "gocompiler.l"
+#line 76 "gocompiler.l"
 { reserved(); }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 76 "gocompiler.l"
+#line 77 "gocompiler.l"
 { reserved(); }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 77 "gocompiler.l"
+#line 78 "gocompiler.l"
 { reserved(); }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 78 "gocompiler.l"
+#line 79 "gocompiler.l"
 { reserved(); }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 79 "gocompiler.l"
+#line 80 "gocompiler.l"
 { reserved(); }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 80 "gocompiler.l"
+#line 81 "gocompiler.l"
 { reserved(); }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 81 "gocompiler.l"
+#line 82 "gocompiler.l"
 { reserved(); }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 82 "gocompiler.l"
+#line 83 "gocompiler.l"
 { reserved(); }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 83 "gocompiler.l"
+#line 84 "gocompiler.l"
 { reserved(); }
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 84 "gocompiler.l"
+#line 85 "gocompiler.l"
 { reserved(); }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 85 "gocompiler.l"
+#line 86 "gocompiler.l"
 { reserved(); }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 86 "gocompiler.l"
+#line 87 "gocompiler.l"
 { reserved(); }
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 87 "gocompiler.l"
+#line 88 "gocompiler.l"
 { reserved(); }
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 88 "gocompiler.l"
+#line 89 "gocompiler.l"
 { reserved(); }
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 89 "gocompiler.l"
+#line 90 "gocompiler.l"
 { reserved(); }
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 90 "gocompiler.l"
+#line 91 "gocompiler.l"
 { reserved(); }
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 92 "gocompiler.l"
-{ printf("DECIMAL(%s)\n", yytext); }
+#line 93 "gocompiler.l"
+{ if (print_tokens) printf("DECIMAL(%s)\n", yytext); }
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 93 "gocompiler.l"
-{ printf("DECIMAL(%s)\n", yytext); }
+#line 94 "gocompiler.l"
+{ if (print_tokens) printf("DECIMAL(%s)\n", yytext); }
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 94 "gocompiler.l"
-{ printf("DECIMAL(%s)\n", yytext); }
+#line 95 "gocompiler.l"
+{ if (print_tokens) printf("DECIMAL(%s)\n", yytext); }
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 95 "gocompiler.l"
-{ printf("DECIMAL(%s)\n", yytext); }
+#line 96 "gocompiler.l"
+{ if (print_tokens) printf("DECIMAL(%s)\n", yytext); }
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 99 "gocompiler.l"
-{ printf("NATURAL(%s)\n", yytext); }
+#line 100 "gocompiler.l"
+{ if (print_tokens) printf("NATURAL(%s)\n", yytext); }
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 100 "gocompiler.l"
-{ printf("NATURAL(%s)\n", yytext); } /*naturals nao começam com 0 devido aos octais*/
+#line 101 "gocompiler.l"
+{ if (print_tokens) printf("NATURAL(%s)\n", yytext); } /*naturals nao começam com 0 devido aos octais*/
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 101 "gocompiler.l"
-{ printf("NATURAL(%s)\n", yytext); }
+#line 102 "gocompiler.l"
+{ if (print_tokens) printf("NATURAL(%s)\n", yytext); }
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 105 "gocompiler.l"
-{ printf("IDENTIFIER(%s)\n", yytext); }
+#line 106 "gocompiler.l"
+{ if (print_tokens) printf("IDENTIFIER(%s)\n", yytext); }
 	YY_BREAK
 case 67:
-YY_RULE_SETUP
-#line 107 "gocompiler.l"
-{ ; }
-	YY_BREAK
-case 68:
 YY_RULE_SETUP
 #line 108 "gocompiler.l"
 { ; }
 	YY_BREAK
-case 69:
+case 68:
 YY_RULE_SETUP
 #line 109 "gocompiler.l"
+{ ; }
+	YY_BREAK
+case 69:
+YY_RULE_SETUP
+#line 110 "gocompiler.l"
 { ; }
 	YY_BREAK
 case 70:
 /* rule 70 can match eol */
 YY_RULE_SETUP
-#line 110 "gocompiler.l"
+#line 111 "gocompiler.l"
 { newline(); }
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 112 "gocompiler.l"
+#line 113 "gocompiler.l"
 { BEGIN(COMMENT); }
 	YY_BREAK
 case 72:
 YY_RULE_SETUP
-#line 113 "gocompiler.l"
+#line 114 "gocompiler.l"
 { ; }
 	YY_BREAK
 case 73:
 /* rule 73 can match eol */
 YY_RULE_SETUP
-#line 114 "gocompiler.l"
+#line 115 "gocompiler.l"
 { newline(); }
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
-#line 115 "gocompiler.l"
+#line 116 "gocompiler.l"
 { BEGIN(INITIAL); }
 	YY_BREAK
 case 75:
 YY_RULE_SETUP
-#line 117 "gocompiler.l"
+#line 118 "gocompiler.l"
 { BEGIN(STRING); }
 	YY_BREAK
 case 76:
 YY_RULE_SETUP
-#line 118 "gocompiler.l"
+#line 119 "gocompiler.l"
 { BEGIN(INITIAL); }
 	YY_BREAK
 case 77:
 YY_RULE_SETUP
-#line 119 "gocompiler.l"
+#line 120 "gocompiler.l"
 { ; }
 	YY_BREAK
 case 78:
 /* rule 78 can match eol */
 YY_RULE_SETUP
-#line 120 "gocompiler.l"
+#line 121 "gocompiler.l"
 { printf("Line %d, column %d: invalid escape sequence (%s)\n", line, tok_column, yytext); }
 	YY_BREAK
 case 79:
 YY_RULE_SETUP
-#line 121 "gocompiler.l"
-{ printf("STRLIT(%s)\n", yytext); }
+#line 122 "gocompiler.l"
+{ if (print_tokens) printf("STRLIT(%s)\n", yytext); }
 	YY_BREAK
 case 80:
 /* rule 80 can match eol */
 YY_RULE_SETUP
-#line 122 "gocompiler.l"
+#line 123 "gocompiler.l"
 { newline(); BEGIN(INITIAL); }
 	YY_BREAK
 case 81:
 YY_RULE_SETUP
-#line 124 "gocompiler.l"
+#line 125 "gocompiler.l"
 { printf("Line %d, column %d: unrecognized character (%s)\n", line, tok_column, yytext); }
 	YY_BREAK
 case 82:
 YY_RULE_SETUP
-#line 126 "gocompiler.l"
+#line 127 "gocompiler.l"
 ECHO;
 	YY_BREAK
-#line 1378 "lex.yy.c"
+#line 1379 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(COMMENT):
 case YY_STATE_EOF(STRING):
@@ -2381,15 +2382,19 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 126 "gocompiler.l"
+#line 127 "gocompiler.l"
 
 
 extern int yylex();
 
-int main() {
-    yylex();    /* run the lexical analysis automaton */
+int main(int argc, char **argv) {
+    if (argc > 1 && strcmp(argv[1], "-l") == 0) {
+        print_tokens = 1;  /* Enable token printing if -l option is passed */
+    }
+    yylex();  /* Run the lexical analysis automaton */
     return 0;
 }
+
 
 int yywrap() {  /* called on EOF, return 1 to terminate */
     return 1;
@@ -2406,5 +2411,8 @@ void newline() {
 }
 
 void reserved(){
-    printf("RESERVED\n");
+  if (print_tokens) {
+        printf("RESERVED\n");
+    }
 }
+
