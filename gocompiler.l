@@ -1,4 +1,9 @@
 %{
+    /*
+    ** --
+    **  Marco Manuel Almeida e Silva - 2021211653
+    */
+
     /* place here any C variables and definitions */
 
     #include <stdarg.h>
@@ -163,8 +168,6 @@ void newline() {
 }
 
 void reserved(){
-    if (print_tokens) {
-        printf("RESERVED\n");
-    }
+    print_token("RESERVED(%s)", yytext);
     emit_semicolon = 0;
 }
