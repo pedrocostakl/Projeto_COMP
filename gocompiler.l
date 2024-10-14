@@ -24,8 +24,11 @@
 
 %}
 
-digit   [0-9]
-letter  [a-zA-Z]|"_"
+unicode_letter    [a-zA-Z]
+letter            {unicode_letter}|"_"
+digit             [0-9]
+octal_digit       [0-7]
+hex_digit         {digit}|{unicode_letter}
 escape  \\z
 
 %X COMMENT STRING
@@ -101,9 +104,9 @@ type                                                   { reserved(); }
 {digit}*"."{digit}*[e|E][-|+]?{digit}+                 { if (print_tokens) printf("DECIMAL(%s)\n", yytext); emit_semicolon = 1; }
 {digit}+[e|E][-|+]?{digit}+                            { if (print_tokens) printf("DECIMAL(%s)\n", yytext); emit_semicolon = 1; }
 
-[0][1-8]*[0-8]*                                        { if (print_tokens) printf("NATURAL(%s)\n", yytext); emit_semicolon = 1; }
 [1-9]{digit}*                                          { if (print_tokens) printf("NATURAL(%s)\n", yytext); emit_semicolon = 1; } /*naturals nao começam com 0 devido aos octais*/
-[0x|0X]([a-fA-F])+                                     { if (print_tokens) printf("NATURAL(%s)\n", yytext); emit_semicolon = 1; }
+[0x|0X]{hex_digit}+                                    { if (print_tokens) printf("NATURAL(%s)\n", yytext); emit_semicolon = 1; }
+[0]{octal_digit}*                                      { if (print_tokens) printf("NATURAL(%s)\n", yytext); emit_semicolon = 1; }
 
 {letter}({letter}|{digit})*                            { if (print_tokens) printf("IDENTIFIER(%s)\n", yytext); emit_semicolon = 1; }
 
