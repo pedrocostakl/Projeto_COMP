@@ -1,0 +1,13 @@
+PACKAGE
+IDENTIFIER(main)
+SEMICOLON
+FUNC
+IDENTIFIER(main)
+LPAR
+RPAR
+Line 6, column 13: illegal character ($)
+SEMICOLON
+VAR
+Line 7, column 7: illegal character ($)
+INT
+Line 8, column 1: illegal character ($)
