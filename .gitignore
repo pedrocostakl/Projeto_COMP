@@ -2,6 +2,3 @@ lexer
 gocompiler
 lex.yy.c
 makefile.txt
-
-*.dgo
-*.out
