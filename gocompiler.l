@@ -12,6 +12,8 @@
     int line = 1;
     int column = 1;
     int tok_column = 1;
+    int comment_line = 0;
+    int comment_column = 0;
     int print_tokens = 0;  /* Global flag to print tokens if -l is passed */
     int emit_semicolon = 0; /* Used to know when to omit semicolons */
 
@@ -36,6 +38,7 @@ escape  \\z
 %%
 
 "//".*                                                 { /* Ignore the comment until the end of the line */ }
+
 else                                                   { if (print_tokens) printf("ELSE\n"); emit_semicolon = 0; } /* Reserved keywords */
 for                                                    { if (print_tokens) printf("FOR\n"); emit_semicolon = 0; }
 if                                                     { if (print_tokens) printf("IF\n"); emit_semicolon = 0; }
@@ -115,10 +118,11 @@ type                                                   { reserved(); }
 "\r"                                                   { ; }
 "\n"                                                   { newline(); }
 
-"/*"                                                   { BEGIN(COMMENT); }
+"/*"                                                   { BEGIN(COMMENT); comment_line = line; comment_column = tok_column; }
 <COMMENT>.                                             { ; }
 <COMMENT>"\n"                                          { newline(); }
 <COMMENT>"*/"                                          { BEGIN(INITIAL); }
+<COMMENT><<EOF>>                                       { BEGIN(INITIAL); printf("Line %d, column %d: unterminated comment\n", comment_line, comment_column); }
 
 \"                                                     { BEGIN(STRING); }
 <STRING>\"                                             { BEGIN(INITIAL); }
