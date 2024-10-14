@@ -49,12 +49,12 @@ func                                { printf("FUNC\n"); }
 "}"                                 { printf("RBRACE\n"); }
 "["                                 { printf("LSQ\n"); }
 "]"                                 { printf("RSQ\n"); }
-"=="                                  { printf("EQUAL\n"); }
-">="                                  { printf("GE\n"); }
-"<="                                  { printf("LE\n"); }
-"!="                                  { printf("NE\n"); }
-"&&"                                  { printf("AND\n"); }
-"||"                                  { printf("OR\n"); }
+"=="                                { printf("EQUAL\n"); }
+">="                                { printf("GE\n"); }
+"<="                                { printf("LE\n"); }
+"!="                                { printf("NE\n"); }
+"&&"                                { printf("AND\n"); }
+"||"                                { printf("OR\n"); }
 
 
 int                                 { printf("INT\n"); } /* Types */
@@ -86,8 +86,8 @@ select                              { reserved(); }
 struct                              { reserved(); }
 switch                              { reserved(); }
 type                                { reserved(); }
-"++"                                  { reserved(); }
-"--"                                  { reserved(); }
+"++"                                { reserved(); }
+"--"                                { reserved(); }
 
 {digit}+                            { printf("NATURAL(%s)\n", yytext); }
 {digit}*"."{digit}+                 { printf("DECIMAL(%s)\n", yytext); }
