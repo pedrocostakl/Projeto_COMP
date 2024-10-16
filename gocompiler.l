@@ -37,7 +37,7 @@ unicode_letter    [a-zA-Z]
 letter            {unicode_letter}|"_"
 digit             [0-9]
 octal_digit       [0-7]
-hex_digit         {digit}|{unicode_letter}
+hex_digit         {digit}|[a-fA-F]
 escape  \\z
 
 %X COMMENT STRING
