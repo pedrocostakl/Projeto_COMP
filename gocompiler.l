@@ -129,7 +129,7 @@ type                                                   { reserved(); }
 <COMMENT>.                                             { ; }
 <COMMENT>"\n"                                          { newline(); }
 <COMMENT>"*/"                                          { BEGIN(INITIAL); }
-<COMMENT><<EOF>>                                       { BEGIN(INITIAL); printf("Line %d, column %d: unterminated comment\n", comment_line, comment_column); }
+<COMMENT><<EOF>>                                       { user_action(); BEGIN(INITIAL); printf("Line %d, column %d: unterminated comment\n", comment_line, comment_column); }
 
 \"                          { BEGIN(STRING); string_initial_column = tok_column; temp_string[0] = '\0'; invalid_esc_chr = 0;}
 
