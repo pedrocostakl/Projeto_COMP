@@ -22,8 +22,10 @@
 
     void user_action();
     void print_token(const char *tok, ...);
+    void emit_semicolon_if_needed();
     void newline();
     void reserved();
+
 
     char  temp_string [1000] ;
 
@@ -129,13 +131,13 @@ type                                                   { reserved(); }
 <COMMENT>.                                             { ; }
 <COMMENT>"\n"                                          { newline(); }
 <COMMENT>"*/"                                          { BEGIN(INITIAL); }
-<COMMENT><<EOF>>                                       { user_action(); BEGIN(INITIAL); printf("Line %d, column %d: unterminated comment\n", comment_line, comment_column); }
+<COMMENT><<EOF>>                                       { user_action(); BEGIN(INITIAL); printf("Line %d, column %d: unterminated comment\n", comment_line, comment_column); emit_semicolon = 0;}
 
 \"                          { BEGIN(STRING); string_initial_column = tok_column; temp_string[0] = '\0'; invalid_esc_chr = 0;}
 
-<STRING>\"                   { BEGIN(INITIAL); if (print_tokens) if (!invalid_esc_chr) printf("STRLIT(\"%s\")\n", temp_string); emit_semicolon = 1; }
+<STRING>\"                   { BEGIN(INITIAL); if (print_tokens) if (!invalid_esc_chr) printf("STRLIT(\"%s\")\n", temp_string); if(!invalid_esc_chr) emit_semicolon = 1; }
 
-<STRING>\n                 { BEGIN(INITIAL); printf("Line %d, column %d: unterminated string literal\n", line, string_initial_column); newline(); }
+<STRING>\n                 { BEGIN(INITIAL); printf("Line %d, column %d: unterminated string literal\n", line, string_initial_column); emit_semicolon = 0; newline();}
 
 <STRING>\\[fnrt\\\"]          { strcat(temp_string, yytext); }  /* Valid escape sequences: \f, \n, \r, \t, \\, \" */
 
@@ -146,7 +148,7 @@ type                                                   { reserved(); }
 <STRING>.                     { printf("Line %d, column %d: illegal character in string literal (%s)\n", line, tok_column, yytext); }  /* Handle any illegal characters */
 <STRING><<EOF>>              { user_action(); BEGIN(INITIAL); printf("Line %d, column %d: unterminated string literal\n", line, string_initial_column); }
 
-
+<<EOF>>                                { emit_semicolon_if_needed(); return 0; }  /* Handle end of file */
 .                                                      { printf("Line %d, column %d: illegal character (%s)\n", line, tok_column, yytext); }
 
 %%
@@ -177,6 +179,12 @@ void print_token(const char *tok, ...) {
         vprintf(tok, args);
         printf("\n");
         va_end(args);
+    }
+}
+void emit_semicolon_if_needed() {
+    if (emit_semicolon) {
+        printf("SEMICOLON\n");  /* Emit a semicolon if the last token requires it */
+        emit_semicolon = 0;     /* Reset the flag */
     }
 }
 
