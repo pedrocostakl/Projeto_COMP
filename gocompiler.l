@@ -109,10 +109,9 @@ type                                                   { reserved(); }
 {digit}+[e|E][-|+]?{digit}+                            { if (print_tokens) printf("DECIMAL(%s)\n", yytext); emit_semicolon = 1; }
 
 [1-9]{digit}*                                          { if (print_tokens) printf("NATURAL(%s)\n", yytext); emit_semicolon = 1; } /*naturals nao começam com 0 devido aos octais*/
-[0x|0X]{hex_digit}+                                    { if (print_tokens) printf("NATURAL(%s)\n", yytext); emit_semicolon = 1; }
 [0][x|X]{hex_digit}+                                   { if (print_tokens) printf("NATURAL(%s)\n", yytext); emit_semicolon = 1; }
 [0]{octal_digit}*                                      { if (print_tokens) printf("NATURAL(%s)\n", yytext); emit_semicolon = 1; }
-
+[0]{digit}*                                            { printf("Line %d, column %d: invalid octal constant (%s)\n", line, tok_column, yytext); }
 
 {letter}({letter}|{digit})*                            { if (print_tokens) printf("IDENTIFIER(%s)\n", yytext); emit_semicolon = 1; }
 
