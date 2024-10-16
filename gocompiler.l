@@ -124,7 +124,7 @@ type                                                   { reserved(); }
 " "+                                                   { ; }
 "\t"+                                                  { ; }
 "\r"                                                   { ; }
-"\n"                                                   { newline(); }
+"\n"                                                   { newline(); emit_semicolon_if_needed(); }
 
 "/*"                                                   { BEGIN(COMMENT); comment_line = line; comment_column = tok_column; }
 <COMMENT>.                                             { ; }
@@ -190,11 +190,6 @@ void emit_semicolon_if_needed() {
 void newline() {
     line++;
     column = 1;
-
-    if (emit_semicolon) {
-        print_token("SEMICOLON");
-        emit_semicolon = 0;
-    }
 }
 
 void reserved(){
