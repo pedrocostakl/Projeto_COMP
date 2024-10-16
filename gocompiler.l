@@ -124,7 +124,7 @@ type                                                   { reserved(); }
 <COMMENT>.                                             { ; }
 <COMMENT>"\n"                                          { newline(); }
 <COMMENT>"*/"                                          { BEGIN(INITIAL); }
-<COMMENT><<EOF>>                                       { BEGIN(INITIAL); printf("Line %d, column %d: unterminated comment\n", comment_line, comment_column); }
+<COMMENT><<EOF>>                                       { user_action(); BEGIN(INITIAL); printf("Line %d, column %d: unterminated comment\n", comment_line, comment_column); }
 
 \"                                                     { BEGIN(STRING); }
 <STRING>\"                                             { BEGIN(INITIAL); }
