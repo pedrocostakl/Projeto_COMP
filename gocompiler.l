@@ -135,15 +135,13 @@ type                                                   { reserved(); }
 \"                          { BEGIN(STRING); string_initial_column = tok_column; temp_string[0] = '\0'; invalid_esc_chr = 0;}
 
 <STRING>\"                   { BEGIN(INITIAL); if (print_tokens) if (!invalid_esc_chr) printf("STRLIT(\"%s\")\n", temp_string); if(!invalid_esc_chr) emit_semicolon = 1; }
-
+<STRING>\\\n                { BEGIN(INITIAL); printf("Line %d, column %d: invalid escape sequence (%c)\n", line, tok_column, yytext[0]); invalid_esc_chr = 1;printf("Line %d, column %d: unterminated string literal\n", line, string_initial_column); emit_semicolon = 0; newline();}
 <STRING>\n                 { BEGIN(INITIAL); printf("Line %d, column %d: unterminated string literal\n", line, string_initial_column); emit_semicolon = 0; newline();}
 
 <STRING>\\[fnrt\\\"]          { strcat(temp_string, yytext); }  /* Valid escape sequences: \f, \n, \r, \t, \\, \" */
 
-<STRING>\\[^fnrt\\]           { printf("Line %d, column %d: invalid escape sequence (\\%c)\n", line, tok_column, yytext[1]); invalid_esc_chr = 1; }  /* Print the error, but stay in STRING state */
-
+<STRING>\\[^fnrt\\]           {printf("Line %d, column %d: invalid escape sequence (%s)\n", line, tok_column, yytext); invalid_esc_chr = 1; }  /* Print the error, but stay in STRING state */
 <STRING>[^\\\n"]+             { strcat(temp_string, yytext); }  /* Regular characters inside the string */
-
 <STRING>.                     { printf("Line %d, column %d: illegal character in string literal (%s)\n", line, tok_column, yytext); }  /* Handle any illegal characters */
 <STRING><<EOF>>              { user_action(); BEGIN(INITIAL); printf("Line %d, column %d: unterminated string literal\n", line, string_initial_column); }
 
