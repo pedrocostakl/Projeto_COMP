@@ -109,14 +109,14 @@ type                                                   { reserved(); }
 
 {digit}*"."{digit}+                                    { if (print_tokens) printf("DECIMAL(%s)\n", yytext); emit_semicolon = 1; }
 {digit}+"."{digit}*                                    { if (print_tokens) printf("DECIMAL(%s)\n", yytext); emit_semicolon = 1; }
-{digit}*"."{digit}*[eE][-|+]?{digit}+                 { if (print_tokens) printf("DECIMAL(%s)\n", yytext); emit_semicolon = 1; }
-{digit}+[eE][-|+]?{digit}+                            { if (print_tokens) printf("DECIMAL(%s)\n", yytext); emit_semicolon = 1; }
+{digit}*"."{digit}*[eE][-+]?{digit}+                 { if (print_tokens) printf("DECIMAL(%s)\n", yytext); emit_semicolon = 1; }
+{digit}+[eE][-+]?{digit}+                            { if (print_tokens) printf("DECIMAL(%s)\n", yytext); emit_semicolon = 1; }
+
+
+[1-9]{digit}*                                          { if (print_tokens) printf("NATURAL(%s)\n", yytext); emit_semicolon = 1; } /*naturals nao começam com 0 devido aos octais*/
 
 [0]{octal_digit}*                                      { if (print_tokens) printf("NATURAL(%s)\n", yytext); emit_semicolon = 1; }
-[0]{digit}*                                            { printf("Line %d, column %d: invalid octal constant (%s)\n", line, tok_column, yytext); }
-[1-9]{digit}*                                          { if (print_tokens) printf("NATURAL(%s)\n", yytext); emit_semicolon = 1; } /*naturals nao começam com 0 devido aos octais*/
-[0][x|X]{hex_digit}+                                    { if (print_tokens) printf("NATURAL(%s)\n", yytext); emit_semicolon = 1; } /* Hexadecimal numbers, e.g., 0x1A3 */
-                                        
+[0]{digit}*                                            { printf("Line %d, column %d: invalid octal constant (%s)\n", line, tok_column, yytext); }                                       
 
 {letter}({letter}|{digit})*                            { if (print_tokens) printf("IDENTIFIER(%s)\n", yytext); emit_semicolon = 1; }
 
@@ -144,7 +144,7 @@ type                                                   { reserved(); }
 <STRING>[^\\\n"]+             { strcat(temp_string, yytext); }  /* Regular characters inside the string */
 
 <STRING>.                     { printf("Line %d, column %d: illegal character in string literal (%s)\n", line, tok_column, yytext); }  /* Handle any illegal characters */
-
+<STRING><<EOF>>              { user_action(); BEGIN(INITIAL); printf("Line %d, column %d: unterminated string literal\n", line, string_initial_column); }
 
 
 .                                                      { printf("Line %d, column %d: illegal character (%s)\n", line, tok_column, yytext); }
