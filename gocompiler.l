@@ -1,7 +1,7 @@
 
 %{
     /*
-    ** --
+    **  Pedro Sousa da Costa - 2022220304
     **  Marco Manuel Almeida e Silva - 2021211653
     */
 
@@ -13,15 +13,19 @@
     int line = 1;
     int column = 1;
     int tok_column = 1;
+    int string_initial_column = 1;
     int comment_line = 0;
     int comment_column = 0;
     int print_tokens = 0;  /* Global flag to print tokens if -l is passed */
     int emit_semicolon = 0; /* Used to know when to omit semicolons */
+    int invalid_esc_chr = 0; /*Flag to determine if the string should be printed*/
 
     void user_action();
     void print_token(const char *tok, ...);
     void newline();
     void reserved();
+
+    char  temp_string [1000] ;
 
     #define YY_USER_ACTION user_action();
 
@@ -31,7 +35,7 @@ unicode_letter    [a-zA-Z]
 letter            {unicode_letter}|"_"
 digit             [0-9]
 octal_digit       [0-7]
-hex_digit         {digit}|{unicode_letter}
+hex_digit         [0-9a-fA-F]  /* Hex digits: 0-9, a-f, A-F */
 escape  \\z
 
 %X COMMENT STRING
@@ -105,13 +109,14 @@ type                                                   { reserved(); }
 
 {digit}*"."{digit}+                                    { if (print_tokens) printf("DECIMAL(%s)\n", yytext); emit_semicolon = 1; }
 {digit}+"."{digit}*                                    { if (print_tokens) printf("DECIMAL(%s)\n", yytext); emit_semicolon = 1; }
-{digit}*"."{digit}*[e|E][-|+]?{digit}+                 { if (print_tokens) printf("DECIMAL(%s)\n", yytext); emit_semicolon = 1; }
-{digit}+[e|E][-|+]?{digit}+                            { if (print_tokens) printf("DECIMAL(%s)\n", yytext); emit_semicolon = 1; }
+{digit}*"."{digit}*[eE][-|+]?{digit}+                 { if (print_tokens) printf("DECIMAL(%s)\n", yytext); emit_semicolon = 1; }
+{digit}+[eE][-|+]?{digit}+                            { if (print_tokens) printf("DECIMAL(%s)\n", yytext); emit_semicolon = 1; }
 
-[1-9]{digit}*                                          { if (print_tokens) printf("NATURAL(%s)\n", yytext); emit_semicolon = 1; } /*naturals nao começam com 0 devido aos octais*/
-[0][x|X]{hex_digit}+                                   { if (print_tokens) printf("NATURAL(%s)\n", yytext); emit_semicolon = 1; }
 [0]{octal_digit}*                                      { if (print_tokens) printf("NATURAL(%s)\n", yytext); emit_semicolon = 1; }
 [0]{digit}*                                            { printf("Line %d, column %d: invalid octal constant (%s)\n", line, tok_column, yytext); }
+[1-9]{digit}*                                          { if (print_tokens) printf("NATURAL(%s)\n", yytext); emit_semicolon = 1; } /*naturals nao começam com 0 devido aos octais*/
+[0][x|X]{hex_digit}+                                    { if (print_tokens) printf("NATURAL(%s)\n", yytext); emit_semicolon = 1; } /* Hexadecimal numbers, e.g., 0x1A3 */
+                                        
 
 {letter}({letter}|{digit})*                            { if (print_tokens) printf("IDENTIFIER(%s)\n", yytext); emit_semicolon = 1; }
 
@@ -126,12 +131,21 @@ type                                                   { reserved(); }
 <COMMENT>"*/"                                          { BEGIN(INITIAL); }
 <COMMENT><<EOF>>                                       { BEGIN(INITIAL); printf("Line %d, column %d: unterminated comment\n", comment_line, comment_column); }
 
-\"                                                     { BEGIN(STRING); }
-<STRING>\"                                             { BEGIN(INITIAL); }
-<STRING>\\[fnrt\\\"]                                   { ; }
-<STRING>\\[^fnrt\\\"]                                  { printf("Line %d, column %d: invalid escape sequence (%s)\n", line, tok_column, yytext); }
-<STRING>[^\\\n"]*                                      { if (print_tokens) printf("STRLIT(\"%s\")\n", yytext); emit_semicolon = 1; }
-<STRING>\n                                             { newline(); BEGIN(INITIAL); }
+\"                          { BEGIN(STRING); string_initial_column = tok_column; temp_string[0] = '\0'; invalid_esc_chr = 0;}
+
+<STRING>\"                   { BEGIN(INITIAL); if (print_tokens) if (!invalid_esc_chr) printf("STRLIT(\"%s\")\n", temp_string); emit_semicolon = 1; }
+
+<STRING>\n                 { BEGIN(INITIAL); printf("Line %d, column %d: unterminated string literal\n", line, string_initial_column); newline(); }
+
+<STRING>\\[fnrt\\\"]          { strcat(temp_string, yytext); }  /* Valid escape sequences: \f, \n, \r, \t, \\, \" */
+
+<STRING>\\[^fnrt\\]           { printf("Line %d, column %d: invalid escape sequence (\\%c)\n", line, tok_column, yytext[1]); invalid_esc_chr = 1; }  /* Print the error, but stay in STRING state */
+
+<STRING>[^\\\n"]+             { strcat(temp_string, yytext); }  /* Regular characters inside the string */
+
+<STRING>.                     { printf("Line %d, column %d: illegal character in string literal (%s)\n", line, tok_column, yytext); }  /* Handle any illegal characters */
+
+
 
 .                                                      { printf("Line %d, column %d: illegal character (%s)\n", line, tok_column, yytext); }
 
