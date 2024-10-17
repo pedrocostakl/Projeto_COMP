@@ -9,13 +9,15 @@
 
     #include <stdarg.h>
     #include <string.h>
+    
+    #define BUF_SIZE 4096 * 2
 
     int line = 1;
     int column = 1;
     int tok_column = 1;
-    int string_initial_column = 1;
+    int string_initial_column = 1; /*Auxiliary variable to store the column where the string starts*/
     int comment_line = 0;
-    int comment_column = 0;
+    int comment_column = 0; /*Auxiliary variable to store the column where the comment starts*/
     int print_tokens = 0;  /* Global flag to print tokens if -l is passed */
     int emit_semicolon = 0; /* Used to know when to omit semicolons */
     int invalid_esc_chr = 0; /*Flag to determine if the string should be printed*/
@@ -27,7 +29,7 @@
     void reserved();
 
 
-    char  temp_string [4096] ;
+    char  temp_string [BUF_SIZE] ;
 
     #define YY_USER_ACTION user_action();
 
@@ -93,7 +95,7 @@ os.Args                                                { if (print_tokens) print
 
 {letter}({letter}|{digit})*                            { if (print_tokens) printf("IDENTIFIER(%s)\n", yytext); emit_semicolon = 1; }
 
-[1-9]{digit}*                                          { if (print_tokens) printf("NATURAL(%s)\n", yytext); emit_semicolon = 1; } /*naturals nao começam com 0 devido aos octais*/
+[1-9]{digit}*                                          { if (print_tokens) printf("NATURAL(%s)\n", yytext); emit_semicolon = 1; } /*naturals don't start with 0, only octals do*/
 0{octal_digit}*                                        { if (print_tokens) printf("NATURAL(%s)\n", yytext); emit_semicolon = 1; }
 0{digit}+                                              { printf("Line %d, column %d: invalid octal constant (%s)\n", line, tok_column, yytext); }
 [0][xX]{hex_digit}+                                    { if (print_tokens) printf("NATURAL(%s)\n", yytext); emit_semicolon = 1; }
@@ -129,7 +131,7 @@ os.Args                                                { if (print_tokens) print
 <STRING><<EOF>>            { user_action(); BEGIN(INITIAL); printf("Line %d, column %d: unterminated string literal\n", line, string_initial_column); }
 
 <<EOF>>                                { emit_semicolon_if_needed(); return 0; }  /* Handle end of file */
-.                                                      { printf("Line %d, column %d: illegal character (%s)\n", line, tok_column, yytext); }
+.                                      { printf("Line %d, column %d: illegal character (%s)\n", line, tok_column, yytext); }
 
 %%
 
