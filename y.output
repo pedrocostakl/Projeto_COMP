@@ -1,0 +1,261 @@
+Terminals unused in grammar
+
+    IF
+    THEN
+    ELSE
+
+
+Grammar
+
+    0 $accept: calculator $end
+
+    1 calculator: expression_list
+
+    2 expression_list: expression
+    3                | expression_list ',' expression
+
+    4 expression: NATURAL
+    5           | '(' expression ')'
+    6           | expression '+' expression
+    7           | expression '-' expression
+    8           | expression '*' expression
+    9           | expression '/' expression
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    '(' (40) 5
+    ')' (41) 5
+    '*' (42) 8
+    '+' (43) 6
+    ',' (44) 3
+    '-' (45) 7
+    '/' (47) 9
+    error (256)
+    NATURAL (258) 4
+    IF (259)
+    THEN (260)
+    ELSE (261)
+
+
+Nonterminals, with rules where they appear
+
+    $accept (14)
+        on left: 0
+    calculator (15)
+        on left: 1
+        on right: 0
+    expression_list (16)
+        on left: 2 3
+        on right: 1 3
+    expression (17)
+        on left: 4 5 6 7 8 9
+        on right: 2 3 5 6 7 8 9
+
+
+State 0
+
+    0 $accept: • calculator $end
+
+    NATURAL  shift, and go to state 1
+    '('      shift, and go to state 2
+
+    calculator       go to state 3
+    expression_list  go to state 4
+    expression       go to state 5
+
+
+State 1
+
+    4 expression: NATURAL •
+
+    $default  reduce using rule 4 (expression)
+
+
+State 2
+
+    5 expression: '(' • expression ')'
+
+    NATURAL  shift, and go to state 1
+    '('      shift, and go to state 2
+
+    expression  go to state 6
+
+
+State 3
+
+    0 $accept: calculator • $end
+
+    $end  shift, and go to state 7
+
+
+State 4
+
+    1 calculator: expression_list •
+    3 expression_list: expression_list • ',' expression
+
+    ','  shift, and go to state 8
+
+    $default  reduce using rule 1 (calculator)
+
+
+State 5
+
+    2 expression_list: expression •
+    6 expression: expression • '+' expression
+    7           | expression • '-' expression
+    8           | expression • '*' expression
+    9           | expression • '/' expression
+
+    '+'  shift, and go to state 9
+    '-'  shift, and go to state 10
+    '/'  shift, and go to state 11
+    '*'  shift, and go to state 12
+
+    $default  reduce using rule 2 (expression_list)
+
+
+State 6
+
+    5 expression: '(' expression • ')'
+    6           | expression • '+' expression
+    7           | expression • '-' expression
+    8           | expression • '*' expression
+    9           | expression • '/' expression
+
+    '+'  shift, and go to state 9
+    '-'  shift, and go to state 10
+    '/'  shift, and go to state 11
+    '*'  shift, and go to state 12
+    ')'  shift, and go to state 13
+
+
+State 7
+
+    0 $accept: calculator $end •
+
+    $default  accept
+
+
+State 8
+
+    3 expression_list: expression_list ',' • expression
+
+    NATURAL  shift, and go to state 1
+    '('      shift, and go to state 2
+
+    expression  go to state 14
+
+
+State 9
+
+    6 expression: expression '+' • expression
+
+    NATURAL  shift, and go to state 1
+    '('      shift, and go to state 2
+
+    expression  go to state 15
+
+
+State 10
+
+    7 expression: expression '-' • expression
+
+    NATURAL  shift, and go to state 1
+    '('      shift, and go to state 2
+
+    expression  go to state 16
+
+
+State 11
+
+    9 expression: expression '/' • expression
+
+    NATURAL  shift, and go to state 1
+    '('      shift, and go to state 2
+
+    expression  go to state 17
+
+
+State 12
+
+    8 expression: expression '*' • expression
+
+    NATURAL  shift, and go to state 1
+    '('      shift, and go to state 2
+
+    expression  go to state 18
+
+
+State 13
+
+    5 expression: '(' expression ')' •
+
+    $default  reduce using rule 5 (expression)
+
+
+State 14
+
+    3 expression_list: expression_list ',' expression •
+    6 expression: expression • '+' expression
+    7           | expression • '-' expression
+    8           | expression • '*' expression
+    9           | expression • '/' expression
+
+    '+'  shift, and go to state 9
+    '-'  shift, and go to state 10
+    '/'  shift, and go to state 11
+    '*'  shift, and go to state 12
+
+    $default  reduce using rule 3 (expression_list)
+
+
+State 15
+
+    6 expression: expression • '+' expression
+    6           | expression '+' expression •
+    7           | expression • '-' expression
+    8           | expression • '*' expression
+    9           | expression • '/' expression
+
+    '/'  shift, and go to state 11
+    '*'  shift, and go to state 12
+
+    $default  reduce using rule 6 (expression)
+
+
+State 16
+
+    6 expression: expression • '+' expression
+    7           | expression • '-' expression
+    7           | expression '-' expression •
+    8           | expression • '*' expression
+    9           | expression • '/' expression
+
+    '/'  shift, and go to state 11
+    '*'  shift, and go to state 12
+
+    $default  reduce using rule 7 (expression)
+
+
+State 17
+
+    6 expression: expression • '+' expression
+    7           | expression • '-' expression
+    8           | expression • '*' expression
+    9           | expression • '/' expression
+    9           | expression '/' expression •
+
+    $default  reduce using rule 9 (expression)
+
+
+State 18
+
+    6 expression: expression • '+' expression
+    7           | expression • '-' expression
+    8           | expression • '*' expression
+    8           | expression '*' expression •
+    9           | expression • '/' expression
+
+    $default  reduce using rule 8 (expression)

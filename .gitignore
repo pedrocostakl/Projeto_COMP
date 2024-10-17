@@ -2,3 +2,5 @@ lexer
 gocompiler
 lex.yy.c
 makefile.txt
+y.tab.c
+y.tab.h
