@@ -1,3 +1,4 @@
+*.zip
 lexer
 gocompiler
 lex.yy.c
