@@ -1,4 +1,6 @@
 *.zip
+*.output
+
 lexer
 gocompiler
 lex.yy.c
