@@ -1,0 +1,59 @@
+Line 1, column 14: illegal character ()
+Line 2, column 1: illegal character ()
+Line 3, column 14: illegal character ()
+Line 4, column 46: illegal character ()
+Line 5, column 36: illegal character ()
+Line 6, column 20: illegal character ()
+Line 7, column 10: illegal character ()
+Line 8, column 10: illegal character ()
+Line 9, column 20: illegal character ()
+Line 10, column 31: illegal character ()
+Line 11, column 10: illegal character ()
+Line 12, column 6: illegal character ()
+Program
+..FuncDecl
+....FuncHeader
+......Identifier(main)
+......FuncParams
+....FuncBody
+......If
+........Or
+..........Eq
+............Identifier(n)
+............Natural(0)
+..........And
+............Lt
+..............Minus
+................Identifier(sz)
+..............Natural(10)
+............Not
+..............Eq
+................Identifier(id)
+................Natural(30)
+........Block
+..........If
+............Ge
+..............Eq
+................Le
+..................Identifier(x)
+..................Natural(100)
+................Natural(90)
+..............Minus
+................Natural(3)
+............Block
+..............Return
+............Block
+..........Block
+............Assign
+..............Identifier(n)
+..............Natural(10)
+............Assign
+..............Identifier(n)
+..............Add
+................Sub
+..................Add
+....................Natural(3)
+....................Natural(4)
+..................Natural(6)
+................Natural(7)
+........Block
