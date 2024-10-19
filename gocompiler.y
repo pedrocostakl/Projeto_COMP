@@ -70,13 +70,6 @@ program
 { printf("package!\n"); }
 ;
 
-declarations
-: VAR IDENTIFIER type SEMICOLON declarations
-{ printf("var!\n"); }
-| VAR IDENTIFIER type SEMICOLON
-{ printf("var!\n"); }
-;
-
 type
 : INT
 {}
@@ -85,6 +78,69 @@ type
 | BOOL
 {}
 | STR
+{}
+;
+
+declarations
+: var_declaration SEMICOLON declarations
+{}
+| var_declaration SEMICOLON
+{}
+| func_declaration SEMICOLON declarations
+{}
+| func_declaration SEMICOLON
+{}
+;
+
+var_declaration
+: VAR var_spec
+{}
+| VAR LPAR var_spec SEMICOLON RPAR
+{}
+;
+
+var_spec
+: IDENTIFIER type
+{ printf("var!\n"); }
+| IDENTIFIER var_spec_list
+{}
+;
+
+var_spec_list
+: COMMA var_spec
+{ printf("var in list!\n"); }
+;
+
+func_declaration
+: FUNC IDENTIFIER LPAR parameters RPAR type func_body
+{ printf("function!\n"); }
+| FUNC IDENTIFIER LPAR parameters RPAR func_body
+{ printf("function!\n"); }
+| FUNC IDENTIFIER LPAR RPAR type func_body
+{ printf("function!\n"); }
+| FUNC IDENTIFIER LPAR RPAR func_body
+{ printf("function!\n"); }
+;
+
+parameters
+: parameter
+{}
+| parameter parameters_list
+{}
+;
+
+parameters_list
+: COMMA parameters
+{}
+;
+
+parameter
+: IDENTIFIER type
+{}
+;
+
+func_body
+: LBRACE RBRACE
 {}
 ;
 
