@@ -5,8 +5,6 @@
     **  Marco Manuel Almeida e Silva - 2021211653
     */
 
-    /* place here any C variables and definitions */
-
     #include <stdarg.h>
     #include <string.h>
 
@@ -25,6 +23,7 @@
     int invalid_esc_chr = 0; /*Flag to determine if the string should be printed*/
     char temp_string [BUF_SIZE] ;
 
+    void run_lex();
     void user_action();
     void print_token(const char *tok, ...);
     int emit_semicolon();
@@ -141,7 +140,7 @@ int main(int argc, char **argv) {
     if (argc > 1) {
         if (strcmp(argv[1], "-l") == 0) {
             print_tokens = 1;  /* Enable token printing if -l option is passed */
-            while (yylex());
+            run_lex();
             return 0;
         }
         if (strcmp(argv[1], "-t") == 0) {
@@ -149,12 +148,16 @@ int main(int argc, char **argv) {
             return 0;
         }
     }
-    while (yylex());  /* Run the lexical analysis automaton */
+    run_lex();  /* Run the lexical analysis automaton */
     return 0;
 }
 
 int yywrap() {  /* called on EOF, return 1 to terminate */
     return 1;
+}
+
+void run_lex() {
+    while (yylex() != 0);
 }
 
 void user_action() {
