@@ -95,15 +95,15 @@ os.Args                                                { print_token("CMDARGS");
 
 {letter}({letter}|{digit})*                            { print_token("IDENTIFIER(%s)", yytext); semicolon = 1; return IDENTIFIER; }
 
-[1-9]{digit}*                                          { print_token("NATURAL(%s)", yytext); semicolon = 1; return NATURAL; } /*naturals don't start with 0, only octals do*/
+[1-9]{digit}*                                          { print_token("NATURAL(%s)", yytext); semicolon = 1; yylval = atoi(yytext); return NATURAL; } /*naturals don't start with 0, only octals do*/
 0{octal_digit}*                                        { print_token("NATURAL(%s)", yytext); semicolon = 1; return NATURAL; }
 0{digit}+                                              { printf("Line %d, column %d: invalid octal constant (%s)\n", line, tok_column, yytext); }
 [0][xX]{hex_digit}+                                    { print_token("NATURAL(%s)", yytext); semicolon = 1; return NATURAL; }
 
-{digit}*"."{digit}+                                    { print_token("DECIMAL(%s)\n", yytext); semicolon = 1; return DECIMAL; }
-{digit}+"."{digit}*                                    { print_token("DECIMAL(%s)\n", yytext); semicolon = 1; return DECIMAL; }
-{digit}*"."{digit}*[eE][-+]?{digit}+                   { print_token("DECIMAL(%s)\n", yytext); semicolon = 1; return DECIMAL; }
-{digit}+[eE][-+]?{digit}+                              { print_token("DECIMAL(%s)\n", yytext); semicolon = 1; return DECIMAL; }
+{digit}*"."{digit}+                                    { print_token("DECIMAL(%s)", yytext); semicolon = 1; return DECIMAL; }
+{digit}+"."{digit}*                                    { print_token("DECIMAL(%s)", yytext); semicolon = 1; return DECIMAL; }
+{digit}*"."{digit}*[eE][-+]?{digit}+                   { print_token("DECIMAL(%s)", yytext); semicolon = 1; return DECIMAL; }
+{digit}+[eE][-+]?{digit}+                              { print_token("DECIMAL(%s)", yytext); semicolon = 1; return DECIMAL; }
 
 " "+                                                   { ; }
 "\t"+                                                  { ; }
@@ -118,7 +118,7 @@ os.Args                                                { print_token("CMDARGS");
 
 \"                         { BEGIN(STRING); string_initial_column = tok_column; temp_string[0] = '\0'; invalid_esc_chr = 0;}
 
-<STRING>\"                 { BEGIN(INITIAL); if (!invalid_esc_chr) { print_token("STRLIT(\"%s\")\n", temp_string); semicolon = 1; return STRLIT; } }
+<STRING>\"                 { BEGIN(INITIAL); if (!invalid_esc_chr) { print_token("STRLIT(\"%s\")", temp_string); semicolon = 1; return STRLIT; } }
 <STRING>\\\n               { BEGIN(INITIAL); printf("Line %d, column %d: invalid escape sequence (%c)\n", line, tok_column, yytext[0]); invalid_esc_chr = 1;printf("Line %d, column %d: unterminated string literal\n", line, string_initial_column); semicolon = 0; newline();}
 <STRING>\n                 { BEGIN(INITIAL); printf("Line %d, column %d: unterminated string literal\n", line, string_initial_column); semicolon = 0; newline();}
 
@@ -135,12 +135,13 @@ os.Args                                                { print_token("CMDARGS");
 %%
 
 extern int yylex();
+extern int yyparse();
 
 int main(int argc, char **argv) {
     if (argc > 1) {
         if (strcmp(argv[1], "-l") == 0) {
             print_tokens = 1;  /* Enable token printing if -l option is passed */
-            yylex();
+            while (yylex());
             return 0;
         }
         if (strcmp(argv[1], "-t") == 0) {
@@ -148,7 +149,7 @@ int main(int argc, char **argv) {
             return 0;
         }
     }
-    yylex();  /* Run the lexical analysis automaton */
+    while (yylex());  /* Run the lexical analysis automaton */
     return 0;
 }
 
