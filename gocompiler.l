@@ -49,13 +49,13 @@ reserved          break|case|chan|const|continue|default|defer|fallthrough|go|go
 
 "//".*                                                 { /* Ignore the comment until the end of the line */ }
 
-else                                                   { print_token("ELSE"); emit_semicolon = 0; } /* Reserved keywords */
-for                                                    { print_token("FOR"); emit_semicolon = 0; }
-if                                                     { print_token("IF"); emit_semicolon = 0; }
-package                                                { print_token("PACKAGE"); emit_semicolon = 0; }
-return                                                 { print_token("RETURN"); emit_semicolon = 1; }
-var                                                    { print_token("VAR"); emit_semicolon = 0; }
-func                                                   { print_token("FUNC"); emit_semicolon = 0; }
+else                                                   { print_token("ELSE"); emit_semicolon = 0; return ELSE; } /* Reserved keywords */
+for                                                    { print_token("FOR"); emit_semicolon = 0; return FOR; }
+if                                                     { print_token("IF"); emit_semicolon = 0; return IF; }
+package                                                { print_token("PACKAGE"); emit_semicolon = 0; return PACKAGE; }
+return                                                 { print_token("RETURN"); emit_semicolon = 1; return RETURN; }
+var                                                    { print_token("VAR"); emit_semicolon = 0; return VAR; }
+func                                                   { print_token("FUNC"); emit_semicolon = 0; return FUNC; }
 
 "+"                                                    { print_token("PLUS"); emit_semicolon = 0; } /* Operators and punctuation */
 "-"                                                    { print_token("MINUS"); emit_semicolon = 0; }
@@ -75,35 +75,35 @@ func                                                   { print_token("FUNC"); em
 "}"                                                    { print_token("RBRACE"); emit_semicolon = 1; }
 "["                                                    { print_token("LSQ"); emit_semicolon = 0; }
 "]"                                                    { print_token("RSQ"); emit_semicolon = 1; }
-"=="                                                   { print_token("EQ"); emit_semicolon = 0; }
-">="                                                   { print_token("GE"); emit_semicolon = 0; }
-"<="                                                   { print_token("LE"); emit_semicolon = 0; }
-"!="                                                   { print_token("NE"); emit_semicolon = 0; }
-"&&"                                                   { print_token("AND"); emit_semicolon = 0; }
-"||"                                                   { print_token("OR"); emit_semicolon = 0; }
+"=="                                                   { print_token("EQ"); emit_semicolon = 0; return EQ; }
+">="                                                   { print_token("GE"); emit_semicolon = 0; return GE; }
+"<="                                                   { print_token("LE"); emit_semicolon = 0; return LE; }
+"!="                                                   { print_token("NE"); emit_semicolon = 0; return NE; }
+"&&"                                                   { print_token("AND"); emit_semicolon = 0; return AND; }
+"||"                                                   { print_token("OR"); emit_semicolon = 0; return OR; }
 
-int                                                    { print_token("INT"); emit_semicolon = 0; } /* Types */
-float32                                                { print_token("FLOAT32"); emit_semicolon = 0; }
-bool                                                   { print_token("BOOL"); emit_semicolon = 0; }
-string                                                 { print_token("STRING"); emit_semicolon = 0; }
+int                                                    { print_token("INT"); emit_semicolon = 0; return INT; } /* Types */
+float32                                                { print_token("FLOAT32"); emit_semicolon = 0; return FLOAT32; }
+bool                                                   { print_token("BOOL"); emit_semicolon = 0; return BOOL; }
+string                                                 { print_token("STRING"); emit_semicolon = 0; return STR; }
 
-fmt.Println                                            { print_token("PRINT"); emit_semicolon = 0; } /* Functions */
-strconv.Atoi                                           { print_token("PARSEINT"); emit_semicolon = 0; }
-os.Args                                                { print_token("CMDARGS"); emit_semicolon = 0; }
+fmt.Println                                            { print_token("PRINT"); emit_semicolon = 0; return PRINT; } /* Functions */
+strconv.Atoi                                           { print_token("PARSEINT"); emit_semicolon = 0; return PARSEINT; }
+os.Args                                                { print_token("CMDARGS"); emit_semicolon = 0; return CMDARGS; }
 
-{reserved}                                             { reserved(); } /* Reserved keywords */
+{reserved}                                             { reserved(); return RESERVED; } /* Reserved keywords */
 
-{letter}({letter}|{digit})*                            { print_token("IDENTIFIER(%s)", yytext); emit_semicolon = 1; }
+{letter}({letter}|{digit})*                            { print_token("IDENTIFIER(%s)", yytext); emit_semicolon = 1; return IDENTIFIER; }
 
-[1-9]{digit}*                                          { print_token("NATURAL(%s)", yytext); emit_semicolon = 1; } /*naturals don't start with 0, only octals do*/
-0{octal_digit}*                                        { print_token("NATURAL(%s)", yytext); emit_semicolon = 1; }
+[1-9]{digit}*                                          { print_token("NATURAL(%s)", yytext); emit_semicolon = 1; return NATURAL; } /*naturals don't start with 0, only octals do*/
+0{octal_digit}*                                        { print_token("NATURAL(%s)", yytext); emit_semicolon = 1; return NATURAL; }
 0{digit}+                                              { printf("Line %d, column %d: invalid octal constant (%s)\n", line, tok_column, yytext); }
-[0][xX]{hex_digit}+                                    { print_token("NATURAL(%s)", yytext); emit_semicolon = 1; }
+[0][xX]{hex_digit}+                                    { print_token("NATURAL(%s)", yytext); emit_semicolon = 1; return NATURAL; }
 
-{digit}*"."{digit}+                                    { print_token("DECIMAL(%s)\n", yytext); emit_semicolon = 1; }
-{digit}+"."{digit}*                                    { print_token("DECIMAL(%s)\n", yytext); emit_semicolon = 1; }
-{digit}*"."{digit}*[eE][-+]?{digit}+                   { print_token("DECIMAL(%s)\n", yytext); emit_semicolon = 1; }
-{digit}+[eE][-+]?{digit}+                              { print_token("DECIMAL(%s)\n", yytext); emit_semicolon = 1; }
+{digit}*"."{digit}+                                    { print_token("DECIMAL(%s)\n", yytext); emit_semicolon = 1; return DECIMAL; }
+{digit}+"."{digit}*                                    { print_token("DECIMAL(%s)\n", yytext); emit_semicolon = 1; return DECIMAL; }
+{digit}*"."{digit}*[eE][-+]?{digit}+                   { print_token("DECIMAL(%s)\n", yytext); emit_semicolon = 1; return DECIMAL; }
+{digit}+[eE][-+]?{digit}+                              { print_token("DECIMAL(%s)\n", yytext); emit_semicolon = 1; return DECIMAL; }
 
 
 " "+                                                   { ; }
@@ -119,7 +119,7 @@ os.Args                                                { print_token("CMDARGS");
 
 \"                         { BEGIN(STRING); string_initial_column = tok_column; temp_string[0] = '\0'; invalid_esc_chr = 0;}
 
-<STRING>\"                 { BEGIN(INITIAL); if (print_tokens) if (!invalid_esc_chr) printf("STRLIT(\"%s\")\n", temp_string); if(!invalid_esc_chr) emit_semicolon = 1; }
+<STRING>\"                 { BEGIN(INITIAL); if (!invalid_esc_chr) { print_token("STRLIT(\"%s\")\n", temp_string); emit_semicolon = 1; return STRLIT; } }
 <STRING>\\\n               { BEGIN(INITIAL); printf("Line %d, column %d: invalid escape sequence (%c)\n", line, tok_column, yytext[0]); invalid_esc_chr = 1;printf("Line %d, column %d: unterminated string literal\n", line, string_initial_column); emit_semicolon = 0; newline();}
 <STRING>\n                 { BEGIN(INITIAL); printf("Line %d, column %d: unterminated string literal\n", line, string_initial_column); emit_semicolon = 0; newline();}
 

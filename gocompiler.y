@@ -33,7 +33,7 @@
 %token INT
 %token FLOAT32
 %token BOOL
-%token STRING
+%token STR
 %token PRINT
 %token PARSEINT
 %token FUNC
