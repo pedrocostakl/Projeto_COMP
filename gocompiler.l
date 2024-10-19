@@ -12,6 +12,13 @@
     
     #define BUF_SIZE 8192
 
+    void run_lex();
+    void user_action();
+    void print_token(const char *tok, ...);
+    int emit_semicolon();
+    void newline();
+    void reserved();
+
     int line = 1;
     int column = 1;
     int tok_column = 1;
@@ -22,13 +29,6 @@
     int semicolon = 0; /* Used to know when to emit semicolons */
     int invalid_esc_chr = 0; /*Flag to determine if the string should be printed*/
     char temp_string [BUF_SIZE] ;
-
-    void run_lex();
-    void user_action();
-    void print_token(const char *tok, ...);
-    int emit_semicolon();
-    void newline();
-    void reserved();
 
     #define YY_USER_ACTION user_action();
 
@@ -56,24 +56,24 @@ return                                                 { print_token("RETURN"); 
 var                                                    { print_token("VAR"); semicolon = 0; return VAR; }
 func                                                   { print_token("FUNC"); semicolon = 0; return FUNC; }
 
-"+"                                                    { print_token("PLUS"); semicolon = 0; return yytext[0]; } /* Operators and punctuation */
-"-"                                                    { print_token("MINUS"); semicolon = 0; return yytext[0]; }
-"*"                                                    { print_token("STAR"); semicolon = 0; return yytext[0]; }
-"/"                                                    { print_token("DIV"); semicolon = 0; return yytext[0]; }
-"("                                                    { print_token("LPAR"); semicolon = 0; return yytext[0]; }
-")"                                                    { print_token("RPAR"); semicolon = 1; return yytext[0]; }
-"="                                                    { print_token("ASSIGN"); semicolon = 0; return yytext[0]; }
-","                                                    { print_token("COMMA"); semicolon = 0; return yytext[0]; }
-";"                                                    { print_token("SEMICOLON"); semicolon = 0; return yytext[0]; }
-"_"                                                    { print_token("BLANKID"); semicolon = 0; return yytext[0]; }
-">"                                                    { print_token("GT"); semicolon = 0; return yytext[0]; }
-"<"                                                    { print_token("LT"); semicolon = 0; return yytext[0]; }
-"%"                                                    { print_token("MOD"); semicolon = 0; return yytext[0]; }
-"!"                                                    { print_token("NOT"); semicolon = 0; return yytext[0]; }
-"{"                                                    { print_token("LBRACE"); semicolon = 0; return yytext[0]; }
-"}"                                                    { print_token("RBRACE"); semicolon = 1; return yytext[0]; }
-"["                                                    { print_token("LSQ"); semicolon = 0; return yytext[0]; }
-"]"                                                    { print_token("RSQ"); semicolon = 1; return yytext[0]; }
+"+"                                                    { print_token("PLUS"); semicolon = 0; return PLUS; } /* Operators and punctuation */
+"-"                                                    { print_token("MINUS"); semicolon = 0; return MINUS; }
+"*"                                                    { print_token("STAR"); semicolon = 0; return STAR; }
+"/"                                                    { print_token("DIV"); semicolon = 0; return DIV; }
+"("                                                    { print_token("LPAR"); semicolon = 0; return LPAR; }
+")"                                                    { print_token("RPAR"); semicolon = 1; return RPAR; }
+"="                                                    { print_token("ASSIGN"); semicolon = 0; return ASSIGN; }
+","                                                    { print_token("COMMA"); semicolon = 0; return COMMA; }
+";"                                                    { print_token("SEMICOLON"); semicolon = 0; return SEMICOLON; }
+"_"                                                    { print_token("BLANKID"); semicolon = 0; return BLANKID; }
+">"                                                    { print_token("GT"); semicolon = 0; return GT; }
+"<"                                                    { print_token("LT"); semicolon = 0; return LT; }
+"%"                                                    { print_token("MOD"); semicolon = 0; return MOD; }
+"!"                                                    { print_token("NOT"); semicolon = 0; return NOT; }
+"{"                                                    { print_token("LBRACE"); semicolon = 0; return LBRACE; }
+"}"                                                    { print_token("RBRACE"); semicolon = 1; return RBRACE; }
+"["                                                    { print_token("LSQ"); semicolon = 0; return LSQ; }
+"]"                                                    { print_token("RSQ"); semicolon = 1; return RSQ; }
 "=="                                                   { print_token("EQ"); semicolon = 0; return EQ; }
 ">="                                                   { print_token("GE"); semicolon = 0; return GE; }
 "<="                                                   { print_token("LE"); semicolon = 0; return LE; }
@@ -107,7 +107,7 @@ os.Args                                                { print_token("CMDARGS");
 " "+                                                   { ; }
 "\t"+                                                  { ; }
 "\r"                                                   { ; }
-"\n"                                                   { newline(); if (emit_semicolon()) return ';'; }
+"\n"                                                   { newline(); if (emit_semicolon()) return SEMICOLON; }
 
 "/*"                                                   { BEGIN(COMMENT); comment_line = line; comment_column = tok_column; }
 <COMMENT>.                                             { ; }
@@ -128,7 +128,7 @@ os.Args                                                { print_token("CMDARGS");
 <STRING>.                  { printf("Line %d, column %d: illegal character in string literal (%s)\n", line, tok_column, yytext); }  /* Handle any illegal characters */
 <STRING><<EOF>>            { user_action(); BEGIN(INITIAL); printf("Line %d, column %d: unterminated string literal\n", line, string_initial_column); }
 
-<<EOF>>                                { if (emit_semicolon()) return ';'; return 0; }  /* Handle end of file */
+<<EOF>>                                { if (emit_semicolon()) return SEMICOLON; return 0; }  /* Handle end of file */
 .                                      { printf("Line %d, column %d: illegal character (%s)\n", line, tok_column, yytext); }
 
 %%
@@ -148,7 +148,7 @@ int main(int argc, char **argv) {
             return 0;
         }
     }
-    run_lex();  /* Run the lexical analysis automaton */
+    yyparse();  /* Run the lexical analysis automaton */
     return 0;
 }
 
@@ -174,6 +174,7 @@ void print_token(const char *tok, ...) {
         va_end(args);
     }
 }
+
 int emit_semicolon() {
     if (semicolon) {
         print_token("SEMICOLON");  /* Emit a semicolon if the last token requires it */

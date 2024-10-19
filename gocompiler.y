@@ -9,7 +9,10 @@
 
     extern int yylex(void);
     void yyerror(char *);
+
     extern char *yytext;
+    extern int line;
+    extern int tok_column;
 
 %}
 
@@ -17,13 +20,30 @@
 %token STRLIT
 %token NATURAL
 %token DECIMAL
+%token SEMICOLON
+%token COMMA
+%token BLANKID
+%token ASSIGN
+%token STAR
+%token DIV
+%token MINUS
+%token PLUS
 %token EQ
 %token GE
 %token GT
+%token LBRACE
 %token LE
+%token LPAR
+%token LSQ
+%token LT
+%token MOD
 %token NE
+%token NOT
 %token AND
 %token OR
+%token RBRACE
+%token RPAR
+%token RSQ
 %token PACKAGE
 %token RETURN
 %token ELSE
@@ -45,23 +65,31 @@
 
 %%
 
-calculator: expression_list                         { printf("\n"); }
-          ;
+program
+: PACKAGE IDENTIFIER SEMICOLON declarations
+{ printf("package!\n"); }
+;
 
-expression_list: expression                         { printf("%d", $1); }
-               | expression_list ',' expression     { printf(", %d", $3); }
-               ;
+declarations
+: VAR IDENTIFIER type SEMICOLON declarations
+{ printf("var!\n"); }
+| VAR IDENTIFIER type SEMICOLON
+{ printf("var!\n"); }
+;
 
-expression: NATURAL                                 { $$ = $1; }
-          | '(' expression ')'                      { $$ = $2; }
-          | expression '+' expression               { $$ = $1 + $3; }
-          | expression '-' expression               { $$ = $1 - $3; }
-          | expression '*' expression               { $$ = $1 * $3; }
-          | expression '/' expression               { $$ = $1 / $3; }
-          ;
+type
+: INT
+{}
+| FLOAT32
+{}
+| BOOL
+{}
+| STR
+{}
+;
 
 %%
 
 void yyerror(char *error) {
-    printf("%s '%s'\n", error, yytext);
+    printf("Line %d, column %d: %s: %s\n", line, tok_column, error, yytext);
 }
