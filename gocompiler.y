@@ -13,10 +13,32 @@
 
 %}
 
+%token IDENTIFIER
+%token STRLIT
 %token NATURAL
-%token IF
-%token THEN
+%token DECIMAL
+%token EQ
+%token GE
+%token GT
+%token LE
+%token NE
+%token AND
+%token OR
+%token PACKAGE
+%token RETURN
 %token ELSE
+%token FOR
+%token IF
+%token VAR
+%token INT
+%token FLOAT32
+%token BOOL
+%token STRING
+%token PRINT
+%token PARSEINT
+%token FUNC
+%token CMDARGS
+%token RESERVED
 
 %left '+' '-'
 %left '/' '*'
