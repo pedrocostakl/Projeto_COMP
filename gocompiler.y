@@ -11,8 +11,8 @@
     void yyerror(char *);
 
     extern char *yytext;
-    extern int line;
-    extern int tok_column;
+    extern int line;           /* Extern line variable from lex file */
+    extern int tok_column;     /* Extern token column variable from lex file */
 
 %}
 
@@ -68,6 +68,8 @@
 program
 : PACKAGE IDENTIFIER SEMICOLON declarations
 { printf("package!\n"); }
+| PACKAGE IDENTIFIER SEMICOLON
+{ printf("empty program!\n"); }
 ;
 
 type
@@ -140,8 +142,26 @@ parameter
 ;
 
 func_body
-: LBRACE RBRACE
+: LBRACE vars_statements RBRACE
 {}
+| LBRACE RBRACE
+{}
+;
+
+vars_statements
+: var_declaration SEMICOLON vars_statements
+{}
+| statement SEMICOLON vars_statements
+{}
+| var_declaration SEMICOLON
+{}
+| statement SEMICOLON
+{}
+;
+
+statement
+: IDENTIFIER ASSIGN NATURAL
+{ printf("statement in function body!\n"); }
 ;
 
 %%

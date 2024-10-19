@@ -39,7 +39,7 @@ letter            {unicode_letter}|"_"
 digit             [0-9]
 octal_digit       [0-7]
 hex_digit         [0-9a-fA-F]
-escape  \\z
+escape            \\z
 reserved          break|case|chan|const|continue|default|defer|fallthrough|go|goto|import|interface|map|range|select|struct|switch|type|"++"|"--"
 
 %X COMMENT STRING
