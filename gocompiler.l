@@ -9,8 +9,10 @@
 
     #include <stdarg.h>
     #include <string.h>
+
+    #include "y.tab.h"
     
-    #define BUF_SIZE 4096 * 2
+    #define BUF_SIZE 8192
 
     int line = 1;
     int column = 1;
@@ -21,15 +23,13 @@
     int print_tokens = 0;  /* Global flag to print tokens if -l is passed */
     int emit_semicolon = 0; /* Used to know when to omit semicolons */
     int invalid_esc_chr = 0; /*Flag to determine if the string should be printed*/
+    char temp_string [BUF_SIZE] ;
 
     void user_action();
     void print_token(const char *tok, ...);
     void emit_semicolon_if_needed();
     void newline();
     void reserved();
-
-
-    char  temp_string [BUF_SIZE] ;
 
     #define YY_USER_ACTION user_action();
 
@@ -49,61 +49,61 @@ reserved          break|case|chan|const|continue|default|defer|fallthrough|go|go
 
 "//".*                                                 { /* Ignore the comment until the end of the line */ }
 
-else                                                   { if (print_tokens) printf("ELSE\n"); emit_semicolon = 0; } /* Reserved keywords */
-for                                                    { if (print_tokens) printf("FOR\n"); emit_semicolon = 0; }
-if                                                     { if (print_tokens) printf("IF\n"); emit_semicolon = 0; }
-package                                                { if (print_tokens) printf("PACKAGE\n"); emit_semicolon = 0; }
-return                                                 { if (print_tokens) printf("RETURN\n"); emit_semicolon = 1; }
-var                                                    { if (print_tokens) printf("VAR\n"); emit_semicolon = 0; }
-func                                                   { if (print_tokens) printf("FUNC\n"); emit_semicolon = 0; }
+else                                                   { print_token("ELSE"); emit_semicolon = 0; } /* Reserved keywords */
+for                                                    { print_token("FOR"); emit_semicolon = 0; }
+if                                                     { print_token("IF"); emit_semicolon = 0; }
+package                                                { print_token("PACKAGE"); emit_semicolon = 0; }
+return                                                 { print_token("RETURN"); emit_semicolon = 1; }
+var                                                    { print_token("VAR"); emit_semicolon = 0; }
+func                                                   { print_token("FUNC"); emit_semicolon = 0; }
 
-"+"                                                    { if (print_tokens) printf("PLUS\n"); emit_semicolon = 0; } /* Operators and punctuation */
-"-"                                                    { if (print_tokens) printf("MINUS\n"); emit_semicolon = 0; }
-"*"                                                    { if (print_tokens) printf("STAR\n"); emit_semicolon = 0; }
-"/"                                                    { if (print_tokens) printf("DIV\n"); emit_semicolon = 0; }
-"("                                                    { if (print_tokens) printf("LPAR\n"); emit_semicolon = 0; }
-")"                                                    { if (print_tokens) printf("RPAR\n"); emit_semicolon = 1; }
-"="                                                    { if (print_tokens) printf("ASSIGN\n"); emit_semicolon = 0; }
-","                                                    { if (print_tokens) printf("COMMA\n"); emit_semicolon = 0; }
-";"                                                    { if (print_tokens) printf("SEMICOLON\n"); emit_semicolon = 0; }
-"_"                                                    { if (print_tokens) printf("BLANKID\n"); emit_semicolon = 0; }
-">"                                                    { if (print_tokens) printf("GT\n"); emit_semicolon = 0; }
-"<"                                                    { if (print_tokens) printf("LT\n"); emit_semicolon = 0; }
-"%"                                                    { if (print_tokens) printf("MOD\n"); emit_semicolon = 0; }
-"!"                                                    { if (print_tokens) printf("NOT\n"); emit_semicolon = 0; }
-"{"                                                    { if (print_tokens) printf("LBRACE\n"); emit_semicolon = 0; }
-"}"                                                    { if (print_tokens) printf("RBRACE\n"); emit_semicolon = 1; }
-"["                                                    { if (print_tokens) printf("LSQ\n"); emit_semicolon = 0; }
-"]"                                                    { if (print_tokens) printf("RSQ\n"); emit_semicolon = 1; }
-"=="                                                   { if (print_tokens) printf("EQ\n"); emit_semicolon = 0; }
-">="                                                   { if (print_tokens) printf("GE\n"); emit_semicolon = 0; }
-"<="                                                   { if (print_tokens) printf("LE\n"); emit_semicolon = 0; }
-"!="                                                   { if (print_tokens) printf("NE\n"); emit_semicolon = 0; }
-"&&"                                                   { if (print_tokens) printf("AND\n"); emit_semicolon = 0; }
-"||"                                                   { if (print_tokens) printf("OR\n"); emit_semicolon = 0; }
+"+"                                                    { print_token("PLUS"); emit_semicolon = 0; } /* Operators and punctuation */
+"-"                                                    { print_token("MINUS"); emit_semicolon = 0; }
+"*"                                                    { print_token("STAR"); emit_semicolon = 0; }
+"/"                                                    { print_token("DIV"); emit_semicolon = 0; }
+"("                                                    { print_token("LPAR"); emit_semicolon = 0; }
+")"                                                    { print_token("RPAR"); emit_semicolon = 1; }
+"="                                                    { print_token("ASSIGN"); emit_semicolon = 0; }
+","                                                    { print_token("COMMA"); emit_semicolon = 0; }
+";"                                                    { print_token("SEMICOLON"); emit_semicolon = 0; }
+"_"                                                    { print_token("BLANKID"); emit_semicolon = 0; }
+">"                                                    { print_token("GT"); emit_semicolon = 0; }
+"<"                                                    { print_token("LT"); emit_semicolon = 0; }
+"%"                                                    { print_token("MOD"); emit_semicolon = 0; }
+"!"                                                    { print_token("NOT"); emit_semicolon = 0; }
+"{"                                                    { print_token("LBRACE"); emit_semicolon = 0; }
+"}"                                                    { print_token("RBRACE"); emit_semicolon = 1; }
+"["                                                    { print_token("LSQ"); emit_semicolon = 0; }
+"]"                                                    { print_token("RSQ"); emit_semicolon = 1; }
+"=="                                                   { print_token("EQ"); emit_semicolon = 0; }
+">="                                                   { print_token("GE"); emit_semicolon = 0; }
+"<="                                                   { print_token("LE"); emit_semicolon = 0; }
+"!="                                                   { print_token("NE"); emit_semicolon = 0; }
+"&&"                                                   { print_token("AND"); emit_semicolon = 0; }
+"||"                                                   { print_token("OR"); emit_semicolon = 0; }
 
-int                                                    { if (print_tokens) printf("INT\n"); emit_semicolon = 0; } /* Types */
-float32                                                { if (print_tokens) printf("FLOAT32\n"); emit_semicolon = 0; }
-bool                                                   { if (print_tokens) printf("BOOL\n"); emit_semicolon = 0; }
-string                                                 { if (print_tokens) printf("STRING\n"); emit_semicolon = 0; }
+int                                                    { print_token("INT"); emit_semicolon = 0; } /* Types */
+float32                                                { print_token("FLOAT32"); emit_semicolon = 0; }
+bool                                                   { print_token("BOOL"); emit_semicolon = 0; }
+string                                                 { print_token("STRING"); emit_semicolon = 0; }
 
-fmt.Println                                            { if (print_tokens) printf("PRINT\n"); emit_semicolon = 0; } /* Functions */
-strconv.Atoi                                           { if (print_tokens) printf("PARSEINT\n"); emit_semicolon = 0; }
-os.Args                                                { if (print_tokens) printf("CMDARGS\n"); emit_semicolon = 0; }
+fmt.Println                                            { print_token("PRINT"); emit_semicolon = 0; } /* Functions */
+strconv.Atoi                                           { print_token("PARSEINT"); emit_semicolon = 0; }
+os.Args                                                { print_token("CMDARGS"); emit_semicolon = 0; }
 
 {reserved}                                             { reserved(); } /* Reserved keywords */
 
-{letter}({letter}|{digit})*                            { if (print_tokens) printf("IDENTIFIER(%s)\n", yytext); emit_semicolon = 1; }
+{letter}({letter}|{digit})*                            { print_token("IDENTIFIER(%s)", yytext); emit_semicolon = 1; }
 
-[1-9]{digit}*                                          { if (print_tokens) printf("NATURAL(%s)\n", yytext); emit_semicolon = 1; } /*naturals don't start with 0, only octals do*/
-0{octal_digit}*                                        { if (print_tokens) printf("NATURAL(%s)\n", yytext); emit_semicolon = 1; }
+[1-9]{digit}*                                          { print_token("NATURAL(%s)", yytext); emit_semicolon = 1; } /*naturals don't start with 0, only octals do*/
+0{octal_digit}*                                        { print_token("NATURAL(%s)", yytext); emit_semicolon = 1; }
 0{digit}+                                              { printf("Line %d, column %d: invalid octal constant (%s)\n", line, tok_column, yytext); }
-[0][xX]{hex_digit}+                                    { if (print_tokens) printf("NATURAL(%s)\n", yytext); emit_semicolon = 1; }
+[0][xX]{hex_digit}+                                    { print_token("NATURAL(%s)", yytext); emit_semicolon = 1; }
 
-{digit}*"."{digit}+                                    { if (print_tokens) printf("DECIMAL(%s)\n", yytext); emit_semicolon = 1; }
-{digit}+"."{digit}*                                    { if (print_tokens) printf("DECIMAL(%s)\n", yytext); emit_semicolon = 1; }
-{digit}*"."{digit}*[eE][-+]?{digit}+                   { if (print_tokens) printf("DECIMAL(%s)\n", yytext); emit_semicolon = 1; }
-{digit}+[eE][-+]?{digit}+                              { if (print_tokens) printf("DECIMAL(%s)\n", yytext); emit_semicolon = 1; }
+{digit}*"."{digit}+                                    { print_token("DECIMAL(%s)\n", yytext); emit_semicolon = 1; }
+{digit}+"."{digit}*                                    { print_token("DECIMAL(%s)\n", yytext); emit_semicolon = 1; }
+{digit}*"."{digit}*[eE][-+]?{digit}+                   { print_token("DECIMAL(%s)\n", yytext); emit_semicolon = 1; }
+{digit}+[eE][-+]?{digit}+                              { print_token("DECIMAL(%s)\n", yytext); emit_semicolon = 1; }
 
 
 " "+                                                   { ; }
@@ -125,7 +125,7 @@ os.Args                                                { if (print_tokens) print
 
 <STRING>\\[fnrt\\\"]       { strcat(temp_string, yytext); }  /* Valid escape sequences: \f, \n, \r, \t, \\, \" */
 
-<STRING>\\[^fnrt\\]        {printf("Line %d, column %d: invalid escape sequence (%s)\n", line, tok_column, yytext); invalid_esc_chr = 1; }  /* Print the error, but stay in STRING state */
+<STRING>\\[^fnrt\\]        { printf("Line %d, column %d: invalid escape sequence (%s)\n", line, tok_column, yytext); invalid_esc_chr = 1; }  /* Print the error, but stay in STRING state */
 <STRING>[^\\\n"]+          { strcat(temp_string, yytext); }  /* Regular characters inside the string */
 <STRING>.                  { printf("Line %d, column %d: illegal character in string literal (%s)\n", line, tok_column, yytext); }  /* Handle any illegal characters */
 <STRING><<EOF>>            { user_action(); BEGIN(INITIAL); printf("Line %d, column %d: unterminated string literal\n", line, string_initial_column); }
@@ -138,8 +138,16 @@ os.Args                                                { if (print_tokens) print
 extern int yylex();
 
 int main(int argc, char **argv) {
-    if (argc > 1 && strcmp(argv[1], "-l") == 0) {
-        print_tokens = 1;  /* Enable token printing if -l option is passed */
+    if (argc > 1) {
+        if (strcmp(argv[1], "-l") == 0) {
+            print_tokens = 1;  /* Enable token printing if -l option is passed */
+            yylex();
+            return 0;
+        }
+        if (strcmp(argv[1], "-t") == 0) {
+            yyparse();
+            return 0;
+        }
     }
     yylex();  /* Run the lexical analysis automaton */
     return 0;
@@ -165,7 +173,7 @@ void print_token(const char *tok, ...) {
 }
 void emit_semicolon_if_needed() {
     if (emit_semicolon) {
-        printf("SEMICOLON\n");  /* Emit a semicolon if the last token requires it */
+        print_token("SEMICOLON");  /* Emit a semicolon if the last token requires it */
         emit_semicolon = 0;     /* Reset the flag */
     }
 }
