@@ -6,6 +6,7 @@
     */
 
     #include <stdio.h>
+    #include "ast.h"
 
     extern int yylex(void);
     void yyerror(char *);
@@ -14,12 +15,10 @@
     extern int line;           /* Extern line variable from lex file */
     extern int tok_column;     /* Extern token column variable from lex file */
 
+    struct node_t *program;
+
 %}
 
-%token IDENTIFIER
-%token STRLIT
-%token NATURAL
-%token DECIMAL
 %token SEMICOLON
 %token COMMA
 %token BLANKID
@@ -60,16 +59,31 @@
 %token CMDARGS
 %token RESERVED
 
+%token<lexeme> IDENTIFIER STRLIT NATURAL DECIMAL
+
+%type<node_t> program type declarations var_declaration var_spec var_spec_list func_declaration parameters parameter
+%type<node_t> func_body vars_statements statement
+
 %left '+' '-'
 %left '/' '*'
+
+%union{
+    char *lexeme;
+    struct node_t *node;
+}
 
 %%
 
 program
 : PACKAGE IDENTIFIER SEMICOLON declarations
-{ printf("package!\n"); }
+{
+    $$ = program = newnode(Program, NULL);
+    addchild(program, $4);
+}
 | PACKAGE IDENTIFIER SEMICOLON
-{ printf("empty program!\n"); }
+{ 
+    $$ = program = newnode(Program, NULL);
+}
 ;
 
 type
@@ -127,12 +141,7 @@ func_declaration
 parameters
 : parameter
 {}
-| parameter parameters_list
-{}
-;
-
-parameters_list
-: COMMA parameters
+| parameters COMMA parameter
 {}
 ;
 

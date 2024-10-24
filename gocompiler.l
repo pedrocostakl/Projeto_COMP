@@ -9,6 +9,7 @@
     #include <string.h>
 
     #include "y.tab.h"
+    #include "ast.h"
     
     #define BUF_SIZE 8192
 
@@ -29,6 +30,8 @@
     int print_tokens = 0;             /* Global flag to print tokens if -l is passed */
     int parse = 0;                    /* Enables the returning of token values to the parser */
     char temp_string[BUF_SIZE];
+
+    extern struct node_t *program;
 
     #define YY_USER_ACTION user_action();
 

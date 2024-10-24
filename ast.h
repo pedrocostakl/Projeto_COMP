@@ -6,8 +6,14 @@
 */
 
 enum category {
+
+    /* Raiz */
     Program,
+
+    /* Declaração de variáveis */
     VarDecl,
+
+    /* Declaração/definição de funções */
     FuncDecl,
     FuncHeader,
     FuncParams,
