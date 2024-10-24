@@ -55,16 +55,16 @@ enum category {
 
 } category_t;
 
-struct node {
+struct node_t {
     enum category_t category;
     char *token;
     struct node_list_t *children;
-} node_t;
+};
 
-struct node_list {
+struct node_list_t {
     struct node_list *next;
     struct node_t *node;
-} node_list_t;
+};
 
 struct node_t *newnode(enum category_t category, char *token);
 void addchild(struct node_t *parent, struct node_t *child);
