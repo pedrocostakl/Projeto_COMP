@@ -5,7 +5,7 @@
 **  Marco Manuel Almeida e Silva - 2021211653
 */
 
-enum category {
+enum category_t {
 
     /* Raiz */
     Program,
@@ -47,7 +47,6 @@ enum category {
     Minus,
     Plus,
     Assign,
-    Call,
 
     /* Terminais */
     Int,
@@ -57,9 +56,9 @@ enum category {
     Natural,
     Decimal,
     Identifier,
-    StrLit,
+    StrLit
 
-} category_t;
+};
 
 struct node_t {
     enum category_t category;
@@ -68,7 +67,7 @@ struct node_t {
 };
 
 struct node_list_t {
-    struct node_list *next;
+    struct node_list_t *next;
     struct node_t *node;
 };
 

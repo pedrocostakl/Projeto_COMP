@@ -34,6 +34,7 @@
     extern struct node_t *program;
 
     #define YY_USER_ACTION user_action();
+    #define PASS_TOKEN()
 
 %}
 
@@ -96,7 +97,7 @@ os.Args                                     { print_token("CMDARGS"); semicolon 
 
 {letter}({letter}|{digit})*                 { print_token("IDENTIFIER(%s)", yytext); semicolon = 1; if (parse) return IDENTIFIER; }
 
-[1-9]{digit}*                               { print_token("NATURAL(%s)", yytext); semicolon = 1; yylval = atoi(yytext); if (parse) return NATURAL; } /*naturals don't start with 0, only octals do*/
+[1-9]{digit}*                               { print_token("NATURAL(%s)", yytext); semicolon = 1; PASS_TOKEN(); if (parse) return NATURAL; } /*naturals don't start with 0, only octals do*/
 [0][xX]{hex_digit}+                         { print_token("NATURAL(%s)", yytext); semicolon = 1; if (parse) return NATURAL; }
 0{octal_digit}*                             { print_token("NATURAL(%s)", yytext); semicolon = 1; if (parse) return NATURAL; }
 0{digit}+                                   { printf("Line %d, column %d: invalid octal constant (%s)\n", line, tok_column, yytext); }

@@ -13,7 +13,7 @@ all: $(TARGET)
 
 # Rule to build the lexer executable
 $(TARGET): $(YACC_OUTPUT) $(LEX_OUTPUT)
-	$(CC) $(YACC_OUTPUT) $(LEX_OUTPUT) -o $(TARGET)
+	$(CC) ast.c $(YACC_OUTPUT) $(LEX_OUTPUT) -o $(TARGET)
 
 # Rule to generate the y.tab.c file from yacc file
 $(YACC_OUTPUT): $(YACC_FILE)

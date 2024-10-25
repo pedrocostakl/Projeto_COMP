@@ -61,13 +61,13 @@
 
 %token<lexeme> IDENTIFIER STRLIT NATURAL DECIMAL
 
-%type<node_t> program type declarations var_declaration var_spec var_spec_list func_declaration parameters parameter
-%type<node_t> func_body vars_statements statement
+%type<node> program type declarations var_declaration var_spec var_spec_list func_declaration parameters parameter
+%type<node> func_body vars_statements statement
 
 %left '+' '-'
 %left '/' '*'
 
-%union{
+%union {
     char *lexeme;
     struct node_t *node;
 }
