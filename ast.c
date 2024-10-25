@@ -7,6 +7,8 @@
 **  Marco Manuel Almeida e Silva - 2021211653
 */
 
+void print_category(enum category_t category);
+
 struct node_t *newnode(enum category_t category, char *token) {
     struct node_t *new = malloc(sizeof(struct node_t));
     new->category = category;
@@ -26,4 +28,27 @@ void addchild(struct node_t *parent, struct node_t *child) {
     new->node = child;
     new->next = NULL;
     children->next = new;
+}
+
+void show(struct node_t *root, int depth) {
+    for (int i = 0; i < depth; i++) {
+        printf("..");
+    }
+    print_category(root->category);
+    struct node_list_t *children = root->children;
+    while (children->next != NULL) {
+        show(children->node, depth + 1);
+        children = children->next;
+    }
+}
+
+void print_category(enum category_t category) {
+    switch (category) {
+        case Program:
+        printf("Program");
+        return;
+        case VarDecl:
+        printf("VarDecl");
+        return;
+    }
 }

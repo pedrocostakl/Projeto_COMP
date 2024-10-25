@@ -88,13 +88,13 @@ program
 
 type
 : INT
-{}
+{ $$ = newnode(Int, NULL); }
 | FLOAT32
-{}
+{ $$ = newnode(Float32, NULL); }
 | BOOL
-{}
+{ $$ = newnode(Bool, NULL); }
 | STR
-{}
+{ $$ = newnode(String, NULL); }
 ;
 
 declarations
