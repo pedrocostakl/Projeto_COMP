@@ -8,7 +8,7 @@
 enum category_t {
 
     /* Raiz */
-    Program,
+    Program = 0,
 
     /* Declaração de variáveis */
     VarDecl,

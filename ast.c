@@ -35,9 +35,10 @@ void show(struct node_t *root, int depth) {
         printf("..");
     }
     print_category(root->category);
+    printf("\n");
     struct node_list_t *children = root->children;
     while (children->next != NULL) {
-        show(children->node, depth + 1);
+        show(children->next->node, depth + 1);
         children = children->next;
     }
 }

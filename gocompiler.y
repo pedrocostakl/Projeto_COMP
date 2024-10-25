@@ -61,7 +61,7 @@
 
 %token<lexeme> IDENTIFIER STRLIT NATURAL DECIMAL
 
-%type<node> program type declarations var_declaration var_spec var_spec_list func_declaration parameters parameter
+%type<node> program type declarations var_declaration var_spec func_declaration parameters parameter
 %type<node> func_body vars_statements statement
 
 %left '+' '-'
@@ -81,50 +81,71 @@ program
     addchild(program, $4);
 }
 | PACKAGE IDENTIFIER SEMICOLON
-{ 
+{
     $$ = program = newnode(Program, NULL);
 }
 ;
 
 type
 : INT
-{ $$ = newnode(Int, NULL); }
+{ 
+    //$$ = newnode(Int, NULL);
+}
 | FLOAT32
-{ $$ = newnode(Float32, NULL); }
+{
+    //$$ = newnode(Float32, NULL);
+}
 | BOOL
-{ $$ = newnode(Bool, NULL); }
+{
+    //$$ = newnode(Bool, NULL);
+}
 | STR
-{ $$ = newnode(String, NULL); }
+{
+    //$$ = newnode(String, NULL);
+}
 ;
 
 declarations
 : var_declaration SEMICOLON declarations
-{}
+{
+    //addchild($$, $1);
+    $$ = $1;
+}
 | var_declaration SEMICOLON
-{}
+{
+    //addchild($$, $1);
+    $$ = $1;
+}
 | func_declaration SEMICOLON declarations
-{}
+{
+    $$ = program;
+}
 | func_declaration SEMICOLON
-{}
+{
+    $$ = program;
+}
 ;
 
 var_declaration
 : VAR var_spec
-{}
+{
+    $$ = $2;
+}
 | VAR LPAR var_spec SEMICOLON RPAR
-{}
+{
+    $$ = $3;
+}
 ;
 
 var_spec
 : IDENTIFIER type
-{ printf("var!\n"); }
-| IDENTIFIER var_spec_list
-{}
-;
+{
+    $$ = newnode(VarDecl, NULL);
+}
+| IDENTIFIER COMMA var_spec
+{
 
-var_spec_list
-: COMMA var_spec
-{ printf("var in list!\n"); }
+}
 ;
 
 func_declaration
