@@ -86,37 +86,16 @@ program
 }
 ;
 
-type
-: INT
-{ 
-    //$$ = newnode(Int, NULL);
-}
-| FLOAT32
-{
-    //$$ = newnode(Float32, NULL);
-}
-| BOOL
-{
-    //$$ = newnode(Bool, NULL);
-}
-| STR
-{
-    //$$ = newnode(String, NULL);
-}
-;
-
 declarations
-: var_declaration SEMICOLON declarations
+: declarations SEMICOLON var_declaration
 {
-    //addchild($$, $1);
     $$ = $1;
 }
 | var_declaration SEMICOLON
 {
-    //addchild($$, $1);
     $$ = $1;
 }
-| func_declaration SEMICOLON declarations
+| declarations SEMICOLON func_declaration
 {
     $$ = program;
 }
@@ -141,10 +120,14 @@ var_spec
 : IDENTIFIER type
 {
     $$ = newnode(VarDecl, NULL);
+    addchild($$, $2);
+    addchild($$, newnode(Identifier, NULL));
 }
 | IDENTIFIER COMMA var_spec
 {
-
+    $$ = newnode(Identifier, NULL);
+    addchild($3, $$);
+    $$ = $3;
 }
 ;
 
@@ -192,6 +175,25 @@ vars_statements
 statement
 : IDENTIFIER ASSIGN NATURAL
 { printf("statement in function body!\n"); }
+;
+
+type
+: INT
+{ 
+    $$ = newnode(Int, NULL);
+}
+| FLOAT32
+{
+    $$ = newnode(Float32, NULL);
+}
+| BOOL
+{
+    $$ = newnode(Bool, NULL);
+}
+| STR
+{
+    $$ = newnode(String, NULL);
+}
 ;
 
 %%

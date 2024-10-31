@@ -51,5 +51,118 @@ void print_category(enum category_t category) {
         case VarDecl:
         printf("VarDecl");
         return;
+        case FuncDecl:
+        printf("FuncDecl");
+        break;
+        case FuncHeader:
+        printf("FuncHeader");
+        break;
+        case FuncParams:
+        printf("FuncParams");
+        break;
+        case FuncBody:
+        printf("FuncBody");
+        break;
+        case ParamDecl:
+        printf("ParamDecl");
+        break;
+        case Block:
+        printf("Block");
+        break;
+        case If:
+        printf("If");
+        break;
+        case For:
+        printf("For");
+        break;
+        case Return:
+        printf("Return");
+        break;
+        case Call:
+        printf("Call");
+        break;
+        case Print:
+        printf("Print");
+        break;
+        case ParseArgs:
+        printf("ParseArgs");
+        break;
+        case Or:
+        printf("Or");
+        break;
+        case And:
+        printf("And");
+        break;
+        case Eq:
+        printf("Eq");
+        break;
+        case Ne:
+        printf("Ne");
+        break;
+        case Lt:
+        printf("Lt");
+        break;
+        case Gt:
+        printf("Gt");
+        break;
+        case Le:
+        printf("Le");
+        break;
+        case Ge:
+        printf("Ge");
+        break;
+        case Add:
+        printf("Add");
+        break;
+        case Sub:
+        printf("Sub");
+        break;
+        case Mul:
+        printf("Mul");
+        break;
+        case Div:
+        printf("Div");
+        break;
+        case Mod:
+        printf("Mod");
+        break;
+        case Not:
+        printf("Not");
+        break;
+        case Minus:
+        printf("Minus");
+        break;
+        case Plus:
+        printf("Plus");
+        break;
+        case Assign:
+        printf("Assign");
+        break;
+        case Int:
+        printf("Int");
+        break;
+        case Float32:
+        printf("Float32");
+        break;
+        case Bool:
+        printf("Bool");
+        break;
+        case String:
+        printf("String");
+        break;
+        case Natural:
+        printf("Natural");
+        break;
+        case Decimal:
+        printf("Decimal");
+        break;
+        case Identifier:
+        printf("Identifier");
+        break;
+        case StrLit:
+        printf("StrLit");
+        break;
+        default:
+        break;
     }
 }
