@@ -56,7 +56,10 @@ enum category_t {
     Natural,
     Decimal,
     Identifier,
-    StrLit
+    StrLit,
+
+    /* Nó intermediário que não será imprimido */
+    Intermediate
 
 };
 

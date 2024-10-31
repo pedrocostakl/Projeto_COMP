@@ -64,8 +64,10 @@
 %type<node> program type declarations var_declaration var_spec func_declaration parameters parameter
 %type<node> func_body vars_statements statement
 
+%left LOW
 %left '+' '-'
 %left '/' '*'
+%left HIGH
 
 %union {
     char *lexeme;
@@ -87,9 +89,11 @@ program
 ;
 
 declarations
-: declarations SEMICOLON var_declaration
+: var_declaration SEMICOLON declarations
 {
-    $$ = $1;
+    $$ = newnode(Intermediate, NULL);
+    addchild($$, $1);
+    addchild($$, $3);
 }
 | var_declaration SEMICOLON
 {
@@ -121,12 +125,10 @@ var_spec
 {
     $$ = newnode(VarDecl, NULL);
     addchild($$, $2);
-    addchild($$, newnode(Identifier, NULL));
+    addchild($$, newnode(Identifier, $1));
 }
 | IDENTIFIER COMMA var_spec
 {
-    $$ = newnode(Identifier, NULL);
-    addchild($3, $$);
     $$ = $3;
 }
 ;

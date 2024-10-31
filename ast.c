@@ -35,6 +35,9 @@ void show(struct node_t *root, int depth) {
         printf("..");
     }
     print_category(root->category);
+    if (root->token) {
+        printf("(%s)", root->token);
+    }
     printf("\n");
     struct node_list_t *children = root->children;
     while (children->next != NULL) {
