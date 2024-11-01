@@ -64,7 +64,7 @@
 %token<lexeme> IDENTIFIER STRLIT NATURAL DECIMAL
 
 %type<node> program type declarations var_declaration var_spec func_declaration func_header parameters parameter
-%type<node> func_body vars_statements statement func_invocation expr
+%type<node> func_body vars_statements statement block func_invocation expr
 
 %left LOW
 %left PLUS MINUS
@@ -231,6 +231,51 @@ statement
     $$ = newnode(Assign, NULL);
     addchild($$, newnode(Identifier, $1));
     addchild($$, $3);
+}
+| IF expr block
+{
+    $$ = newnode(If, NULL);
+    addchild($$, $2);
+    addchild($$, $3);
+    addchild($$, newnode(Block, NULL));
+}
+| IF expr block ELSE block
+{
+    $$ = newnode(If, NULL);
+    addchild($$, $2);
+    addchild($$, $3);
+    addchild($$, $5);
+}
+| RETURN expr
+{
+    $$ = newnode(Return, NULL);
+    addchild($$, $2);
+}
+| RETURN
+{
+    $$ = newnode(Return, NULL);
+}
+| PRINT LPAR expr RPAR
+{
+    $$ = newnode(Print, NULL);
+    addchild($$, $3);
+}
+| PRINT LPAR STRLIT RPAR
+{
+    $$ = newnode(Print, NULL);
+    addchild($$, newnode(StrLit, $3));
+}
+;
+
+block
+: LBRACE RBRACE
+{
+    $$ = newnode(Block, NULL);
+}
+| LBRACE statement SEMICOLON RBRACE
+{
+    $$ = newnode(Block, NULL);
+    addchild($$, $2);
 }
 ;
 
