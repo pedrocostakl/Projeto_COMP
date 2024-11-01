@@ -12,10 +12,12 @@
     void yyerror(char *);
 
     extern char *yytext;
-    extern int line;           /* Extern line variable from lex file */
-    extern int tok_column;     /* Extern token column variable from lex file */
+    extern int line;                 /* Extern line variable from lex file */
+    extern int tok_column;           /* Extern token column variable from lex file */
 
     struct node_t *program;
+    struct node_t *type;
+    struct node_t *declarations;
 
 %}
 
@@ -61,7 +63,7 @@
 
 %token<lexeme> IDENTIFIER STRLIT NATURAL DECIMAL
 
-%type<node> program type declarations var_declaration var_spec func_declaration parameters parameter
+%type<node> program type declarations var_declaration var_spec func_declaration func_header parameters parameter
 %type<node> func_body vars_statements statement
 
 %left LOW
@@ -91,57 +93,95 @@ program
 declarations
 : var_declaration SEMICOLON declarations
 {
-    $$ = newnode(Intermediate, NULL);
-    addchild($$, $1);
-    addchild($$, $3);
+    $$ = declarations;
 }
 | var_declaration SEMICOLON
 {
-    $$ = $1;
+    $$ = declarations;
 }
 | declarations SEMICOLON func_declaration
 {
-    $$ = program;
+    $$ = declarations;
 }
 | func_declaration SEMICOLON
 {
-    $$ = program;
+    $$ = declarations;
 }
 ;
 
 var_declaration
 : VAR var_spec
 {
-    $$ = $2;
+    addchild(declarations, $2);
 }
 | VAR LPAR var_spec SEMICOLON RPAR
 {
-    $$ = $3;
+    addchild(declarations, $3);
 }
 ;
 
 var_spec
 : IDENTIFIER type
 {
+    if (declarations == NULL) {
+        declarations = newnode(Intermediate, NULL);
+    }
+
     $$ = newnode(VarDecl, NULL);
     addchild($$, $2);
     addchild($$, newnode(Identifier, $1));
 }
 | IDENTIFIER COMMA var_spec
 {
-    $$ = $3;
+    if (declarations == NULL) {
+        declarations = newnode(Intermediate, NULL);
+    }
+
+    $$ = newnode(VarDecl, NULL);
+    addchild($$, type);
+    addchild($$, newnode(Identifier, $1));
+    addchild(declarations, $3);
 }
 ;
 
 func_declaration
-: FUNC IDENTIFIER LPAR parameters RPAR type func_body
-{ printf("function!\n"); }
-| FUNC IDENTIFIER LPAR parameters RPAR func_body
-{ printf("function!\n"); }
-| FUNC IDENTIFIER LPAR RPAR type func_body
-{ printf("function!\n"); }
-| FUNC IDENTIFIER LPAR RPAR func_body
-{ printf("function!\n"); }
+: FUNC func_header func_body
+{
+    $$ = newnode(FuncDecl, NULL);
+    addchild($$, $2);
+    addchild(declarations, $$);
+    //addchild($$, $3);
+}
+;
+
+func_header
+: IDENTIFIER LPAR parameters RPAR type
+{
+    $$ = newnode(FuncHeader, NULL);
+    addchild($$, newnode(Identifier, $1));
+    addchild($$, $5);
+    addchild($$, $3);
+}
+| IDENTIFIER LPAR parameters RPAR
+{
+    $$ = newnode(FuncHeader, NULL);
+    addchild($$, newnode(Identifier, $1));
+    addchild($$, $3);
+
+}
+| IDENTIFIER LPAR RPAR type
+{
+    $$ = newnode(FuncHeader, NULL);
+    addchild($$, newnode(Identifier, $1));
+    addchild($$, $4);
+    addchild($$, newnode(FuncParams, NULL));
+}
+| IDENTIFIER LPAR RPAR
+{
+    $$ = newnode(FuncHeader, NULL);
+    addchild($$, newnode(Identifier, $1));
+    addchild($$, newnode(FuncParams, NULL));
+}
 ;
 
 parameters
@@ -153,7 +193,11 @@ parameters
 
 parameter
 : IDENTIFIER type
-{}
+{
+    $$ = newnode(ParamDecl, NULL);
+    addchild($$, newnode(Identifier, $1));
+    addchild($$, $2);
+}
 ;
 
 func_body
@@ -182,19 +226,23 @@ statement
 type
 : INT
 { 
-    $$ = newnode(Int, NULL);
+    type = newnode(Int, NULL);
+    $$ = type;
 }
 | FLOAT32
 {
-    $$ = newnode(Float32, NULL);
+    type = newnode(Float32, NULL);
+    $$ = type;
 }
 | BOOL
 {
-    $$ = newnode(Bool, NULL);
+    type = newnode(Bool, NULL);
+    $$ = type;
 }
 | STR
 {
-    $$ = newnode(String, NULL);
+    type = newnode(String, NULL);
+    $$ = type;
 }
 ;
 
