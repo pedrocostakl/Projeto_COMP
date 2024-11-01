@@ -64,7 +64,7 @@
 %token<lexeme> IDENTIFIER STRLIT NATURAL DECIMAL
 
 %type<node> program type declarations var_declaration var_spec func_declaration func_header parameters parameter
-%type<node> func_body vars_statements statement block func_invocation expr
+%type<node> func_body vars_statements statement block parse_args func_invocation expr
 
 %left LOW
 %left PLUS MINUS
@@ -232,6 +232,10 @@ statement
     addchild($$, newnode(Identifier, $1));
     addchild($$, $3);
 }
+| block
+{
+    $$ = $1;
+}
 | IF expr block
 {
     $$ = newnode(If, NULL);
@@ -266,6 +270,14 @@ statement
 {
     $$ = newnode(Return, NULL);
 }
+| func_invocation
+{
+    $$ = $1;
+}
+| parse_args
+{
+    $$ = $1;
+}
 | PRINT LPAR expr RPAR
 {
     $$ = newnode(Print, NULL);
@@ -290,9 +302,21 @@ block
 }
 ;
 
+parse_args
+: IDENTIFIER COMMA BLANKID ASSIGN PARSEINT LPAR CMDARGS LSQ expr RSQ RPAR
+{
+    $$ = newnode(ParseArgs, NULL);
+    addchild($$, newnode(Identifier, $1));
+    addchild($$, $9);
+}
+;
+
 func_invocation
 : IDENTIFIER LPAR RPAR
-{}
+{
+    $$ = newnode(Call, NULL);
+    addchild($$, newnode(Identifier, $1));
+}
 ;
 
 expr
