@@ -64,11 +64,11 @@
 %token<lexeme> IDENTIFIER STRLIT NATURAL DECIMAL
 
 %type<node> program type declarations var_declaration var_spec func_declaration func_header parameters parameter
-%type<node> func_body vars_statements statement
+%type<node> func_body vars_statements statement func_invocation expr
 
 %left LOW
-%left '+' '-'
-%left '/' '*'
+%left PLUS MINUS
+%left DIV STAR
 %left HIGH
 
 %union {
@@ -99,7 +99,7 @@ declarations
 {
     $$ = declarations;
 }
-| declarations SEMICOLON func_declaration
+| func_declaration SEMICOLON declarations
 {
     $$ = declarations;
 }
@@ -149,8 +149,8 @@ func_declaration
 {
     $$ = newnode(FuncDecl, NULL);
     addchild($$, $2);
+    addchild($$, $3);
     addchild(declarations, $$);
-    //addchild($$, $3);
 }
 ;
 
@@ -202,9 +202,14 @@ parameter
 
 func_body
 : LBRACE vars_statements RBRACE
-{}
+{
+    $$ = newnode(FuncBody, NULL);
+    addchild($$, $2);
+}
 | LBRACE RBRACE
-{}
+{
+    $$ = newnode(FuncBody, NULL);
+}
 ;
 
 vars_statements
@@ -215,12 +220,139 @@ vars_statements
 | var_declaration SEMICOLON
 {}
 | statement SEMICOLON
-{}
+{
+    $$ = $1;
+}
 ;
 
 statement
-: IDENTIFIER ASSIGN NATURAL
-{ printf("statement in function body!\n"); }
+: IDENTIFIER ASSIGN expr
+{
+    $$ = newnode(Assign, NULL);
+    addchild($$, newnode(Identifier, $1));
+    addchild($$, $3);
+}
+;
+
+func_invocation
+: IDENTIFIER LPAR RPAR
+{}
+;
+
+expr
+: expr OR expr
+{
+    $$ = newnode(Or, NULL);
+    addchild($$, $1);
+    addchild($$, $3);
+}
+| expr AND expr
+{
+    $$ = newnode(And, NULL);
+    addchild($$, $1);
+    addchild($$, $3);
+}
+| expr LT expr
+{
+    $$ = newnode(Lt, NULL);
+    addchild($$, $1);
+    addchild($$, $3);
+}
+| expr GT expr
+{
+    $$ = newnode(Gt, NULL);
+    addchild($$, $1);
+    addchild($$, $3);
+}
+| expr EQ expr
+{
+    $$ = newnode(Eq, NULL);
+    addchild($$, $1);
+    addchild($$, $3);
+}
+| expr NE expr
+{
+    $$ = newnode(Ne, NULL);
+    addchild($$, $1);
+    addchild($$, $3);
+}
+| expr LE expr
+{
+    $$ = newnode(Le, NULL);
+    addchild($$, $1);
+    addchild($$, $3);
+}
+| expr GE expr
+{
+    $$ = newnode(Ge, NULL);
+    addchild($$, $1);
+    addchild($$, $3);
+}
+| expr PLUS expr
+{
+    $$ = newnode(Plus, NULL);
+    addchild($$, $1);
+    addchild($$, $3);
+}
+| expr MINUS expr
+{
+    $$ = newnode(Minus, NULL);
+    addchild($$, $1);
+    addchild($$, $3);
+}
+| expr STAR expr
+{
+    $$ = newnode(Mul, NULL);
+    addchild($$, $1);
+    addchild($$, $3);
+}
+| expr DIV expr
+{
+    $$ = newnode(Div, NULL);
+    addchild($$, $1);
+    addchild($$, $3);
+}
+| expr MOD expr
+{
+    $$ = newnode(Mod, NULL);
+    addchild($$, $1);
+    addchild($$, $3);
+}
+| NOT expr
+{
+    $$ = newnode(Not, NULL);
+    addchild($$, $2);
+}
+| MINUS expr
+{
+    $$ = newnode(Minus, NULL);
+    addchild($$, $2);
+}
+| PLUS expr
+{
+    $$ = newnode(Plus, NULL);
+    addchild($$, $2);
+}
+| NATURAL
+{
+    $$ = newnode(Natural, $1);
+}
+| DECIMAL
+{
+    $$ = newnode(Decimal, $1);
+}
+| IDENTIFIER
+{
+    $$ = newnode(Identifier, $1);
+}
+| func_invocation
+{
+
+}
+| LPAR expr RPAR
+{
+    $$ = $2;
+}
 ;
 
 type
