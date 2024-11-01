@@ -246,6 +246,17 @@ statement
     addchild($$, $3);
     addchild($$, $5);
 }
+| FOR expr block
+{
+    $$ = newnode(For, NULL);
+    addchild($$, $2);
+    addchild($$, $3);
+}
+| FOR block
+{
+    $$ = newnode(For, NULL);
+    addchild($$, $2);
+}
 | RETURN expr
 {
     $$ = newnode(Return, NULL);
