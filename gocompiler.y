@@ -17,7 +17,7 @@
 
     struct node_t *program;
     struct node_t *type;
-    struct node_t *declarations;
+    //struct node_t *declarations;
 
 %}
 
@@ -93,54 +93,77 @@ program
 declarations
 : var_declaration SEMICOLON declarations
 {
-    $$ = declarations;
+    $$ = newnode(Intermediate, NULL);
+    addchild($$, $1);
+    addchild($$, $3);
 }
 | var_declaration SEMICOLON
 {
-    $$ = declarations;
+    $$ = $1;
 }
 | func_declaration SEMICOLON declarations
 {
-    $$ = declarations;
+    $$ = newnode(Intermediate, NULL);
+    addchild($$, $1);
+    addchild($$, $3);
 }
 | func_declaration SEMICOLON
 {
-    $$ = declarations;
+    $$ = $1;
 }
 ;
 
 var_declaration
 : VAR var_spec
 {
-    addchild(declarations, $2);
+    //if (declarations == NULL) {
+    //    declarations = newnode(Intermediate, NULL);
+    //}
+    //addchild(declarations, $2);
+    $$ = $2;
 }
 | VAR LPAR var_spec SEMICOLON RPAR
 {
-    addchild(declarations, $3);
+    //if (declarations == NULL) {
+    //    declarations = newnode(Intermediate, NULL);
+    //}
+    //addchild(declarations, $3);
+    $$ = $3;
 }
 ;
 
 var_spec
 : IDENTIFIER type
 {
-    if (declarations == NULL) {
-        declarations = newnode(Intermediate, NULL);
-    }
+    //if (declarations == NULL) {
+    //    declarations = newnode(Intermediate, NULL);
+    //}
+    //$$ = newnode(VarDecl, NULL);
+    //addchild($$, $2);
+    //addchild($$, newnode(Identifier, $1));
 
-    $$ = newnode(VarDecl, NULL);
-    addchild($$, $2);
-    addchild($$, newnode(Identifier, $1));
+    $$ = newnode(Intermediate, NULL);
+    struct node_t *vardecl = newnode(VarDecl, NULL);
+    addchild(vardecl, $2);
+    addchild(vardecl, newnode(Identifier, $1));
+    addchild($$, vardecl);
 }
 | IDENTIFIER COMMA var_spec
 {
-    if (declarations == NULL) {
-        declarations = newnode(Intermediate, NULL);
-    }
+    //if (declarations == NULL) {
+    //    declarations = newnode(Intermediate, NULL);
+    //}
+    //$$ = newnode(VarDecl, NULL);
+    //addchild($$, type);
+    //addchild($$, newnode(Identifier, $1));
+    //addchild(declarations, $3);
 
-    $$ = newnode(VarDecl, NULL);
-    addchild($$, type);
-    addchild($$, newnode(Identifier, $1));
-    addchild(declarations, $3);
+    $$ = newnode(Intermediate, NULL);
+    struct node_t *vardecl = newnode(VarDecl, NULL);
+    addchild(vardecl, type);
+    addchild(vardecl, newnode(Identifier, $1));
+    addchild($$, vardecl);
+    addchild($$, $3);
 }
 ;
 
@@ -150,7 +173,7 @@ func_declaration
     $$ = newnode(FuncDecl, NULL);
     addchild($$, $2);
     addchild($$, $3);
-    addchild(declarations, $$);
+    //addchild(declarations, $$);
 }
 ;
 
@@ -160,13 +183,17 @@ func_header
     $$ = newnode(FuncHeader, NULL);
     addchild($$, newnode(Identifier, $1));
     addchild($$, $5);
-    addchild($$, $3);
+    struct node_t *params = newnode(FuncParams, NULL);
+    addchild(params, $3);
+    addchild($$, params);
 }
 | IDENTIFIER LPAR parameters RPAR
 {
     $$ = newnode(FuncHeader, NULL);
     addchild($$, newnode(Identifier, $1));
-    addchild($$, $3);
+    struct node_t *params = newnode(FuncParams, NULL);
+    addchild(params, $3);
+    addchild($$, params);
 
 }
 | IDENTIFIER LPAR RPAR type
@@ -186,9 +213,16 @@ func_header
 
 parameters
 : parameter
-{}
+{
+    $$ = newnode(Intermediate, NULL);
+    addchild($$, $1);
+}
 | parameters COMMA parameter
-{}
+{
+    $$ = newnode(Intermediate, NULL);
+    addchild($$, $1);
+    addchild($$, $3);
+}
 ;
 
 parameter
@@ -214,11 +248,21 @@ func_body
 
 vars_statements
 : var_declaration SEMICOLON vars_statements
-{}
+{
+    $$ = newnode(Intermediate, NULL);
+    addchild($$, $1);
+    addchild($$, $3);
+}
 | statement SEMICOLON vars_statements
-{}
+{
+    $$ = newnode(Intermediate, NULL);
+    addchild($$, $1);
+    addchild($$, $3);
+}
 | var_declaration SEMICOLON
-{}
+{
+    $$ = $1;
+}
 | statement SEMICOLON
 {
     $$ = $1;
