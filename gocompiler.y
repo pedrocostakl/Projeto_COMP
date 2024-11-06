@@ -67,8 +67,15 @@
 %type<node> func_body vars_statements statement block parse_args func_invocation func_invocation_exprs expr
 
 %left LOW
+%right ASSIGN
+%left OR
+%left AND
+%left LT GT GE
+%left EQ NE
+%left LE
 %left PLUS MINUS
 %left DIV STAR
+%left LPAR RPAR
 %left HIGH
 
 %union {
@@ -229,8 +236,8 @@ parameter
 : IDENTIFIER type
 {
     $$ = newnode(ParamDecl, NULL);
-    addchild($$, newnode(Identifier, $1));
     addchild($$, $2);
+    addchild($$, newnode(Identifier, $1));
 }
 ;
 
@@ -266,6 +273,14 @@ vars_statements
 | statement SEMICOLON
 {
     $$ = $1;
+}
+| vars_statements SEMICOLON
+{
+    $$ = $1;
+}
+| SEMICOLON
+{
+    $$ = newnode(Intermediate, NULL);
 }
 ;
 
@@ -332,7 +347,7 @@ statement
     $$ = newnode(Print, NULL);
     addchild($$, newnode(StrLit, $3));
 }
-| SEMICOLON
+| error
 {
     $$ = newnode(Intermediate, NULL);
 }
@@ -357,6 +372,10 @@ parse_args
     addchild($$, newnode(Identifier, $1));
     addchild($$, $9);
 }
+| IDENTIFIER COMMA BLANKID ASSIGN PARSEINT LPAR error RPAR
+{
+    $$ = newnode(Intermediate, NULL);
+}
 ;
 
 func_invocation
@@ -370,6 +389,10 @@ func_invocation
     $$ = newnode(Call, NULL);
     addchild($$, newnode(Identifier, $1));
     addchild($$, $3);
+}
+| IDENTIFIER LPAR error RPAR
+{
+    $$ = newnode(Intermediate, NULL);
 }
 ;
 
@@ -500,6 +523,10 @@ expr
 | LPAR expr RPAR
 {
     $$ = $2;
+}
+| LPAR error RPAR
+{
+    $$ = newnode(Intermediate, NULL);
 }
 ;
 
