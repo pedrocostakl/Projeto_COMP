@@ -76,4 +76,7 @@ struct node_list_t {
 
 struct node_t *newnode(enum category_t category, char *token);
 void addchild(struct node_t *parent, struct node_t *child);
+void addChildBeginning(struct node_t *parent, struct node_t *child);
 void show(struct node_t *root, int depth);
+int removeIntermediates(struct node_t *root,struct node_list_t *previous, struct node_list_t *next, struct node_t * previous_node);
+void remove_intermediate_nodes(struct node_t *node);

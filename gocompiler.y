@@ -150,6 +150,9 @@ func_declaration
     $$ = newnode(FuncDecl, NULL);
     addchild($$, $2);
     addchild($$, $3);
+    if (declarations == NULL) {
+        declarations = newnode(Intermediate, NULL);
+    }
     addchild(declarations, $$);
 }
 ;

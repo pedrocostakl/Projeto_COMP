@@ -193,6 +193,8 @@ int main(int argc, char **argv) {
         if (strcmp(argv[1], "-t") == 0) {
             parse = 1;
             yyparse();
+            //removeIntermediates(program,NULL,NULL,NULL);
+            remove_intermediate_nodes(program);
             show(program, 0);
             return 0;
         }
