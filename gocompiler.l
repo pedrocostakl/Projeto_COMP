@@ -193,7 +193,7 @@ int main(int argc, char **argv) {
         if (strcmp(argv[1], "-t") == 0) {
             parse = 1;
             yyparse();
-            show(program, 0);
+            show(program, 0, 0);
             return 0;
         }
     }

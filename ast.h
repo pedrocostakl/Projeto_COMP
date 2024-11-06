@@ -76,4 +76,5 @@ struct node_list_t {
 
 struct node_t *newnode(enum category_t category, char *token);
 void addchild(struct node_t *parent, struct node_t *child);
-void show(struct node_t *root, int depth);
+int numchildren(struct node_t *root);
+void show(struct node_t *root, int depth, int force);

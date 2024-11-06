@@ -30,21 +30,55 @@ void addchild(struct node_t *parent, struct node_t *child) {
     children->next = new;
 }
 
-void show(struct node_t *root, int depth) {
-    if (root->category != Intermediate) {
-        for (int i = 0; i < depth; i++) {
-        printf("..");
-        }
-        print_category(root->category);
-        if (root->token) {
-            printf("(%s)", root->token);
-        }
-        printf("\n");
-        depth += 1;
-    }
+int numchildren(struct node_t *root) {
+    int num = 0;
     struct node_list_t *children = root->children;
     while (children->next != NULL) {
-        show(children->next->node, depth);
+        if (children->next->node->category == Intermediate) {
+            num += numchildren(children->next->node);
+        } else {
+            num++;
+        }
+        children = children->next;
+    }
+    return num;
+}
+
+void show(struct node_t *root, int depth, int force) {
+    // controlo do print do node e do seu token
+    switch (root->category) {
+        case Intermediate:
+            break;
+        case Block:
+            if (force == 0 && numchildren(root) < 2) {
+                break;
+            }
+        default:
+            for (int i = 0; i < depth; i++) {
+                printf("..");
+            }
+            depth++;
+            print_category(root->category);
+            if (root->token != NULL) {
+                if (root->category != StrLit) {
+                    printf("(%s)", root->token); // print do valor do token
+                } else {
+                    printf("(\"%s\")", root->token); // print de strlit com \"
+                }
+            }
+            printf("\n");
+            break;
+    }
+    // forçar ou não o próximo Block
+    if (root->category == If || root->category == For) {
+        force = 1;
+    } else {
+        force = 0;
+    }
+    // iterar children
+    struct node_list_t *children = root->children;
+    while (children->next != NULL) {
+        show(children->next->node, depth, force);
         children = children->next;
     }
 }

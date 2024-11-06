@@ -339,7 +339,7 @@ block
 {
     $$ = newnode(Block, NULL);
 }
-| LBRACE statement SEMICOLON RBRACE
+| LBRACE vars_statements RBRACE
 {
     $$ = newnode(Block, NULL);
     addchild($$, $2);
@@ -414,13 +414,13 @@ expr
 }
 | expr PLUS expr
 {
-    $$ = newnode(Plus, NULL);
+    $$ = newnode(Add, NULL);
     addchild($$, $1);
     addchild($$, $3);
 }
 | expr MINUS expr
 {
-    $$ = newnode(Minus, NULL);
+    $$ = newnode(Sub, NULL);
     addchild($$, $1);
     addchild($$, $3);
 }
