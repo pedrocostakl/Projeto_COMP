@@ -7,6 +7,7 @@
 #include "stdio.h"
 #include "ast.h"
 
+int numchildren(struct node_t *root);
 void print_category(const enum category_t category);
 
 struct node_t *newnode(enum category_t category, char *token) {
@@ -30,26 +31,6 @@ void addchild(struct node_t *parent, struct node_t *child) {
     children->next = new;
 }
 
-int numchildren(struct node_t *root) {
-    int num = 0;
-    struct node_list_t *children = root->children;
-    while (children->next != NULL) {
-        if (children->next->node->category == Intermediate) {
-            num += numchildren(children->next->node);
-        } else {
-            if (children->next->node->category == Block) {
-                if (numchildren(children->next->node) > 0) {
-                    num++;
-                }
-            } else {
-                num++;
-            }
-        }
-        children = children->next;
-    }
-    return num;
-}
-
 void show(struct node_t *root, int depth, int force) {
     // controlo do print do node e do seu token
     switch (root->category) {
@@ -57,8 +38,9 @@ void show(struct node_t *root, int depth, int force) {
             break;
         case Block:
             if (force == 0 && numchildren(root) < 2) {
-                break;
+                break; // não continua para o print caso não seja válido
             }
+            // se o bloco for válido, continuar para o print
         default:
             for (int i = 0; i < depth; i++) {
                 printf("..");
@@ -69,7 +51,8 @@ void show(struct node_t *root, int depth, int force) {
                 if (root->category != StrLit) {
                     printf("(%s)", root->token); // print do valor do token
                 } else {
-                    printf("(\"%s\")", root->token); // print de strlit com \"
+                    //printf("(\"%s\")", root->token); // print de strlit com \"
+                    printf("(%s)", root->token); // print do valor do token
                 }
             }
             printf("\n");
@@ -87,6 +70,27 @@ void show(struct node_t *root, int depth, int force) {
         show(children->next->node, depth, force);
         children = children->next;
     }
+}
+
+int numchildren(struct node_t *root) {
+    int num = 0;
+    struct node_list_t *children = root->children;
+    while (children->next != NULL) {
+        if (children->next->node->category == Intermediate) {
+            num += numchildren(children->next->node);
+        } else {
+            if (children->next->node->category == Block) {
+                // contar um block como child apenas se não estiver vazio
+                if (numchildren(children->next->node) > 0) {
+                    num++;
+                }
+            } else {
+                num++;
+            }
+        }
+        children = children->next;
+    }
+    return num;
 }
 
 void print_category(const enum category_t category) {

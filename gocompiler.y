@@ -6,6 +6,8 @@
     */
 
     #include <stdio.h>
+    #include <string.h>
+    
     #include "ast.h"
 
     extern int yylex(void);
@@ -14,10 +16,11 @@
     extern char *yytext;
     extern int line;                 /* Extern line variable from lex file */
     extern int tok_column;           /* Extern token column variable from lex file */
+    extern int column;
+
     int syntax_error_flag = 0;
     struct node_t *program;
     struct node_t *type;
-    //struct node_t *declarations;
 
 %}
 
@@ -123,18 +126,10 @@ declarations
 var_declaration
 : VAR var_spec
 {
-    //if (declarations == NULL) {
-    //    declarations = newnode(Intermediate, NULL);
-    //}
-    //addchild(declarations, $2);
     $$ = $2;
 }
 | VAR LPAR var_spec SEMICOLON RPAR
 {
-    //if (declarations == NULL) {
-    //    declarations = newnode(Intermediate, NULL);
-    //}
-    //addchild(declarations, $3);
     $$ = $3;
 }
 ;
@@ -142,13 +137,6 @@ var_declaration
 var_spec
 : IDENTIFIER type
 {
-    //if (declarations == NULL) {
-    //    declarations = newnode(Intermediate, NULL);
-    //}
-    //$$ = newnode(VarDecl, NULL);
-    //addchild($$, $2);
-    //addchild($$, newnode(Identifier, $1));
-
     $$ = newnode(Intermediate, NULL);
     struct node_t *vardecl = newnode(VarDecl, NULL);
     addchild(vardecl, $2);
@@ -157,14 +145,6 @@ var_spec
 }
 | IDENTIFIER COMMA var_spec
 {
-    //if (declarations == NULL) {
-    //    declarations = newnode(Intermediate, NULL);
-    //}
-    //$$ = newnode(VarDecl, NULL);
-    //addchild($$, type);
-    //addchild($$, newnode(Identifier, $1));
-    //addchild(declarations, $3);
-
     $$ = newnode(Intermediate, NULL);
     struct node_t *vardecl = newnode(VarDecl, NULL);
     addchild(vardecl, type);
@@ -180,7 +160,6 @@ func_declaration
     $$ = newnode(FuncDecl, NULL);
     addchild($$, $2);
     addchild($$, $3);
-    //addchild(declarations, $$);
 }
 ;
 
@@ -419,7 +398,7 @@ func_invocation_exprs
     $$ = newnode(Intermediate, NULL);
     addchild($$, $1);
 }
-| expr COMMA func_invocation_exprs
+| func_invocation_exprs COMMA expr
 {
     $$ = newnode(Intermediate, NULL);
     addchild($$, $1);
@@ -574,5 +553,6 @@ type
 
 void yyerror(char *error) {
     syntax_error_flag = 1;  // Set the error flag to 1
-    printf("Line %d, column %d: %s: %s\n", line, tok_column, error, yytext);
+    int t_column = column - strlen(yytext);
+    printf("Line %d, column %d: %s: %s\n", line, t_column, error, yytext);
 }

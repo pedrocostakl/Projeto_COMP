@@ -127,15 +127,19 @@ os.Args                                     { print_token("CMDARGS"); semicolon 
 \"                                          {
                                                 BEGIN(STRING); 
                                                 string_column = tok_column; 
-                                                temp_string[0] = '\0'; 
+                                                temp_string[0] = '\"';
+                                                temp_string[1] = '\0';
+                                                //temp_string[0] = '\0';
                                                 valid_string = 1;
                                             }
 <STRING>\"                                  { 
                                                 BEGIN(INITIAL); 
                                                 if (valid_string) {
-                                                    print_token("STRLIT(\"%s\")", temp_string); 
+                                                    strcat(temp_string, "\"");
+                                                    print_token("STRLIT(%s)", temp_string); 
                                                     semicolon = 1; 
                                                     yylval.lexeme = strdup(temp_string);
+                                                    yytext = temp_string;
                                                     if (parse) return STRLIT; 
                                                 } 
                                             }
