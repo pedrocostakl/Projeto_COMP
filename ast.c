@@ -37,7 +37,13 @@ int numchildren(struct node_t *root) {
         if (children->next->node->category == Intermediate) {
             num += numchildren(children->next->node);
         } else {
-            num++;
+            if (children->next->node->category == Block) {
+                if (numchildren(children->next->node) > 0) {
+                    num++;
+                }
+            } else {
+                num++;
+            }
         }
         children = children->next;
     }

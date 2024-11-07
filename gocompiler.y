@@ -64,7 +64,7 @@
 %token<lexeme> IDENTIFIER STRLIT NATURAL DECIMAL
 
 %type<node> program type declarations var_declaration var_spec func_declaration func_header parameters parameter
-%type<node> func_body vars_statements statement block parse_args func_invocation func_invocation_exprs expr
+%type<node> func_body vars_statements statement block block_statements parse_args func_invocation func_invocation_exprs expr
 
 %left LOW
 %right ASSIGN
@@ -254,17 +254,17 @@ func_body
 ;
 
 vars_statements
-: var_declaration SEMICOLON vars_statements
+: vars_statements var_declaration SEMICOLON
 {
     $$ = newnode(Intermediate, NULL);
     addchild($$, $1);
-    addchild($$, $3);
+    addchild($$, $2);
 }
-| statement SEMICOLON vars_statements
+| vars_statements statement SEMICOLON
 {
     $$ = newnode(Intermediate, NULL);
     addchild($$, $1);
-    addchild($$, $3);
+    addchild($$, $2);
 }
 | var_declaration SEMICOLON
 {
@@ -278,9 +278,9 @@ vars_statements
 {
     $$ = $1;
 }
-| SEMICOLON
+|
 {
-    $$ = newnode(Intermediate, NULL);
+    $$ = newnode(Intermediate, NULL); // TODO: devia ser NULL
 }
 ;
 
@@ -358,10 +358,27 @@ block
 {
     $$ = newnode(Block, NULL);
 }
-| LBRACE vars_statements RBRACE
+| LBRACE block_statements RBRACE
 {
     $$ = newnode(Block, NULL);
     addchild($$, $2);
+}
+;
+
+block_statements
+: statement SEMICOLON
+{
+    $$ = $1;
+}
+| block_statements statement SEMICOLON
+{
+    $$ = newnode(Intermediate, NULL);
+    addchild($$, $1);
+    addchild($$, $2);
+}
+|
+{
+    $$ = newnode(Intermediate, NULL); // TODO: devia ser NULL
 }
 ;
 
