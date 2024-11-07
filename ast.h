@@ -65,6 +65,7 @@ enum category_t {
     Intermediate
 
 };
+//int syntax_error_flag;
 
 struct node_t {
     enum category_t category;

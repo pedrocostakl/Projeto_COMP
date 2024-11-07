@@ -14,7 +14,7 @@
     extern char *yytext;
     extern int line;                 /* Extern line variable from lex file */
     extern int tok_column;           /* Extern token column variable from lex file */
-
+    int syntax_error_flag = 0;
     struct node_t *program;
     struct node_t *type;
     //struct node_t *declarations;
@@ -70,13 +70,13 @@
 %right ASSIGN
 %left OR
 %left AND
-%left LT GT GE
-%left EQ NE
-%left LE
+%left EQ NE LT GT LE GE
 %left PLUS MINUS
 %left DIV STAR
-%left LPAR RPAR
+%right NOT
+%nonassoc LPAR RPAR
 %left HIGH
+
 
 %union {
     char *lexeme;
@@ -556,5 +556,6 @@ type
 %%
 
 void yyerror(char *error) {
+    syntax_error_flag = 1;  // Set the error flag to 1
     printf("Line %d, column %d: %s: %s\n", line, tok_column, error, yytext);
 }

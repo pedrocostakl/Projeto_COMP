@@ -32,6 +32,7 @@
     char temp_string[BUF_SIZE];
 
     extern struct node_t *program;
+    extern int syntax_error_flag;
 
     #define YY_USER_ACTION user_action();
     #define PASS_TOKEN() yylval.lexeme = strdup(yytext);
@@ -193,7 +194,9 @@ int main(int argc, char **argv) {
         if (strcmp(argv[1], "-t") == 0) {
             parse = 1;
             yyparse();
-            show(program, 0, 0);
+            if(syntax_error_flag == 0){
+                show(program, 0, 0);
+            }
             return 0;
         }
     }
