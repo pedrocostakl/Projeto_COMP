@@ -7,16 +7,17 @@
 
     #include <stdio.h>
     #include <string.h>
-    
+
     #include "ast.h"
 
     extern int yylex(void);
     void yyerror(char *);
 
     extern char *yytext;
-    extern int line;                 /* Extern line variable from lex file */
-    extern int tok_column;           /* Extern token column variable from lex file */
-    extern int column;
+    extern int line;                 /* Line externa do ficheiro lex */
+    extern int column;               /* Column externa do ficheiro lex */
+    extern int tok_line;
+    extern int tok_column;
 
     int syntax_error_flag = 0;
     struct node_t *program;
@@ -75,11 +76,10 @@
 %left AND
 %left EQ NE LT GT LE GE
 %left PLUS MINUS
-%left DIV STAR
+%left DIV STAR MOD
 %right NOT
 %nonassoc LPAR RPAR
 %left HIGH
-
 
 %union {
     char *lexeme;
@@ -257,9 +257,9 @@ vars_statements
 {
     $$ = $1;
 }
-|
+| SEMICOLON 
 {
-    $$ = newnode(Intermediate, NULL); // TODO: devia ser NULL
+    $$ = newnode(Intermediate, NULL);
 }
 ;
 
@@ -349,15 +349,11 @@ block_statements
 {
     $$ = $1;
 }
-| block_statements statement SEMICOLON
+|  block_statements statement SEMICOLON 
 {
     $$ = newnode(Intermediate, NULL);
     addchild($$, $1);
     addchild($$, $2);
-}
-|
-{
-    $$ = newnode(Intermediate, NULL); // TODO: devia ser NULL
 }
 ;
 
@@ -553,6 +549,6 @@ type
 
 void yyerror(char *error) {
     syntax_error_flag = 1;  // Set the error flag to 1
-    int t_column = column - strlen(yytext);
-    printf("Line %d, column %d: %s: %s\n", line, t_column, error, yytext);
+    int w = column - strlen(yytext);
+    printf("Line %d, column %d: %s: %s\n", line, tok_column, error, yytext);
 }

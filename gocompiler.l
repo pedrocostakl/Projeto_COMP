@@ -20,6 +20,7 @@
     void reserved();
 
     int line = 1;                     /* Stores the current line */
+    int tok_line = 1;
     int column = 1;                   /* Stores the current column */
     int tok_column = 1;               /* Stores the column where the current token starts */
     int comment_line = 0;             /* Stores the line where the comment starts */
@@ -140,6 +141,7 @@ os.Args                                     { print_token("CMDARGS"); semicolon 
                                                     semicolon = 1; 
                                                     yylval.lexeme = strdup(temp_string);
                                                     yytext = temp_string;
+                                                    tok_column = string_column;
                                                     if (parse) return STRLIT; 
                                                 } 
                                             }
@@ -198,7 +200,7 @@ int main(int argc, char **argv) {
         if (strcmp(argv[1], "-t") == 0) {
             parse = 1;
             yyparse();
-            if(syntax_error_flag == 0){
+            if (syntax_error_flag == 0) {
                 show(program, 0, 0);
             }
             return 0;
@@ -238,8 +240,10 @@ int emit_semicolon() {
 }
 
 void newline() {
+    tok_line = line;
     line++;
     column = 1;
+    tok_column = 1;
 }
 
 void reserved(){

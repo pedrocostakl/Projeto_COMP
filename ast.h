@@ -6,8 +6,6 @@
 #ifndef AST_H
 #define AST_H
 
-#pragma once
-
 enum category_t {
 
     /* Raiz */
