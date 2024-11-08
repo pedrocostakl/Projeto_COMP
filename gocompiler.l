@@ -192,6 +192,7 @@ int main(int argc, char **argv) {
             return 0;
         }
         if (strcmp(argv[1], "-t") == 0) {
+            //yydebug = 1;//apagar antes de submeter no
             parse = 1;
             yyparse();
             if(syntax_error_flag == 0){
@@ -236,6 +237,7 @@ int emit_semicolon() {
 void newline() {
     line++;
     column = 1;
+    tok_column = 1;
 }
 
 void reserved(){
