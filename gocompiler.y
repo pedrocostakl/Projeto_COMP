@@ -6,18 +6,22 @@
     */
 
     #include <stdio.h>
+    #include <string.h>
+
     #include "ast.h"
 
     extern int yylex(void);
     void yyerror(char *);
 
     extern char *yytext;
-    extern int line;                 /* Extern line variable from lex file */
-    extern int tok_column;           /* Extern token column variable from lex file */
+    extern int line;                 /* Line externa do ficheiro lex */
+    extern int column;               /* Column externa do ficheiro lex */
+    extern int tok_line;
+    extern int tok_column;
+
     int syntax_error_flag = 0;
     struct node_t *program;
     struct node_t *type;
-    //struct node_t *declarations;
 
 %}
 
@@ -72,11 +76,10 @@
 %left AND
 %left EQ NE LT GT LE GE
 %left PLUS MINUS
-%left DIV STAR
+%left DIV STAR MOD
 %right NOT
 %nonassoc LPAR RPAR
 %left HIGH
-
 
 %union {
     char *lexeme;
@@ -123,18 +126,10 @@ declarations
 var_declaration
 : VAR var_spec
 {
-    //if (declarations == NULL) {
-    //    declarations = newnode(Intermediate, NULL);
-    //}
-    //addchild(declarations, $2);
     $$ = $2;
 }
 | VAR LPAR var_spec SEMICOLON RPAR
 {
-    //if (declarations == NULL) {
-    //    declarations = newnode(Intermediate, NULL);
-    //}
-    //addchild(declarations, $3);
     $$ = $3;
 }
 ;
@@ -142,13 +137,6 @@ var_declaration
 var_spec
 : IDENTIFIER type
 {
-    //if (declarations == NULL) {
-    //    declarations = newnode(Intermediate, NULL);
-    //}
-    //$$ = newnode(VarDecl, NULL);
-    //addchild($$, $2);
-    //addchild($$, newnode(Identifier, $1));
-
     $$ = newnode(Intermediate, NULL);
     struct node_t *vardecl = newnode(VarDecl, NULL);
     addchild(vardecl, $2);
@@ -157,14 +145,6 @@ var_spec
 }
 | IDENTIFIER COMMA var_spec
 {
-    //if (declarations == NULL) {
-    //    declarations = newnode(Intermediate, NULL);
-    //}
-    //$$ = newnode(VarDecl, NULL);
-    //addchild($$, type);
-    //addchild($$, newnode(Identifier, $1));
-    //addchild(declarations, $3);
-
     $$ = newnode(Intermediate, NULL);
     struct node_t *vardecl = newnode(VarDecl, NULL);
     addchild(vardecl, type);
@@ -180,7 +160,6 @@ func_declaration
     $$ = newnode(FuncDecl, NULL);
     addchild($$, $2);
     addchild($$, $3);
-    //addchild(declarations, $$);
 }
 ;
 
@@ -278,9 +257,9 @@ vars_statements
 {
     $$ = $1;
 }
-|
+| SEMICOLON 
 {
-    $$ = newnode(Intermediate, NULL); // TODO: devia ser NULL
+    $$ = newnode(Intermediate, NULL);
 }
 ;
 
@@ -370,15 +349,11 @@ block_statements
 {
     $$ = $1;
 }
-| block_statements statement SEMICOLON
+|  block_statements statement SEMICOLON 
 {
     $$ = newnode(Intermediate, NULL);
     addchild($$, $1);
     addchild($$, $2);
-}
-|
-{
-    $$ = newnode(Intermediate, NULL); // TODO: devia ser NULL
 }
 ;
 
@@ -419,7 +394,7 @@ func_invocation_exprs
     $$ = newnode(Intermediate, NULL);
     addchild($$, $1);
 }
-| expr COMMA func_invocation_exprs
+| func_invocation_exprs COMMA expr
 {
     $$ = newnode(Intermediate, NULL);
     addchild($$, $1);

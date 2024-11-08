@@ -6,8 +6,6 @@
 #ifndef AST_H
 #define AST_H
 
-#pragma once
-
 enum category_t {
 
     /* Raiz */
@@ -65,7 +63,6 @@ enum category_t {
     Intermediate
 
 };
-//int syntax_error_flag;
 
 struct node_t {
     enum category_t category;
@@ -80,7 +77,6 @@ struct node_list_t {
 
 struct node_t *newnode(enum category_t category, char *token);
 void addchild(struct node_t *parent, struct node_t *child);
-int numchildren(struct node_t *root);
 void show(struct node_t *root, int depth, int force);
 
 #endif /* AST_H */
