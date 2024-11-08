@@ -549,6 +549,5 @@ type
 
 void yyerror(char *error) {
     syntax_error_flag = 1;  // Set the error flag to 1
-    int w = column - strlen(yytext);
     printf("Line %d, column %d: %s: %s\n", line, tok_column, error, yytext);
 }
