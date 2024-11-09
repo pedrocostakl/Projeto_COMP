@@ -18,7 +18,9 @@
     extern int column;               /* Column externa do ficheiro lex */
     extern int tok_line;
     extern int tok_column;
-
+    extern int last_column;
+    extern int last_line;
+    extern int last_action_newline;
     int syntax_error_flag = 0;
     struct node_t *program;
     struct node_t *type;
@@ -75,8 +77,9 @@
 %left OR
 %left AND
 %left EQ NE LT GT LE GE
-%left PLUS MINUS
+%left PLUS MINUS  // Binary plus and minus with left associativity
 %left DIV STAR MOD
+%right UMINUS   // Declare precedence for unary minus
 %right NOT
 %nonassoc LPAR RPAR
 %left HIGH
@@ -402,7 +405,7 @@ func_invocation_exprs
 }
 ;
 
-expr
+expr//Aqui está a falhar o F e consequentemente o H
 : expr OR expr
 {
     $$ = newnode(Or, NULL);
@@ -457,7 +460,7 @@ expr
     addchild($$, $1);
     addchild($$, $3);
 }
-| expr MINUS expr
+| expr MINUS expr    // Binary Minus
 {
     $$ = newnode(Sub, NULL);
     addchild($$, $1);
@@ -486,7 +489,7 @@ expr
     $$ = newnode(Not, NULL);
     addchild($$, $2);
 }
-| MINUS expr
+| MINUS expr %prec UMINUS  // Unary Minus with explicit precedence
 {
     $$ = newnode(Minus, NULL);
     addchild($$, $2);
@@ -549,5 +552,11 @@ type
 
 void yyerror(char *error) {
     syntax_error_flag = 1;  // Set the error flag to 1
-    printf("Line %d, column %d: %s: %s\n", line, tok_column, error, yytext);
+    if(last_action_newline == 0){
+         printf("Line %d, column %d: %s: %s\n", line, tok_column, error, yytext);
+    }
+    else{
+        printf("Line %d, column %d: %s: %s\n", line-1, last_column-1, error, yytext);
+    }
+
 }

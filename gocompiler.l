@@ -18,11 +18,15 @@
     int emit_semicolon();
     void newline();
     void reserved();
+    void end_of_file();
 
     int line = 1;                     /* Stores the current line */
     int tok_line = 1;
     int column = 1;                   /* Stores the current column */
     int tok_column = 1;               /* Stores the column where the current token starts */
+    int last_line = 1;
+    int last_column = 1;
+    int last_action_newline = 0;
     int comment_line = 0;             /* Stores the line where the comment starts */
     int comment_column = 0;           /* Stores the column where the comment starts */
     int string_column = 1;            /* Auxiliary variable to store the column where the string starts */
@@ -123,6 +127,7 @@ os.Args                                     { print_token("CMDARGS"); semicolon 
                                                 BEGIN(INITIAL); 
                                                 printf("Line %d, column %d: unterminated comment\n", comment_line, comment_column); 
                                                 semicolon = 0; 
+                                                end_of_file();
                                             }
 
 \"                                          {
@@ -180,9 +185,16 @@ os.Args                                     { print_token("CMDARGS"); semicolon 
                                                 user_action();
                                                 BEGIN(INITIAL);
                                                 printf("Line %d, column %d: unterminated string literal\n", line, string_column);
+                                                end_of_file();
                                             }
 
-<<EOF>>                                     { if (emit_semicolon()) { if (parse) return SEMICOLON; } return 0; }  /* Handle end of file */
+<<EOF>>                                     { if (emit_semicolon()) { 
+                                                if (parse) 
+                                                    return SEMICOLON; 
+                                                } 
+                                            end_of_file();
+                                            return 0; 
+                                            }  /* Handle end of file */
 .                                           { printf("Line %d, column %d: illegal character (%s)\n", line, tok_column, yytext); }
 
 %%
@@ -219,6 +231,7 @@ int yywrap() {  /* called on EOF, return 1 to terminate */
 void user_action() {
     tok_column = column;
     column += yyleng;
+    last_action_newline = 0;
 }
 
 void print_token(const char *tok, ...) {
@@ -241,13 +254,20 @@ int emit_semicolon() {
 }
 
 void newline() {
+    last_line = line;
+    last_column = column;
     tok_line = line;
     line++;
     column = 1;
     tok_column = 1;
+    last_action_newline = 1;
 }
 
 void reserved(){
     print_token("RESERVED(%s)", yytext);
     semicolon = 0;
+}
+
+void end_of_file(){
+    last_action_newline = 0;
 }
