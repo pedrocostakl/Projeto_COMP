@@ -79,7 +79,7 @@
 %left EQ NE LT GT LE GE
 %left PLUS MINUS  // Binary plus and minus with left associativity
 %left DIV STAR MOD
-%right UMINUS   // Declare precedence for unary minus
+%right UMINUS UPLUS   // Declare precedence for unary minus and plus
 %right NOT
 %nonassoc LPAR RPAR
 %left HIGH
@@ -494,7 +494,7 @@ expr//Aqui está a falhar o F e consequentemente o H
     $$ = newnode(Minus, NULL);
     addchild($$, $2);
 }
-| PLUS expr
+| PLUS expr %prec UPLUS  // Unary Plus with explicit precedence
 {
     $$ = newnode(Plus, NULL);
     addchild($$, $2);
