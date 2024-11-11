@@ -64,8 +64,17 @@ enum category_t {
 
 };
 
+enum type_t
+{
+    None = 0,
+    TypeInteger,
+    TypeFloat32,
+    TypeString
+};
+
 struct node_t {
     enum category_t category;
+    enum type_t type;
     char *token;
     struct node_list_t *children;
 };
@@ -77,6 +86,7 @@ struct node_list_t {
 
 struct node_t *newnode(enum category_t category, char *token);
 void addchild(struct node_t *parent, struct node_t *child);
-void show(struct node_t *root, int depth, int force);
+struct node_t *getchild(struct node_t *parent, int position);
+void show(struct node_t *root, int depth, int forceblock);
 
 #endif /* AST_H */

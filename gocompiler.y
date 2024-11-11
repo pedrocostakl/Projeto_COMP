@@ -96,6 +96,7 @@ program
 {
     $$ = program = newnode(Program, NULL);
     addchild(program, $4);
+    clean(program);
 }
 | PACKAGE IDENTIFIER SEMICOLON
 {
@@ -405,7 +406,7 @@ func_invocation_exprs
 }
 ;
 
-expr//Aqui está a falhar o F e consequentemente o H
+expr
 : expr OR expr
 {
     $$ = newnode(Or, NULL);
@@ -552,11 +553,9 @@ type
 
 void yyerror(char *error) {
     syntax_error_flag = 1;  // Set the error flag to 1
-    if(last_action_newline == 0){
-         printf("Line %d, column %d: %s: %s\n", line, tok_column, error, yytext);
-    }
-    else{
+    if (last_action_newline == 0) {
+        printf("Line %d, column %d: %s: %s\n", line, tok_column, error, yytext);
+    } else {
         printf("Line %d, column %d: %s: %s\n", line-1, last_column-1, error, yytext);
     }
-
 }

@@ -7,12 +7,13 @@
 #include "stdio.h"
 #include "ast.h"
 
-int numchildren(struct node_t *root);
-void print_category(const enum category_t category);
+static int numchildren(struct node_t *root);
+static void print_category(const enum category_t category);
 
 struct node_t *newnode(enum category_t category, char *token) {
     struct node_t *new = malloc(sizeof(struct node_t));
     new->category = category;
+    new->type = None;
     new->token = token;
     new->children = malloc(sizeof(struct node_list_t));
     new->children->next = NULL;
@@ -31,13 +32,25 @@ void addchild(struct node_t *parent, struct node_t *child) {
     children->next = new;
 }
 
-void show(struct node_t *root, int depth, int force) {
+struct node_t *getchild(struct node_t *parent, int position) {
+    struct node_list_t *child = parent->children->next;
+    while (child != NULL) {
+        if (position == 0) {
+            return child->node;
+        }
+        position--;
+        child = child->next;
+    }
+    return NULL;
+}
+
+void show(struct node_t *root, int depth, int forceblock) {
     // controlo do print do node e do seu token
     switch (root->category) {
         case Intermediate:
             break;
         case Block:
-            if (force == 0 && numchildren(root) < 2) {
+            if (forceblock == 0 && numchildren(root) < 2) {
                 break; // não continua para o print caso não seja válido
             }
             // se o bloco for válido, continuar para o print
@@ -45,35 +58,33 @@ void show(struct node_t *root, int depth, int force) {
             for (int i = 0; i < depth; i++) {
                 printf("..");
             }
-            depth++;
             print_category(root->category);
             if (root->token != NULL) {
-                if (root->category != StrLit) {
-                    printf("(%s)", root->token); // print do valor do token
-                } else {
-                    //printf("(\"%s\")", root->token); // print de strlit com \"
-                    printf("(%s)", root->token); // print do valor do token
-                }
+                printf("(%s)", root->token);
             }
             printf("\n");
+            depth++;
             break;
     }
     // forçar ou não o próximo Block
     if (root->category == If || root->category == For) {
-        force = 1;
+        forceblock = 1;
     } else {
-        force = 0;
+        forceblock = 0;
     }
     // iterar children
     struct node_list_t *children = root->children;
     while (children->next != NULL) {
-        show(children->next->node, depth, force);
+        show(children->next->node, depth, forceblock);
         children = children->next;
     }
 }
 
 int numchildren(struct node_t *root) {
     int num = 0;
+
+    if (root == NULL) return num;
+
     struct node_list_t *children = root->children;
     while (children->next != NULL) {
         if (children->next->node->category == Intermediate) {
