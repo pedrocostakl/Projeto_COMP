@@ -96,7 +96,6 @@ program
 {
     $$ = program = newnode(Program, NULL);
     addchild(program, $4);
-    clean(program);
 }
 | PACKAGE IDENTIFIER SEMICOLON
 {
@@ -141,18 +140,18 @@ var_declaration
 var_spec
 : IDENTIFIER type
 {
-    $$ = newnode(Intermediate, NULL);
-    struct node_t *vardecl = newnode(VarDecl, NULL);
-    addchild(vardecl, $2);
-    addchild(vardecl, newnode(Identifier, $1));
-    addchild($$, vardecl);
+    $$ = newnode(VarDecl, NULL);
+    addchild($$, $2);
+    addchild($$, newnode(Identifier, $1));
 }
 | IDENTIFIER COMMA var_spec
 {
     $$ = newnode(Intermediate, NULL);
+
     struct node_t *vardecl = newnode(VarDecl, NULL);
     addchild(vardecl, type);
     addchild(vardecl, newnode(Identifier, $1));
+
     addchild($$, vardecl);
     addchild($$, $3);
 }

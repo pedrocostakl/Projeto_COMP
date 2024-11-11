@@ -26,10 +26,17 @@ void addchild(struct node_t *parent, struct node_t *child) {
     while (children->next != NULL) {
         children = children->next;
     }
-    struct node_list_t *new = malloc(sizeof(struct node_list_t));
-    new->node = child;
-    new->next = NULL;
-    children->next = new;
+    if (child->category != Intermediate) {
+        struct node_list_t *new = malloc(sizeof(struct node_list_t));
+        new->node = child;
+        new->next = NULL;
+        children->next = new;
+    } else {
+        children->next = child->children->next;
+        free(child);
+        free(child->children);
+    }
+    
 }
 
 struct node_t *getchild(struct node_t *parent, int position) {
@@ -47,8 +54,8 @@ struct node_t *getchild(struct node_t *parent, int position) {
 void show(struct node_t *root, int depth, int forceblock) {
     // controlo do print do node e do seu token
     switch (root->category) {
-        case Intermediate:
-            break;
+        //case Intermediate:
+        //    break;
         case Block:
             if (forceblock == 0 && numchildren(root) < 2) {
                 break; // não continua para o print caso não seja válido
