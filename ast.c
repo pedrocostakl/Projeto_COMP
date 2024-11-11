@@ -22,6 +22,7 @@ struct node_t *newnode(enum category_t category, char *token) {
 }
 
 void addchild(struct node_t *parent, struct node_t *child) {
+    if (child == NULL) return;
     struct node_list_t *children = parent->children;
     while (children->next != NULL) {
         children = children->next;

@@ -147,11 +147,9 @@ var_spec
 | IDENTIFIER COMMA var_spec
 {
     $$ = newnode(Intermediate, NULL);
-
     struct node_t *vardecl = newnode(VarDecl, NULL);
     addchild(vardecl, type);
     addchild(vardecl, newnode(Identifier, $1));
-
     addchild($$, vardecl);
     addchild($$, $3);
 }
@@ -203,8 +201,7 @@ func_header
 parameters
 : parameter
 {
-    $$ = newnode(Intermediate, NULL);
-    addchild($$, $1);
+    $$ = $1;
 }
 | parameters COMMA parameter
 {
@@ -262,7 +259,7 @@ vars_statements
 }
 | SEMICOLON 
 {
-    $$ = newnode(Intermediate, NULL);
+    $$ = NULL;
 }
 ;
 
@@ -331,7 +328,7 @@ statement
 }
 | error
 {
-    $$ = newnode(Intermediate, NULL);
+    $$ = NULL;
 }
 ;
 
@@ -369,7 +366,7 @@ parse_args
 }
 | IDENTIFIER COMMA BLANKID ASSIGN PARSEINT LPAR error RPAR
 {
-    $$ = newnode(Intermediate, NULL);
+    $$ = NULL;
 }
 ;
 
@@ -387,15 +384,14 @@ func_invocation
 }
 | IDENTIFIER LPAR error RPAR
 {
-    $$ = newnode(Intermediate, NULL);
+    $$ = NULL;
 }
 ;
 
 func_invocation_exprs
 : expr
 {
-    $$ = newnode(Intermediate, NULL);
-    addchild($$, $1);
+    $$ = $1;
 }
 | func_invocation_exprs COMMA expr
 {
@@ -521,7 +517,7 @@ expr
 }
 | LPAR error RPAR
 {
-    $$ = newnode(Intermediate, NULL);
+    $$ = NULL;
 }
 ;
 
