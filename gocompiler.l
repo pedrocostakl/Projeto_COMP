@@ -215,6 +215,7 @@ int main(int argc, char **argv) {
             yyparse();
             if (syntax_error_flag == 0) {
                 show(program, 0, 0);
+                clean(program);
             }
             return 0;
         }

@@ -55,8 +55,8 @@ struct node_t *getchild(struct node_t *parent, int position) {
 void show(struct node_t *root, int depth, int forceblock) {
     // controlo do print do node e do seu token
     switch (root->category) {
-        //case Intermediate:
-        //    break;
+        case Intermediate:
+            break;
         case Block:
             if (forceblock == 0 && numchildren(root) < 2) {
                 break; // não continua para o print caso não seja válido
@@ -88,11 +88,24 @@ void show(struct node_t *root, int depth, int forceblock) {
     }
 }
 
+void clean(struct node_t *root) {
+    if (root == NULL) return;
+    struct node_list_t *children = root->children;
+    while (children != NULL) {
+        struct node_t *node = children->node;
+        if (node != NULL) {
+            clean(node);
+        }
+        struct node_list_t *current = children;
+        children = children->next;
+        free(current);
+    }
+    free(root);
+}
+
 int numchildren(struct node_t *root) {
     int num = 0;
-
     if (root == NULL) return num;
-
     struct node_list_t *children = root->children;
     while (children->next != NULL) {
         if (children->next->node->category == Intermediate) {

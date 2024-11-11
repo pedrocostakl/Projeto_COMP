@@ -148,7 +148,7 @@ var_spec
 {
     $$ = newnode(Intermediate, NULL);
     struct node_t *vardecl = newnode(VarDecl, NULL);
-    addchild(vardecl, type);
+    addchild(vardecl, newnode(type->category, NULL));
     addchild(vardecl, newnode(Identifier, $1));
     addchild($$, vardecl);
     addchild($$, $3);
