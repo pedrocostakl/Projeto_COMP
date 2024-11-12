@@ -8,18 +8,18 @@ static int semantic_errors;
 static struct symbol_list_t *global_symbol_table;
 
 struct symbol_list_t *insert_symbol(struct symbol_list_t *table, char *identifier, enum type_t type, struct node_t *node) {
-    struct symbol_list_t *new = (struct symbol_list_t*)malloc(sizeof(struct symbol_list_t));
-    new->identifier = strdup(identifier);
-    new->type = type;
-    new->node = node;
-    new->next = NULL;
+    struct symbol_list_t *new = NULL;
     struct symbol_list_t *symbol = table;
     while (symbol != NULL) {
         if (symbol->next == NULL) {
+            new = (struct symbol_list_t*)malloc(sizeof(struct symbol_list_t));
+            new->identifier = strdup(identifier);
+            new->type = type;
+            new->node = node;
+            new->next = NULL;
             symbol->next = new;
             break;
         } else if (strcmp(symbol->next->identifier, identifier) == 0) {
-            free(new);
             return NULL;
         }
         symbol = symbol->next;
@@ -130,7 +130,7 @@ void check_parameters(struct symbol_list_t *scope, struct node_t *parameters) {
 }
 
 void check_function_body(struct symbol_list_t *scope, struct node_t *function_body) {
-    
+
 }
 
 enum type_t get_type(struct node_t *node) {

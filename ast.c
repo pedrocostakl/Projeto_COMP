@@ -100,6 +100,7 @@ void clean(struct node_t *root) {
         children = children->next;
         free(current);
     }
+    if (root->token != NULL) free(root->token);
     free(root);
 }
 
