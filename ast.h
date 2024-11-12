@@ -69,6 +69,7 @@ enum type_t
     None = 0,
     TypeInteger,
     TypeFloat32,
+    TypeBool,
     TypeString
 };
 

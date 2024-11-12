@@ -10,6 +10,7 @@
 
     #include "y.tab.h"
     #include "ast.h"
+    #include "semantics.h"
     
     #define BUF_SIZE 8192
 
@@ -215,13 +216,14 @@ int main(int argc, char **argv) {
             yyparse();
             if (syntax_error_flag == 0) {
                 show(program, 0, 0);
-                clean(program);
+                check_program(program);
             }
             return 0;
         }
     }
     /* Running the yyparse in here will lead to mooshak test failure */
     yylex();  /* Run the lexical analysis automaton */
+    clean(program);
     return 0;
 }
 
