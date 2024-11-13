@@ -7,6 +7,8 @@
 #include "stdio.h"
 #include "ast.h"
 
+int show_ast_type = 0;
+
 static int numchildren(struct node_t *root);
 static void print_category(const enum category_t category);
 

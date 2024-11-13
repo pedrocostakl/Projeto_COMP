@@ -39,6 +39,7 @@
 
     extern struct node_t *program;
     extern int syntax_error_flag;
+    extern int show_ast_type;
 
     #define YY_USER_ACTION user_action();
     #define PASS_TOKEN() yylval.lexeme = strdup(yytext);
@@ -211,19 +212,30 @@ int main(int argc, char **argv) {
             return 0;
         }
         if (strcmp(argv[1], "-t") == 0) {
-            //yydebug = 1;//apagar antes de submeter no
             parse = 1;
+            show_ast_type = 0;
             yyparse();
             if (syntax_error_flag == 0) {
                 show(program, 0, 0);
-                check_program(program);
             }
+            clean(program);
+            return 0;
+        }
+        if (strcmp(argv[1], "-s") == 0) {
+            parse = 1;
+            show_ast_type = 1;
+            yyparse();
+            if (syntax_error_flag == 0) {
+                check_program(program);
+                show_symbol_table();
+                show(program, 0, 0);
+            }
+            clean(program);
             return 0;
         }
     }
     /* Running the yyparse in here will lead to mooshak test failure */
     yylex();  /* Run the lexical analysis automaton */
-    clean(program);
     return 0;
 }
 
