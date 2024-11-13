@@ -1,0 +1,53 @@
+===== Global Symbol Table =====
+factorial	(int)	int
+main	()	none
+
+===== Function factorial(int) Symbol Table =====
+return		int
+n		int	param
+
+===== Function main() Symbol Table =====
+return		none
+argument		int
+
+Program
+..FuncDecl
+....FuncHeader
+......Identifier(factorial)
+......Int
+......FuncParams
+........ParamDecl
+..........Int
+..........Identifier(n)
+....FuncBody
+......If
+........Eq - bool
+..........Identifier(n) - int
+..........Natural(0) - int
+........Block
+..........Return
+............Natural(1) - int
+........Block
+......Return
+........Mul - int
+..........Identifier(n) - int
+..........Call - int
+............Identifier(factorial) - (int)
+............Sub - int
+..............Identifier(n) - int
+..............Natural(1) - int
+..FuncDecl
+....FuncHeader
+......Identifier(main)
+......FuncParams
+....FuncBody
+......VarDecl
+........Int
+........Identifier(argument)
+......ParseArgs - int
+........Identifier(argument) - int
+........Natural(1) - int
+......Print
+........Call - int
+..........Identifier(factorial) - (int)
+..........Identifier(argument) - int
