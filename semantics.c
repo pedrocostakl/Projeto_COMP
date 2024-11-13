@@ -4,9 +4,6 @@
 #include <stdio.h>
 #include <string.h>
 
-static int semantic_errors;
-static struct symbol_list_t *global_symbol_table;
-
 struct symbol_list_t *insert_symbol(struct symbol_list_t *table, char *identifier, enum type_t type, struct node_t *node) {
     struct symbol_list_t *new = NULL;
     struct symbol_list_t *symbol = table;
@@ -38,12 +35,56 @@ struct symbol_list_t *search_symbol(struct symbol_list_t *table, char *identifie
     return NULL;
 }
 
+static int semantic_errors;
+static struct symbol_list_t *global_symbol_table;
+
+static void print_parameters(struct node_t *node);
+static void show_function();
+
 void show_symbol_table() {
     struct symbol_list_t *symbol = global_symbol_table->next;
+    printf("===== Global Symbol Table =====\n");
     while (symbol != NULL) {
-        // Print here
+        switch (symbol->node->category) {
+            case FuncDecl:
+                printf("%s\t(", symbol->identifier);
+                print_parameters(symbol->node);
+                printf(")\t");
+                print_type(symbol->type);
+                printf("\n");
+                break;
+            case VarDecl:
+                printf("%s\t\t", symbol->identifier);
+                print_type(symbol->type);
+                printf("\n");
+                break;
+        }
         symbol = symbol->next;
     }
+    printf("\n");
+
+
+}
+
+void print_parameters(struct node_t *node) {
+    struct node_t *header = getchild(node, 0);
+    struct node_t *parameters = getchild(header, 1);
+    if (parameters->category != FuncParams) {
+        parameters = getchild(header, 2);
+    }
+    struct node_list_t *children = parameters->children->next;
+    while (children != NULL) {
+        struct node_list_t *next = children->next;
+        print_type(children->node->type);
+        if (next != NULL) {
+            printf(", ");
+        }
+        children = next;
+    }
+}
+
+void show_function() {
+    //printf("===== Function %s() Symbol Table =====\n", symbol->identifier);
 }
 
 /**
@@ -119,6 +160,7 @@ void check_parameters(struct symbol_list_t *scope, struct node_t *parameters) {
     struct node_t *param = getchild(parameters, position);
     while (param != NULL) {
         enum type_t type = get_type(getchild(param, 0));
+        param->type = type;
         struct node_t *id = getchild(param, 1);
         if (insert_symbol(scope, id->token, type, param) == NULL) {
             printf("Error: identifier already declared: %s\n", id->token);

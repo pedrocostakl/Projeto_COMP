@@ -251,3 +251,25 @@ void print_category(const enum category_t category) {
             break;
     }
 }
+
+void print_type(const enum type_t type) {
+    switch (type) {
+        case None:
+            printf("none");
+            break;
+        case TypeInteger:
+            printf("int");
+            break;
+        case TypeFloat32:
+            printf("float32");
+            break;
+        case TypeBool:
+            printf("bool");
+            break;
+        case TypeString:
+            printf("string");
+            break;
+        default:
+            break;
+    }
+}

@@ -92,4 +92,6 @@ struct node_t *getchild(struct node_t *parent, int position);
 void show(struct node_t *root, int depth, int forceblock);
 void clean(struct node_t *root);
 
+void print_type(const enum type_t type);
+
 #endif /* AST_H */
