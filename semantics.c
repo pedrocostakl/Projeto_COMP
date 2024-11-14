@@ -35,11 +35,17 @@ struct symbol_list_t *search_symbol(struct symbol_list_t *table, char *identifie
     return NULL;
 }
 
+struct symbol_list_t *enter_scope(struct symbol_list_t *table) {
+    if (table == NULL) return NULL;
+    table->scope = (struct symbol_list_t*)malloc(sizeof(struct symbol_list_t));
+    return table->scope;
+}
+
 static int semantic_errors;
 static struct symbol_list_t *global_symbol_table;
 
 static void print_parameters(struct node_t *node);
-static void show_function();
+static void show_function(struct symbol_list_t *symbol);
 
 void show_symbol_table() {
     struct symbol_list_t *symbol = global_symbol_table->next;
@@ -63,7 +69,13 @@ void show_symbol_table() {
     }
     printf("\n");
 
-
+    symbol = global_symbol_table->next;
+    while (symbol != NULL) {
+        if (symbol->node->category == FuncDecl) {
+            show_function(symbol);
+        }
+        symbol = symbol->next;
+    }
 }
 
 void print_parameters(struct node_t *node) {
@@ -83,8 +95,25 @@ void print_parameters(struct node_t *node) {
     }
 }
 
-void show_function() {
+void show_function(struct symbol_list_t *symbol) {
     //printf("===== Function %s() Symbol Table =====\n", symbol->identifier);
+    printf("===== Function %s(", symbol->identifier);
+    print_parameters(symbol->node);
+    printf(") Symbol Table =====\n");
+
+    printf("return\t\t");
+    print_type(symbol->type);
+    printf("\n");
+
+    struct symbol_list_t *scope_table = symbol->scope->next;
+    while (scope_table != NULL) {
+        printf("%s\t\t", scope_table->identifier);
+        print_type(scope_table->type);
+        printf("\n");
+        scope_table = scope_table->next;
+    }
+
+    printf("\n");
 }
 
 /**
@@ -122,14 +151,13 @@ int check_program(struct node_t *program) {
 void check_var(struct symbol_list_t *scope, struct node_t *var) {
     struct node_t *id = getchild(var, 1);
     enum type_t type = get_type(getchild(var, 0));
-    if (insert_symbol(global_symbol_table, id->token, type, var) == NULL) {
+    if (insert_symbol(scope, id->token, type, var) == NULL) {
         printf("Error: identifier already declared: %s\n", id->token);
         semantic_errors++;
     }
 }
 
 void check_function(struct symbol_list_t *scope, struct node_t *function) {
-    struct symbol_list_t *function_scope = (struct symbol_list_t*)malloc(sizeof(struct symbol_list_t));
     struct node_t *header = getchild(function, 0);
 
     // Type and parameters node
@@ -142,13 +170,16 @@ void check_function(struct symbol_list_t *scope, struct node_t *function) {
 
     // Insert Identifier
     struct node_t *id = getchild(header, 0);
-    if (insert_symbol(global_symbol_table, id->token, type, function) == NULL) {
+    struct symbol_list_t *new_symbol = insert_symbol(global_symbol_table, id->token, type, function);
+    if (new_symbol == NULL) {
         printf("Error: identifier already declared: %s\n", id->token);
         semantic_errors++;
     }
 
+    struct symbol_list_t *function_scope = enter_scope(new_symbol);
+
     // Parameters
-    check_parameters(global_symbol_table, parameters);
+    check_parameters(function_scope, parameters);
 
     // Function body
     struct node_t *function_body = getchild(function, 1);
@@ -172,7 +203,18 @@ void check_parameters(struct symbol_list_t *scope, struct node_t *parameters) {
 }
 
 void check_function_body(struct symbol_list_t *scope, struct node_t *function_body) {
-
+    struct node_list_t *child = function_body->children->next;
+    while (child != NULL) {
+        struct node_t *node = child->node;
+        switch (node->category) {
+            case VarDecl:
+                check_var(scope, node);
+                break;
+            default:
+                break;
+        }
+        child = child->next;
+    }
 }
 
 enum type_t get_type(struct node_t *node) {
