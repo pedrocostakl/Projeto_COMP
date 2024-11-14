@@ -45,7 +45,8 @@ static int semantic_errors;
 static struct symbol_list_t *global_symbol_table;
 
 static void print_parameters(struct node_t *node);
-static void show_function(struct symbol_list_t *symbol);
+static void show_function(struct symbol_list_t *symbol, struct node_t *node);
+static int is_parameter(struct node_t *node, struct node_t *function);
 
 void show_symbol_table() {
     struct symbol_list_t *symbol = global_symbol_table->next;
@@ -72,7 +73,7 @@ void show_symbol_table() {
     symbol = global_symbol_table->next;
     while (symbol != NULL) {
         if (symbol->node->category == FuncDecl) {
-            show_function(symbol);
+            show_function(symbol, symbol->node);
         }
         symbol = symbol->next;
     }
@@ -95,7 +96,7 @@ void print_parameters(struct node_t *node) {
     }
 }
 
-void show_function(struct symbol_list_t *symbol) {
+void show_function(struct symbol_list_t *symbol, struct node_t *node) {
     //printf("===== Function %s() Symbol Table =====\n", symbol->identifier);
     printf("===== Function %s(", symbol->identifier);
     print_parameters(symbol->node);
@@ -109,11 +110,29 @@ void show_function(struct symbol_list_t *symbol) {
     while (scope_table != NULL) {
         printf("%s\t\t", scope_table->identifier);
         print_type(scope_table->type);
-        printf("\n");
+        if (is_parameter(scope_table->node, node) == 1) {
+            printf("\tparam\n");
+        } else {
+            printf("\n");
+        }
         scope_table = scope_table->next;
     }
 
     printf("\n");
+}
+
+int is_parameter(struct node_t *node, struct node_t *function) {
+    struct node_t *header = getchild(function, 0);
+    struct node_t *parameters = getchild(header, 1);
+    if (parameters->category != FuncParams) {
+        parameters = getchild(header, 2);
+    }
+    struct node_list_t *children = parameters->children->next;
+    while (children != NULL) {
+        if (children->node == node) return 1;
+        children = children->next;
+    }
+    return 0;
 }
 
 /**
