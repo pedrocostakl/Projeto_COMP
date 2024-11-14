@@ -66,8 +66,8 @@ enum category_t {
 
 enum type_t
 {
-    None = 0,
-    Undefined,
+    Undefined = 0,
+    None,
     TypeInteger,
     TypeFloat32,
     TypeBool,

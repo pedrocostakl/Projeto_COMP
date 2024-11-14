@@ -3,8 +3,8 @@
 **  Marco Manuel Almeida e Silva - 2021211653
 */
 
-#include "stdlib.h"
-#include "stdio.h"
+#include <stdlib.h>
+#include <stdio.h>
 #include "ast.h"
 
 int show_ast_type = 0;

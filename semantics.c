@@ -14,6 +14,7 @@ struct symbol_list_t *insert_symbol(struct symbol_list_t *table, char *identifie
             new->type = type;
             new->node = node;
             new->next = NULL;
+            new->scope = NULL;
             symbol->next = new;
             break;
         } else if (strcmp(symbol->next->identifier, identifier) == 0) {
@@ -143,6 +144,8 @@ static void check_var(struct symbol_list_t *scope, struct node_t *var);
 static void check_function(struct symbol_list_t *scope, struct node_t *function);
 static void check_parameters(struct symbol_list_t *scope, struct node_t *parameters);
 static void check_function_body(struct symbol_list_t *scope, struct node_t *function_body);
+static void check_statement(struct symbol_list_t *scope, struct node_t *parent);
+static void check_expressions(struct symbol_list_t *scope, struct node_t *parent);
 
 static enum type_t get_type(struct node_t *node);
 
@@ -229,10 +232,69 @@ void check_function_body(struct symbol_list_t *scope, struct node_t *function_bo
             case VarDecl:
                 check_var(scope, node);
                 break;
+            case Block:
+            case If:
+            case For:
+            case Return:
+            case Call:
+            case Print:
+            case ParseArgs:
+                check_statement(scope, node);
+                break;
+            case Or:
+            case And:
+            case Eq:
+            case Ne:
+            case Lt:
+            case Gt:
+            case Le:
+            case Ge:
+            case Add:
+            case Sub:
+            case Mul:
+            case Div:
+            case Mod:
+            case Not:
+            case Minus:
+            case Plus:
+            case Assign:
+                check_expressions(scope, node);
+                break;
             default:
                 break;
         }
         child = child->next;
+    }
+}
+
+void check_statement(struct symbol_list_t *scope, struct node_t *parent) {
+    
+}
+
+void check_expressions(struct symbol_list_t *scope, struct node_t *parent) {
+    switch (parent->category) {
+        case Natural:
+            parent->type = TypeInteger;
+            break;
+        case Decimal:
+            parent->type = TypeFloat32;
+            break;
+        case Identifier:
+            struct symbol_list_t *symbol = search_symbol(scope, parent->token);
+            if (symbol == NULL) {
+                symbol = search_symbol(global_symbol_table, parent->token);   
+            }
+            if (symbol != NULL) {
+                parent->type = symbol->type;
+            } else {
+                // Erro: Undefined type
+            }
+            break;
+        case StrLit:
+            parent->type = TypeString;
+            break;
+        default:
+            break;
     }
 }
 
