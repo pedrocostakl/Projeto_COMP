@@ -213,7 +213,7 @@ void check_parameters(struct symbol_list_t *scope, struct node_t *parameters) {
     struct node_t *param = getchild(parameters, position);
     while (param != NULL) {
         enum type_t type = get_type(getchild(param, 0));
-        param->type = type;
+        //param->type = type;
         struct node_t *id = getchild(param, 1);
         if (insert_symbol(scope, id->token, type, param) == NULL) {
             printf("Error: identifier already declared: %s\n", id->token);
@@ -294,7 +294,22 @@ void check_statement(struct symbol_list_t *scope, struct node_t *parent) {
                 check_expressions(scope, node);
             } break;
         case Print:
+            {
+                struct node_t *node = getchild(parent, 0);
+                check_expressions(scope, node);
+            } break;
         case ParseArgs:
+            {
+                struct node_t *node1 = getchild(parent, 0);
+                struct node_t *node2 = getchild(parent, 1);
+                check_expressions(scope, node1);
+                check_expressions(scope, node2);
+                if (node1->type == node2->type) {
+                    parent->type = node1->type;
+                } else {
+                    parent->type = Undefined;
+                }
+            }
             break;
         case Assign:
             {
@@ -348,19 +363,33 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent) {
         case Gt:
         case Le:
         case Ge:
+            {
+                struct node_t *node1 = getchild(parent, 0);
+                struct node_t *node2 = getchild(parent, 1);
+                check_expressions(scope, node1);
+                check_expressions(scope, node2);
+                if (node1->type == node2->type) {
+                    parent->type = TypeBool;
+                } else {
+                    parent->type = Undefined;
+                }
+            } break;
         case Add:
         case Sub:
         case Mul:
         case Div:
         case Mod:
-            struct node_t *node1 = getchild(parent, 0);
-            struct node_t *node2 = getchild(parent, 1);
-            check_expressions(scope, node1);
-            check_expressions(scope, node2);
-            if (node1->type == node2->type) {
-                parent->type = node1->type;
-            }
-            break;
+            {
+                struct node_t *node1 = getchild(parent, 0);
+                struct node_t *node2 = getchild(parent, 1);
+                check_expressions(scope, node1);
+                check_expressions(scope, node2);
+                if (node1->type == node2->type) {
+                    parent->type = node1->type;
+                } else {
+                    parent->type = Undefined;
+                }
+            } break;
         default:
             break;
     }
