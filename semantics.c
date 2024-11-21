@@ -1,3 +1,8 @@
+/*
+**  Pedro Sousa da Costa - 2022220304
+**  Marco Manuel Almeida e Silva - 2021211653
+*/
+
 #include "semantics.h"
 
 #include <stdlib.h>
