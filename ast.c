@@ -72,6 +72,10 @@ void show(struct node_t *root, int depth, int forceblock) {
             if (root->token != NULL) {
                 printf("(%s)", root->token);
             }
+            if (root->type > None) {
+                printf(" - ");
+                print_type(root->type);
+            }
             printf("\n");
             depth++;
             break;

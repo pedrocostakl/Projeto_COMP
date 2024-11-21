@@ -236,11 +236,12 @@ void check_function_body(struct symbol_list_t *scope, struct node_t *function_bo
             case If:
             case For:
             case Return:
-            case Call:
             case Print:
             case ParseArgs:
+            case Assign:
                 check_statement(scope, node);
                 break;
+            case Call:
             case Or:
             case And:
             case Eq:
@@ -257,7 +258,6 @@ void check_function_body(struct symbol_list_t *scope, struct node_t *function_bo
             case Not:
             case Minus:
             case Plus:
-            case Assign:
                 check_expressions(scope, node);
                 break;
             default:
@@ -268,11 +268,58 @@ void check_function_body(struct symbol_list_t *scope, struct node_t *function_bo
 }
 
 void check_statement(struct symbol_list_t *scope, struct node_t *parent) {
-    
+    switch (parent->category) {
+        case Block:
+            {
+                struct node_list_t *children = parent->children->next;
+                while (children != NULL) {
+                    check_statement(scope, children->node);
+                    children = children->next;
+                }
+            } break;
+        case If:
+            {
+                struct node_t *node = getchild(parent, 0);
+                struct node_t *block1 = getchild(parent, 1);
+                struct node_t *block2 = getchild(parent, 2);
+                check_expressions(scope, node);
+                check_statement(scope, block1);
+                check_statement(scope, block2);
+            } break;
+        case For:
+            break;
+        case Return:
+            {
+                struct node_t *node = getchild(parent, 0);
+                check_expressions(scope, node);
+            } break;
+        case Print:
+        case ParseArgs:
+            break;
+        case Assign:
+            {
+                struct node_t *node1 = getchild(parent, 0);
+                struct node_t *node2 = getchild(parent, 1);
+                check_expressions(scope, node1);
+                check_expressions(scope, node2);
+            } break;
+        default:
+            break;
+    }
 }
 
 void check_expressions(struct symbol_list_t *scope, struct node_t *parent) {
     switch (parent->category) {
+        case Call:
+            {
+                struct node_list_t *children = parent->children->next;
+                struct node_t *node = children->node;
+                while (children != NULL) {
+                    check_expressions(scope, children->node);
+                    children = children->next;
+                }
+                parent->type = node->type;
+            } break;
         case Natural:
             parent->type = TypeInteger;
             break;
@@ -292,6 +339,27 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent) {
             break;
         case StrLit:
             parent->type = TypeString;
+            break;
+        case Or:
+        case And:
+        case Eq:
+        case Ne:
+        case Lt:
+        case Gt:
+        case Le:
+        case Ge:
+        case Add:
+        case Sub:
+        case Mul:
+        case Div:
+        case Mod:
+            struct node_t *node1 = getchild(parent, 0);
+            struct node_t *node2 = getchild(parent, 1);
+            check_expressions(scope, node1);
+            check_expressions(scope, node2);
+            if (node1->type == node2->type) {
+                parent->type = node1->type;
+            }
             break;
         default:
             break;
