@@ -75,6 +75,7 @@ void show(struct node_t *root, int depth, int forceblock) {
             if (root->token != NULL) {
                 printf("(%s)", root->token);
             }
+            // anotação da árvore
             if (root->type > None && root->category != ParamDecl) {
                 printf(" - ");
                 if (root->category == Identifier) {

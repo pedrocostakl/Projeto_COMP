@@ -15,7 +15,7 @@ all: $(TARGET)
 
 # Rule to build the lexer executable
 $(TARGET): $(YACC_OUTPUT) $(LEX_OUTPUT)
-	$(CC) $(AST_SOURCE) $(SEMANTICS_SOURCE) $(YACC_OUTPUT) $(LEX_OUTPUT) -o $(TARGET)
+	$(CC) -Wall $(AST_SOURCE) $(SEMANTICS_SOURCE) $(YACC_OUTPUT) $(LEX_OUTPUT) -o $(TARGET)
 
 # Rule to generate the y.tab.c file from yacc file
 $(YACC_OUTPUT): $(YACC_FILE)

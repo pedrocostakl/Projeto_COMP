@@ -65,6 +65,8 @@ void show_symbol_table() {
                 print_type(symbol->type);
                 printf("\n");
                 break;
+            default:
+                break;
         }
         symbol = symbol->next;
     }
@@ -286,11 +288,22 @@ void check_statement(struct symbol_list_t *scope, struct node_t *parent) {
                 check_statement(scope, block2);
             } break;
         case For:
-            break;
+            {
+                struct node_t *node1 = getchild(parent, 0);
+                struct node_t *node2 = getchild(parent, 1);
+                if (node2 != NULL) {
+                    check_expressions(scope, node1);
+                    check_statement(scope, node2);
+                } else {
+                    check_statement(scope, node1);
+                }
+            } break;
         case Return:
             {
                 struct node_t *node = getchild(parent, 0);
-                check_expressions(scope, node);
+                if (node != NULL) {
+                    check_expressions(scope, node);
+                }
             } break;
         case Print:
             {
@@ -308,8 +321,7 @@ void check_statement(struct symbol_list_t *scope, struct node_t *parent) {
                 } else {
                     parent->type = Undefined;
                 }
-            }
-            break;
+            } break;
         case Assign:
             {
                 struct node_t *node1 = getchild(parent, 0);
