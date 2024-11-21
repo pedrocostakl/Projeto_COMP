@@ -42,10 +42,9 @@ struct symbol_list_t *enter_scope(struct symbol_list_t *table) {
     return table->scope;
 }
 
-static int semantic_errors;
-static struct symbol_list_t *global_symbol_table;
+int semantic_errors;
+struct symbol_list_t *global_symbol_table;
 
-static void print_parameters(struct node_t *node);
 static void show_function(struct symbol_list_t *symbol, struct node_t *node);
 static int is_parameter(struct node_t *node, struct node_t *function);
 
@@ -213,7 +212,7 @@ void check_parameters(struct symbol_list_t *scope, struct node_t *parameters) {
     struct node_t *param = getchild(parameters, position);
     while (param != NULL) {
         enum type_t type = get_type(getchild(param, 0));
-        //param->type = type;
+        param->type = type;
         struct node_t *id = getchild(param, 1);
         if (insert_symbol(scope, id->token, type, param) == NULL) {
             printf("Error: identifier already declared: %s\n", id->token);

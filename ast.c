@@ -3,11 +3,14 @@
 **  Marco Manuel Almeida e Silva - 2021211653
 */
 
+#include "ast.h"
+#include "semantics.h"
+
 #include <stdlib.h>
 #include <stdio.h>
-#include "ast.h"
 
 int show_ast_type = 0;
+extern struct symbol_list_t *global_symbol_table;
 
 static int numchildren(struct node_t *root);
 static void print_category(const enum category_t category);
@@ -72,9 +75,24 @@ void show(struct node_t *root, int depth, int forceblock) {
             if (root->token != NULL) {
                 printf("(%s)", root->token);
             }
-            if (root->type > None) {
+            if (root->type > None && root->category != ParamDecl) {
                 printf(" - ");
-                print_type(root->type);
+                if (root->category == Identifier) {
+                    struct symbol_list_t *symbol = search_symbol(global_symbol_table, root->token);
+                    if (symbol != NULL) {
+                        if (symbol->node->category == FuncDecl) {
+                            printf("(");
+                            print_parameters(symbol->node);
+                            printf(")");
+                        } else {
+                            print_type(root->type);
+                        }
+                    } else {
+                        print_type(root->type);
+                    }
+                } else {
+                    print_type(root->type);
+                }
             }
             printf("\n");
             depth++;
