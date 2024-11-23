@@ -76,7 +76,8 @@ void show(struct node_t *root, int depth, int forceblock) {
                 printf("(%s)", root->token);
             }
             // anotação da árvore
-            if (root->type > None && root->category != ParamDecl) {
+            //printf("\n%d %d\n", root->type, root->category);
+            if (root->type != None && root->category != ParamDecl) {
                 printf(" - ");
                 if (root->category == Identifier) {
                     struct symbol_list_t *symbol = search_symbol(global_symbol_table, root->token);
@@ -291,6 +292,9 @@ void print_type(const enum type_t type) {
             break;
         case TypeString:
             printf("string");
+            break;
+        case Undefined:
+            printf("undef");
             break;
         default:
             break;
