@@ -376,15 +376,15 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent) {
                 }
                 parent->type = node->type;
             } break;
-        case Natural:{
+        case Natural: {
             parent->type = TypeInteger;
             break;}
-        case Decimal:{
+        case Decimal: {
             parent->type = TypeFloat32;
             break;
         }
            
-        case Identifier:{
+        case Identifier: {
             struct symbol_list_t *symbol = search_symbol(scope, parent->token);
             if (symbol == NULL) {
                 symbol = search_symbol(global_symbol_table, parent->token);   
@@ -400,57 +400,54 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent) {
              break;
         }
            
-        case StrLit:{
+        case StrLit: {
             parent->type = TypeString;
             break;
         }
             
-        case Or:{}
-        case And:{}
-        case Eq:{}
-        case Ne:{}
-        case Lt:{}
-        case Gt:{}
-        case Le:{}
-        case Ge:
-            {
-                struct node_t *node1 = getchild(parent, 0);
-                struct node_t *node2 = getchild(parent, 1);
-                check_expressions(scope, node1);
-                check_expressions(scope, node2);
-
-
-               if (node1->type == Undefined || node2->type == Undefined) {
-                    parent->type = Undefined;
-                } 
-                else if (node1->type == node2->type &&
-                        (node1->type == TypeInteger || node1->type == TypeFloat32)) {
-                    parent->type = TypeBool;
-                } else {
-                    printf("Operator '%s' cannot be applied to types ", get_operator_token(parent->category));
-                    print_type(node1->type);
-                    printf(" and ");
-                    print_type(node2->type);
-                    printf("\n");
-                    parent->type = Undefined;
-                }
+        case Or:
+        case And:
+        case Eq:
+        case Ne:
+        case Lt:
+        case Gt:
+        case Le:
+        case Ge: {
+            struct node_t *node1 = getchild(parent, 0);
+            struct node_t *node2 = getchild(parent, 1);
+            check_expressions(scope, node1);
+            check_expressions(scope, node2);
+            if (node1->type == Undefined || node2->type == Undefined) {
+                parent->type = Undefined;
             } 
+            else if (node1->type == node2->type &&
+                (node1->type == TypeInteger || node1->type == TypeFloat32)) {
+                parent->type = TypeBool;
+            } else {
+                printf("Operator '%s' cannot be applied to types ", get_operator_token(parent->category));
+                print_type(node1->type);
+                printf(" and ");
+                print_type(node2->type);
+                printf("\n");
+                parent->type = Undefined;
+            }
+        } 
         case Add:{
         }
         case Sub:
         case Mul:
         case Div:
         case Mod: {
-                struct node_t *node1 = getchild(parent, 0);
-                struct node_t *node2 = getchild(parent, 1);
-                check_expressions(scope, node1);
-                check_expressions(scope, node2);
+            struct node_t *node1 = getchild(parent, 0);
+            struct node_t *node2 = getchild(parent, 1);
+            check_expressions(scope, node1);
+            check_expressions(scope, node2);
 
                 
-              if (node1->type == Undefined || node2->type == Undefined) {
+            if (node1->type == Undefined || node2->type == Undefined) {
                 parent->type = Undefined;
-            }else if (node1->type == node2->type &&
-                       (node1->type == TypeInteger || node1->type == TypeFloat32)) {
+            } else if (node1->type == node2->type &&
+                (node1->type == TypeInteger || node1->type == TypeFloat32)) {
                 parent->type = node1->type;
             } else {
                 printf("Operator '%s' cannot be applied to types ", get_operator_token(parent->category));
@@ -461,7 +458,7 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent) {
                 parent->type = Undefined;
             }
             break;
-            }
+        }
         default:
             break;
     }

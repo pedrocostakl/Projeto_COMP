@@ -254,8 +254,18 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
         } break;
         case Or:
         case And:
-        case Eq:
             break;
+        case Eq: {
+            struct node_t *expr = getchild(expression, 0);
+            int tmp1 = codegen_expression(expr, scope);
+            int tmp2 = codegen_expression(getchild(expression, 1), scope);
+            printf("  ");
+            printf("%%%d = icmp eq ", temporary);
+            print_codegen_type(expr->type);
+            printf(" %%%d, %%%d\n", tmp1, tmp2);
+            tmp = temporary;
+            temporary++;
+        } break;
         case Ne: {
             struct node_t *expr = getchild(expression, 0);
             int tmp1 = codegen_expression(expr, scope);
@@ -267,11 +277,18 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             tmp = temporary;
             temporary++;
         } break;
-        case Lt:
-        case Gt:
-        case Le:
-        case Ge:
-            break;
+        case Lt: {
+
+        } break;
+        case Gt: {
+
+        } break;
+        case Le: {
+
+        } break;
+        case Ge: {
+
+        } break;
         case Add: {
             int tmp1 = codegen_expression(getchild(expression, 0), scope);
             int tmp2 = codegen_expression(getchild(expression, 1), scope);
