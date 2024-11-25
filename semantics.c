@@ -19,6 +19,7 @@ struct symbol_list_t *insert_symbol(struct symbol_list_t *table, char *identifie
     struct symbol_list_t *new = NULL;
     struct symbol_list_t *symbol = table;
     while (symbol != NULL) {
+       
         if (symbol->next == NULL) {
             new = (struct symbol_list_t*)malloc(sizeof(struct symbol_list_t));
             new->identifier = strdup(identifier);
@@ -28,7 +29,8 @@ struct symbol_list_t *insert_symbol(struct symbol_list_t *table, char *identifie
             new->scope = NULL;
             symbol->next = new;
             break;
-        } else if (strcmp(symbol->next->identifier, identifier) == 0) {
+        }
+        else if (strcmp(symbol->next->identifier, identifier) == 0) {
             return NULL;
         }
         symbol = symbol->next;
@@ -44,6 +46,8 @@ struct symbol_list_t *search_symbol(struct symbol_list_t *table, char *identifie
         }
         symbol = symbol->next;
     }
+    
+    
     return NULL;
 }
 
@@ -53,23 +57,52 @@ struct symbol_list_t *enter_scope(struct symbol_list_t *table) {
     return table->scope;
 }
 
+int semantic_errors;
+struct symbol_list_t *global_symbol_table;
+
+static void show_function(struct symbol_list_t *symbol, struct node_t *node);
+static int is_parameter(struct node_t *node, struct node_t *function);
+
+const char *get_operator_token(enum category_t category) { //função para auxiliar no print de erros que involvem operators
+    switch (category) {
+        case Or: return "||";
+        case And: return "&&";
+        case Eq: return "==";
+        case Ne: return "!=";
+        case Lt: return "<";
+        case Gt: return ">";
+        case Le: return "<=";
+        case Ge: return ">=";
+        case Add: return "+";
+        case Sub: return "-";
+        case Mul: return "*";
+        case Div: return "/";
+        case Mod: return "%";
+        case Not: return "!";
+        case Minus: return "-";
+        case Plus: return "+";
+        default: return "<unknown>";
+    }
+}
+
+
 void show_symbol_table() {
     struct symbol_list_t *symbol = global_symbol_table->next;
     printf("===== Global Symbol Table =====\n");
     while (symbol != NULL) {
         switch (symbol->node->category) {
-            case FuncDecl:
+            case FuncDecl:{
                 printf("%s\t(", symbol->identifier);
                 print_parameters(symbol->node);
                 printf(")\t");
                 print_type(symbol->type);
                 printf("\n");
-                break;
-            case VarDecl:
+                break;}
+            case VarDecl:{
                 printf("%s\t\t", symbol->identifier);
                 print_type(symbol->type);
                 printf("\n");
-                break;
+                break;}
             default:
                 break;
         }
@@ -162,12 +195,12 @@ int check_program(struct node_t *program) {
     while (child != NULL) {
         struct node_t *node = child->node;
         switch (node->category) {
-            case VarDecl:
+            case VarDecl:{
                 check_var(global_symbol_table, node);
-                break;
-            case FuncDecl:
+                break;}
+            case FuncDecl:{
                 check_function(global_symbol_table, node);
-                break;
+                break;}
             default:
                 break;
         }
@@ -235,18 +268,18 @@ void check_function_body(struct symbol_list_t *scope, struct node_t *function_bo
     while (child != NULL) {
         struct node_t *node = child->node;
         switch (node->category) {
-            case VarDecl:
+            case VarDecl:{
                 check_var(scope, node);
-                break;
+                break;}
             case Block:
             case If:
             case For:
             case Return:
             case Print:
             case ParseArgs:
-            case Assign:
+            case Assign:{
                 check_statement(scope, node);
-                break;
+                break;}
             case Call:
             case Or:
             case And:
@@ -263,9 +296,9 @@ void check_function_body(struct symbol_list_t *scope, struct node_t *function_bo
             case Mod:
             case Not:
             case Minus:
-            case Plus:
+            case Plus:{
                 check_expressions(scope, node);
-                break;
+                break;}
             default:
                 break;
         }
@@ -343,46 +376,67 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent) {
                 }
                 parent->type = node->type;
             } break;
-        case Natural:
+        case Natural:{
             parent->type = TypeInteger;
-            break;
-        case Decimal:
+            break;}
+        case Decimal:{
             parent->type = TypeFloat32;
             break;
-        case Identifier: {
-                struct symbol_list_t *symbol = search_symbol(scope, parent->token);
-                if (symbol == NULL) {
-                    symbol = search_symbol(global_symbol_table, parent->token);   
-                }
-                if (symbol != NULL) {
-                    parent->type = symbol->type;
-                } else {
-                    // Erro: Undefined type
-                }
-            } break;
-        case StrLit:
+        }
+           
+        case Identifier:{
+            struct symbol_list_t *symbol = search_symbol(scope, parent->token);
+            if (symbol == NULL) {
+                symbol = search_symbol(global_symbol_table, parent->token);   
+            }
+            if (symbol != NULL) {
+                parent->type = symbol->type;
+            } else {
+                // Erro: Undefined type
+                printf("Cannot find symbol %s\n", parent->token);
+                parent->type = Undefined;
+                //printf("Parent_type:%d\n", parent->type);
+            }
+             break;
+        }
+           
+        case StrLit:{
+            parent->type = TypeString;
+            break;
+        }
+            
+        case Or:{}
+        case And:{}
+        case Eq:{}
+        case Ne:{}
+        case Lt:{}
+        case Gt:{}
+        case Le:{}
+        case Ge:
             {
-                parent->type = TypeString;
-            } break;
-        case Or:
-        case And:
-        case Eq:
-        case Ne:
-        case Lt:
-        case Gt:
-        case Le:
-        case Ge: {
                 struct node_t *node1 = getchild(parent, 0);
                 struct node_t *node2 = getchild(parent, 1);
                 check_expressions(scope, node1);
                 check_expressions(scope, node2);
-                if (node1->type == node2->type) {
+
+
+               if (node1->type == Undefined || node2->type == Undefined) {
+                    parent->type = Undefined;
+                } 
+                else if (node1->type == node2->type &&
+                        (node1->type == TypeInteger || node1->type == TypeFloat32)) {
                     parent->type = TypeBool;
                 } else {
+                    printf("Operator '%s' cannot be applied to types ", get_operator_token(parent->category));
+                    print_type(node1->type);
+                    printf(" and ");
+                    print_type(node2->type);
+                    printf("\n");
                     parent->type = Undefined;
                 }
-            } break;
-        case Add:
+            } 
+        case Add:{
+        }
         case Sub:
         case Mul:
         case Div:
@@ -391,12 +445,23 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent) {
                 struct node_t *node2 = getchild(parent, 1);
                 check_expressions(scope, node1);
                 check_expressions(scope, node2);
-                if (node1->type == node2->type) {
-                    parent->type = node1->type;
-                } else {
-                    parent->type = Undefined;
-                }
-            } break;
+
+                
+              if (node1->type == Undefined || node2->type == Undefined) {
+                parent->type = Undefined;
+            }else if (node1->type == node2->type &&
+                       (node1->type == TypeInteger || node1->type == TypeFloat32)) {
+                parent->type = node1->type;
+            } else {
+                printf("Operator '%s' cannot be applied to types ", get_operator_token(parent->category));
+                print_type(node1->type);
+                printf(" and ");
+                print_type(node2->type);
+                printf("\n");
+                parent->type = Undefined;
+            }
+            break;
+            }
         default:
             break;
     }

@@ -296,6 +296,9 @@ void print_type(const enum type_t type) {
         case TypeString:
             printf("string");
             break;
+        case Undefined:
+            printf("undef");
+            break;
         default:
             break;
     }
