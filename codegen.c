@@ -14,7 +14,7 @@
 extern struct symbol_list_t *global_symbol_table;
 
 static int temporary;
-static int label_num;
+static unsigned int label_num;
 
 enum label_type_t {
     LabelThen = 0,
@@ -30,7 +30,7 @@ static int codegen_statement(struct node_t *statement, struct symbol_list_t *sco
 static int codegen_expression(struct node_t *expression, struct symbol_list_t *scope);
 
 static void print_codegen_type(enum type_t type);
-static void print_label(int num, enum label_type_t label_type);
+static void print_label(unsigned int num, enum label_type_t label_type);
 
 void codegen_program(struct node_t *program) {
     label_num = 0;
@@ -175,7 +175,7 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
             codegen_block(statement, scope);
         } break;
         case If: {
-            int if_label_num = label_num;
+            unsigned int if_label_num = label_num;
             label_num++;
 
             struct node_list_t *children = statement->children->next;
@@ -477,16 +477,16 @@ void print_codegen_type(enum type_t type) {
     }
 }
 
-void print_label(int num, enum label_type_t label_type) {
+void print_label(unsigned int num, enum label_type_t label_type) {
     switch (label_type) {
         case LabelThen: {
-            printf("L%dthen", num);
+            printf("L%uthen", num);
         } break;
         case LabelElse: {
-            printf("L%delse", num);
+            printf("L%uelse", num);
         } break;
         case LabelEnd: {
-            printf("L%dend", num);
+            printf("L%und", num);
         } break;
         default:
             break;
