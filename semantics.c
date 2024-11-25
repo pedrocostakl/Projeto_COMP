@@ -130,7 +130,7 @@ void print_parameters(struct node_t *node) {
         struct node_list_t *next = children->next;
         print_type(children->node->type);
         if (next != NULL) {
-            printf(", ");
+            printf(",");
         }
         children = next;
     }
