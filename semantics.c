@@ -359,6 +359,11 @@ void check_statement(struct symbol_list_t *scope, struct node_t *parent) {
                 struct node_t *node2 = getchild(parent, 1);
                 check_expressions(scope, node1);
                 check_expressions(scope, node2);
+                if (node1->type == node2->type) {
+                    parent->type = node1->type;
+                } else {
+                    parent->type = Undefined;
+                }
             } break;
         default:
             break;
