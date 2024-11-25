@@ -12,7 +12,7 @@
 int show_ast_type = 0;
 extern struct symbol_list_t *global_symbol_table;
 
-static void show_node(struct node_t *root, enum category_t prev_category, int depth, int forceblock);
+static void show_node(struct node_t *root, enum category_t prev_category, int depth, int forceblock, int anotate);
 static int numchildren(struct node_t *root);
 static void print_category(const enum category_t category);
 
@@ -82,8 +82,8 @@ struct node_t *getchild(struct node_t *parent, int position) {
     return NULL;
 }
 
-void show(struct node_t *root) {
-    show_node(root, root->category, 0, 0);
+void show(struct node_t *root, int anotate) {
+    show_node(root, root->category, 0, 0, anotate);
 }
 
 void clean(struct node_t *root) {
@@ -102,7 +102,7 @@ void clean(struct node_t *root) {
     free(root);
 }
 
-void show_node(struct node_t *root, enum category_t prev_category, int depth, int forceblock) {
+void show_node(struct node_t *root, enum category_t prev_category, int depth, int forceblock, int anotate) {
     // controlo do print do node e do seu token
     switch (root->category) {
         case Intermediate:
@@ -120,6 +120,11 @@ void show_node(struct node_t *root, enum category_t prev_category, int depth, in
                 print_category(root->category);
                 if (root->token != NULL) {
                     printf("(%s)", root->token);
+                }
+                depth++;
+                if (anotate == 0) {
+                    printf("\n");
+                    break;
                 }
                 // anotação da árvore
                 if (root->type > None && root->category != ParamDecl) {
@@ -150,7 +155,6 @@ void show_node(struct node_t *root, enum category_t prev_category, int depth, in
                     }
                 }
                 printf("\n");
-                depth++;
                 break;
             }
     }
@@ -163,7 +167,7 @@ void show_node(struct node_t *root, enum category_t prev_category, int depth, in
     // iterar children
     struct node_list_t *children = root->children;
     while (children->next != NULL) {
-        show_node(children->next->node, root->category, depth, forceblock);
+        show_node(children->next->node, root->category, depth, forceblock, anotate);
         children = children->next;
     }
 }

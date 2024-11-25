@@ -279,7 +279,7 @@ statement
     $$ = newnode(If, $1);
     addchild($$, $2);
     addchild($$, $3);
-    addchild($$, newnode(Block, $1));
+    addchild($$, newcategory(Block));
 }
 | IF expr block ELSE block
 {
@@ -290,23 +290,23 @@ statement
 }
 | FOR expr block
 {
-    $$ = newnode(For, $1);
+    $$ = newcategory(For);
     addchild($$, $2);
     addchild($$, $3);
 }
 | FOR block
 {
-    $$ = newnode(For, $1);
+    $$ = newcategory(For);
     addchild($$, $2);
 }
 | RETURN expr
 {
-    $$ = newnode(Return, $1);
+    $$ = newcategory(Return);
     addchild($$, $2);
 }
 | RETURN
 {
-    $$ = newnode(Return, $1);
+    $$ = newcategory(Return);
 }
 | func_invocation
 {
@@ -318,12 +318,12 @@ statement
 }
 | PRINT LPAR expr RPAR
 {
-    $$ = newnode(Print, $1);
+    $$ = newcategory(Print);
     addchild($$, $3);
 }
 | PRINT LPAR STRLIT RPAR
 {
-    $$ = newnode(Print, $1);
+    $$ = newcategory(Print);
     addchild($$, newnode(StrLit, $3));
 }
 | error
@@ -335,11 +335,11 @@ statement
 block
 : LBRACE RBRACE
 {
-    $$ = newnode(Block, $1);
+    $$ = newcategory(Block);
 }
 | LBRACE block_statements RBRACE
 {
-    $$ = newnode(Block, $1);
+    $$ = newcategory(Block);
     addchild($$, $2);
 }
 ;
@@ -360,7 +360,7 @@ block_statements
 parse_args
 : IDENTIFIER COMMA BLANKID ASSIGN PARSEINT LPAR CMDARGS LSQ expr RSQ RPAR
 {
-    $$ = newnode(ParseArgs, $5);
+    $$ = newcategory(ParseArgs);
     addchild($$, newnode(Identifier, $1));
     addchild($$, $9);
 }
@@ -524,22 +524,22 @@ expr
 type
 : INT
 { 
-    type = newnode(Int, $1);
+    type = newcategory(Int);
     $$ = type;
 }
 | FLOAT32
 {
-    type = newnode(Float32, $1);
+    type = newcategory(Float32);
     $$ = type;
 }
 | BOOL
 {
-    type = newnode(Bool, $1);
+    type = newcategory(Bool);
     $$ = type;
 }
 | STR
 {
-    type = newnode(String, $1);
+    type = newcategory(String);
     $$ = type;
 }
 ;

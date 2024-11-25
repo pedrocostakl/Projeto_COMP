@@ -97,7 +97,7 @@ struct node_t *newintermediate();
 struct node_t *newcategory(enum category_t category);
 void addchild(struct node_t *parent, struct node_t *child);
 struct node_t *getchild(struct node_t *parent, int position);
-void show(struct node_t *root);
+void show(struct node_t *root, int anotate);
 void clean(struct node_t *root);
 
 void print_type(const enum type_t type);

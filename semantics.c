@@ -215,7 +215,7 @@ void check_var(struct symbol_list_t *scope, struct node_t *var) {
     struct node_t *id = getchild(var, 1);
     enum type_t type = get_type(getchild(var, 0));
     if (insert_symbol(scope, id->token, type, var) == NULL) {
-        printf("Error: identifier already declared: %s\n", id->token);
+        printf("Line %d, column %d: Symbol %s already defined\n", id->line, id->column, id->token);
         semantic_errors++;
     }
 }
@@ -235,7 +235,7 @@ void check_function(struct symbol_list_t *scope, struct node_t *function) {
     struct node_t *id = getchild(header, 0);
     struct symbol_list_t *new_symbol = insert_symbol(global_symbol_table, id->token, type, function);
     if (new_symbol == NULL) {
-        printf("Error: identifier already declared: %s\n", id->token);
+        printf("Line %d, column %d: Symbol %s already defined\n", id->line, id->column, id->token);
         semantic_errors++;
     }
 
@@ -257,7 +257,7 @@ void check_parameters(struct symbol_list_t *scope, struct node_t *parameters) {
         param->type = type;
         struct node_t *id = getchild(param, 1);
         if (insert_symbol(scope, id->token, type, param) == NULL) {
-            printf("Error: identifier already declared: %s\n", id->token);
+            printf("Line %d, column %d: Symbol %s already defined\n", id->line, id->column, id->token);
             semantic_errors++;
         }
         position++;
@@ -399,9 +399,8 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent) {
                 parent->type = symbol->type;
             } else {
                 // Erro: Undefined type
-                printf("Cannot find symbol %s\n", parent->token);
+                printf("Line %d, column %d: Cannot find symbol %s\n", parent->line, parent->column, parent->token);
                 parent->type = Undefined;
-                //printf("Parent_type:%d\n", parent->type);
             }
             break;
         }
@@ -428,7 +427,8 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent) {
                 (node1->type == TypeInteger || node1->type == TypeFloat32)*/) {
                 parent->type = TypeBool;
             } else {
-                printf("Operator '%s' cannot be applied to types ", get_operator_token(parent->category));
+                printf("Line %d, column %d: Operator '%s' cannot be applied to types ", 
+                    parent->line, parent->column, get_operator_token(parent->category));
                 print_type(node1->type);
                 printf(" and ");
                 print_type(node2->type);
@@ -446,14 +446,14 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent) {
             check_expressions(scope, node1);
             check_expressions(scope, node2);
 
-                
             if (node1->type == Undefined || node2->type == Undefined) {
                 parent->type = Undefined;
             } else if (node1->type == node2->type &&
                 (node1->type == TypeInteger || node1->type == TypeFloat32)) {
                 parent->type = node1->type;
             } else {
-                printf("Operator '%s' cannot be applied to types ", get_operator_token(parent->category));
+                printf("Line %d, column %d: Operator '%s' cannot be applied to types ", 
+                    parent->line, parent->column, get_operator_token(parent->category));
                 print_type(node1->type);
                 printf(" and ");
                 print_type(node2->type);
