@@ -217,7 +217,7 @@ int main(int argc, char **argv) {
             show_ast_type = 0;
             yyparse();
             if (syntax_error_flag == 0) {
-                show(program, 0, 0);
+                show(program);
             }
             clean(program);
             return 0;
@@ -229,7 +229,7 @@ int main(int argc, char **argv) {
             if (syntax_error_flag == 0) {
                 check_program(program);
                 show_symbol_table();
-                show(program, 0, 0);
+                show(program);
             }
             clean(program);
             return 0;
@@ -244,7 +244,7 @@ int main(int argc, char **argv) {
     if (syntax_error_flag == 0) {
         check_program(program);
         show_symbol_table();
-        show(program, 0, 0);
+        show(program);
         codegen_program(program);
     }
 

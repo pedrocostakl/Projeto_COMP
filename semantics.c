@@ -378,7 +378,7 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent) {
                 while (children != NULL) {
                     check_expressions(scope, children->node);
                     children = children->next;
-                }
+                } 
                 parent->type = node->type;
             } break;
         case Natural: {

@@ -12,6 +12,7 @@
 int show_ast_type = 0;
 extern struct symbol_list_t *global_symbol_table;
 
+static void show_node(struct node_t *root, enum category_t prev_category, int depth, int forceblock);
 static int numchildren(struct node_t *root);
 static void print_category(const enum category_t category);
 
@@ -57,20 +58,38 @@ struct node_t *getchild(struct node_t *parent, int position) {
     return NULL;
 }
 
-void show(struct node_t *root, int depth, int forceblock) {
+void show(struct node_t *root) {
+    show_node(root, root->category, 0, 0);
+}
+
+void clean(struct node_t *root) {
+    if (root == NULL) return;
+    struct node_list_t *children = root->children;
+    while (children != NULL) {
+        struct node_t *node = children->node;
+        if (node != NULL) {
+            clean(node);
+        }
+        struct node_list_t *current = children;
+        children = children->next;
+        free(current);
+    }
+    if (root->token != NULL) free(root->token);
+    free(root);
+}
+
+void show_node(struct node_t *root, enum category_t prev_category, int depth, int forceblock) {
     // controlo do print do node e do seu token
     switch (root->category) {
         case Intermediate:
             break;
-        case Block:
-            {
+        case Block: {
                 if (forceblock == 0 && numchildren(root) < 2) {
                     break; // não continua para o print caso não seja válido
                 }
             }
             // se o bloco for válido, continuar para o print
-        default:
-            {
+        default: {
                 for (int i = 0; i < depth; i++) {
                     printf("..");
                 }
@@ -97,6 +116,14 @@ void show(struct node_t *root, int depth, int forceblock) {
                     } else {
                         print_type(root->type);
                     }
+                } else if (root->category == Identifier) {
+                    struct symbol_list_t *symbol = search_symbol(global_symbol_table, root->token);
+                    if (symbol != NULL && symbol->node->category == FuncDecl && prev_category != FuncHeader) {
+                        printf(" - ");
+                        printf("(");
+                        print_parameters(symbol->node);
+                        printf(")");
+                    }
                 }
                 printf("\n");
                 depth++;
@@ -112,25 +139,9 @@ void show(struct node_t *root, int depth, int forceblock) {
     // iterar children
     struct node_list_t *children = root->children;
     while (children->next != NULL) {
-        show(children->next->node, depth, forceblock);
+        show_node(children->next->node, root->category, depth, forceblock);
         children = children->next;
     }
-}
-
-void clean(struct node_t *root) {
-    if (root == NULL) return;
-    struct node_list_t *children = root->children;
-    while (children != NULL) {
-        struct node_t *node = children->node;
-        if (node != NULL) {
-            clean(node);
-        }
-        struct node_list_t *current = children;
-        children = children->next;
-        free(current);
-    }
-    if (root->token != NULL) free(root->token);
-    free(root);
 }
 
 int numchildren(struct node_t *root) {

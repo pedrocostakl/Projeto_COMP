@@ -89,7 +89,7 @@ struct node_list_t {
 struct node_t *newnode(enum category_t category, char *token);
 void addchild(struct node_t *parent, struct node_t *child);
 struct node_t *getchild(struct node_t *parent, int position);
-void show(struct node_t *root, int depth, int forceblock);
+void show(struct node_t *root);
 void clean(struct node_t *root);
 
 void print_type(const enum type_t type);
