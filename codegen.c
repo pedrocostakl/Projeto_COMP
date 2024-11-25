@@ -14,6 +14,13 @@
 extern struct symbol_list_t *global_symbol_table;
 
 static int temporary;
+static int label_num;
+
+enum label_type_t {
+    LabelThen = 0,
+    LabelElse,
+    LabelEnd
+};
 
 static void codegen_var(struct node_t *var, struct symbol_list_t *scope);
 static void codegen_function(struct node_t *function);
@@ -23,8 +30,11 @@ static int codegen_statement(struct node_t *statement, struct symbol_list_t *sco
 static int codegen_expression(struct node_t *expression, struct symbol_list_t *scope);
 
 static void print_codegen_type(enum type_t type);
+static void print_label(int num, enum label_type_t label_type);
 
 void codegen_program(struct node_t *program) {
+    label_num = 0;
+
     printf("\n");
     // funções IO pre-declaradas
     printf("declare i32 @_read(i32)\n");
@@ -165,25 +175,44 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
             codegen_block(statement, scope);
         } break;
         case If: {
+            int if_label_num = label_num;
+            label_num++;
+
             struct node_list_t *children = statement->children->next;
             int tmp1 = codegen_expression(children->node, scope);
 
+            // branch
             printf("  ");
-            printf("br i1 %%%d, label L1then, label L1else\n", tmp1);
+            printf("br i1 %%%d", tmp1);
+            printf(", label ");
+            print_label(if_label_num, LabelThen);
+            printf(", label ");
+            print_label(if_label_num, LabelElse);
+            printf("\n");
 
-            printf("L1then:\n");
+            // if
+            print_label(if_label_num, LabelThen);
+            printf(":\n");
             children = children->next;
             codegen_statement(children->node, scope);
             printf("  ");
-            printf("br label L1end\n");
+            printf("br label ");
+            print_label(if_label_num, LabelEnd);
+            printf("\n");
 
-            printf("L1else:\n");
+            // else
+            print_label(if_label_num, LabelElse);
+            printf(":\n");
             children = children->next;
             codegen_statement(children->node, scope);
             printf("  ");
-            printf("br label L1end\n");
+            printf("br label ");
+            print_label(if_label_num, LabelEnd);
+            printf("\n");
 
-            printf("L1end:\n");
+            // fim
+            print_label(if_label_num, LabelEnd);
+            printf(":\n");
         } break;
         case For: {
             struct node_list_t *children = statement->children->next;
@@ -411,9 +440,15 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             tmp = temporary;
             temporary++;
         } break;
-        case Not:
-        case Minus:
-        case Plus:
+        case Not: {
+
+        } break;
+        case Minus: {
+
+        } break;
+        case Plus: {
+            
+        } break;
         default:
             break;
     }
@@ -436,6 +471,22 @@ void print_codegen_type(enum type_t type) {
         } break;
         case TypeString: {
             printf("i8*");
+        } break;
+        default:
+            break;
+    }
+}
+
+void print_label(int num, enum label_type_t label_type) {
+    switch (label_type) {
+        case LabelThen: {
+            printf("L%dthen", num);
+        } break;
+        case LabelElse: {
+            printf("L%delse", num);
+        } break;
+        case LabelEnd: {
+            printf("L%dend", num);
         } break;
         default:
             break;
