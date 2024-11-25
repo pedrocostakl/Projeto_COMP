@@ -397,7 +397,7 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent) {
                 parent->type = Undefined;
                 //printf("Parent_type:%d\n", parent->type);
             }
-             break;
+            break;
         }
            
         case StrLit: {
@@ -420,8 +420,8 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent) {
             if (node1->type == Undefined || node2->type == Undefined) {
                 parent->type = Undefined;
             } 
-            else if (node1->type == node2->type &&
-                (node1->type == TypeInteger || node1->type == TypeFloat32)) {
+            else if (node1->type == node2->type /*&&
+                (node1->type == TypeInteger || node1->type == TypeFloat32)*/) {
                 parent->type = TypeBool;
             } else {
                 printf("Operator '%s' cannot be applied to types ", get_operator_token(parent->category));
@@ -431,9 +431,8 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent) {
                 printf("\n");
                 parent->type = Undefined;
             }
-        } 
-        case Add:{
-        }
+        } break;
+        case Add:
         case Sub:
         case Mul:
         case Div:

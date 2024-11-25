@@ -261,9 +261,28 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             tmp = temporary;
             temporary++;
         } break;
-        case Or:
-        case And:
-            break;
+        case Or: {
+            struct node_t *expr = getchild(expression, 0);
+            int tmp1 = codegen_expression(expr, scope);
+            int tmp2 = codegen_expression(getchild(expression, 1), scope);
+            printf("  ");
+            printf("%%%d = or ", temporary);
+            print_codegen_type(expr->type);
+            printf(" %%%d, %%%d\n", tmp1, tmp2);
+            tmp = temporary;
+            temporary++;
+        } break;
+        case And: {
+            struct node_t *expr = getchild(expression, 0);
+            int tmp1 = codegen_expression(expr, scope);
+            int tmp2 = codegen_expression(getchild(expression, 1), scope);
+            printf("  ");
+            printf("%%%d = and ", temporary);
+            print_codegen_type(expr->type);
+            printf(" %%%d, %%%d\n", tmp1, tmp2);
+            tmp = temporary;
+            temporary++;
+        } break;
         case Eq: {
             struct node_t *expr = getchild(expression, 0);
             int tmp1 = codegen_expression(expr, scope);
