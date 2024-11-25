@@ -197,10 +197,12 @@ int check_program(struct node_t *program) {
         switch (node->category) {
             case VarDecl:{
                 check_var(global_symbol_table, node);
-                break;}
+                break;
+            }
             case FuncDecl:{
                 check_function(global_symbol_table, node);
-                break;}
+                break;
+            }
             default:
                 break;
         }
@@ -388,7 +390,6 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent) {
             parent->type = TypeFloat32;
             break;
         }
-           
         case Identifier: {
             struct symbol_list_t *symbol = search_symbol(scope, parent->token);
             if (symbol == NULL) {
@@ -404,12 +405,10 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent) {
             }
             break;
         }
-           
         case StrLit: {
             parent->type = TypeString;
             break;
         }
-            
         case Or:
         case And:
         case Eq:

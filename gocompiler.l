@@ -8,10 +8,11 @@
     #include <stdarg.h>
     #include <string.h>
 
-    #include "y.tab.h"
     #include "ast.h"
     #include "semantics.h"
     #include "codegen.h"
+
+    #include "y.tab.h"
     
     #define BUF_SIZE 8192
 
@@ -43,7 +44,7 @@
     extern int show_ast_type;
 
     #define YY_USER_ACTION user_action();
-    #define PASS_TOKEN() yylval.lexeme = strdup(yytext);
+    #define PASS_TOKEN() yylval.pass.token = strdup(yytext);
 
 %}
 
@@ -147,7 +148,7 @@ os.Args                                     { print_token("CMDARGS"); semicolon 
                                                     strcat(temp_string, "\"");
                                                     print_token("STRLIT(%s)", temp_string); 
                                                     semicolon = 1; 
-                                                    yylval.lexeme = strdup(temp_string);
+                                                    yylval.pass.token = strdup(temp_string);
                                                     yytext = temp_string;
                                                     tok_column = string_column;
                                                     if (parse) return STRLIT; 
@@ -208,7 +209,7 @@ extern int yyparse();
 int main(int argc, char **argv) {
     if (argc > 1) {
         if (strcmp(argv[1], "-l") == 0) {
-            print_tokens = 1;  /* Enable token printing if -l option is passed */
+            print_tokens = 1;
             yylex();
             return 0;
         }
@@ -227,17 +228,15 @@ int main(int argc, char **argv) {
             show_ast_type = 1;
             yyparse();
             if (syntax_error_flag == 0) {
-                check_program(program);
-                show_symbol_table();
-                show(program);
+                if (check_program(program) == 0) {
+                    show_symbol_table();
+                    show(program);
+                }
             }
             clean(program);
             return 0;
         }
     }
-    /* Running the yyparse in here will lead to mooshak test failure */
-    //yylex();  /* Run the lexical analysis automaton */
-
     parse = 1;
     show_ast_type = 1;
     yyparse();
@@ -247,7 +246,6 @@ int main(int argc, char **argv) {
         show(program);
         codegen_program(program);
     }
-
     clean(program);
     return 0;
 }
@@ -260,6 +258,10 @@ void user_action() {
     tok_column = column;
     column += yyleng;
     last_action_newline = 0;
+
+    yylval.pass.token = NULL;
+    yylval.pass.line = tok_line;
+    yylval.pass.column = tok_column;
 }
 
 void print_token(const char *tok, ...) {

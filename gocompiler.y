@@ -27,47 +27,47 @@
 
 %}
 
-%token SEMICOLON
-%token COMMA
-%token BLANKID
-%token ASSIGN
-%token STAR
-%token DIV
-%token MINUS
-%token PLUS
-%token EQ
-%token GE
-%token GT
-%token LBRACE
-%token LE
-%token LPAR
-%token LSQ
-%token LT
-%token MOD
-%token NE
-%token NOT
-%token AND
-%token OR
-%token RBRACE
-%token RPAR
-%token RSQ
-%token PACKAGE
-%token RETURN
-%token ELSE
-%token FOR
-%token IF
-%token VAR
-%token INT
-%token FLOAT32
-%token BOOL
-%token STR
-%token PRINT
-%token PARSEINT
-%token FUNC
-%token CMDARGS
-%token RESERVED
+%token<pass> SEMICOLON
+%token<pass> COMMA
+%token<pass> BLANKID
+%token<pass> ASSIGN
+%token<pass> STAR
+%token<pass> DIV
+%token<pass> MINUS
+%token<pass> PLUS
+%token<pass> EQ
+%token<pass> GE
+%token<pass> GT
+%token<pass> LBRACE
+%token<pass> LE
+%token<pass> LPAR
+%token<pass> LSQ
+%token<pass> LT
+%token<pass> MOD
+%token<pass> NE
+%token<pass> NOT
+%token<pass> AND
+%token<pass> OR
+%token<pass> RBRACE
+%token<pass> RPAR
+%token<pass> RSQ
+%token<pass> PACKAGE
+%token<pass> RETURN
+%token<pass> ELSE
+%token<pass> FOR
+%token<pass> IF
+%token<pass> VAR
+%token<pass> INT
+%token<pass> FLOAT32
+%token<pass> BOOL
+%token<pass> STR
+%token<pass> PRINT
+%token<pass> PARSEINT
+%token<pass> FUNC
+%token<pass> CMDARGS
+%token<pass> RESERVED
 
-%token<lexeme> IDENTIFIER STRLIT NATURAL DECIMAL
+%token<pass> IDENTIFIER STRLIT NATURAL DECIMAL
 
 %type<node> program type declarations var_declaration var_spec func_declaration func_header parameters parameter
 %type<node> func_body vars_statements statement block block_statements parse_args func_invocation func_invocation_exprs expr
@@ -85,7 +85,7 @@
 %left HIGH
 
 %union {
-    char *lexeme;
+    struct pass_t pass;
     struct node_t *node;
 }
 
@@ -94,19 +94,19 @@
 program
 : PACKAGE IDENTIFIER SEMICOLON declarations
 {
-    $$ = program = newnode(Program, NULL);
+    $$ = program = newcategory(Program);
     addchild(program, $4);
 }
 | PACKAGE IDENTIFIER SEMICOLON
 {
-    $$ = program = newnode(Program, NULL);
+    $$ = program = newcategory(Program);
 }
 ;
 
 declarations
 : var_declaration SEMICOLON declarations
 {
-    $$ = newnode(Intermediate, NULL);
+    $$ = newintermediate();
     addchild($$, $1);
     addchild($$, $3);
 }
@@ -116,7 +116,7 @@ declarations
 }
 | func_declaration SEMICOLON declarations
 {
-    $$ = newnode(Intermediate, NULL);
+    $$ = newintermediate();
     addchild($$, $1);
     addchild($$, $3);
 }
@@ -140,15 +140,15 @@ var_declaration
 var_spec
 : IDENTIFIER type
 {
-    $$ = newnode(VarDecl, NULL);
+    $$ = newcategory(VarDecl);
     addchild($$, $2);
     addchild($$, newnode(Identifier, $1));
 }
 | IDENTIFIER COMMA var_spec
 {
-    $$ = newnode(Intermediate, NULL);
-    struct node_t *vardecl = newnode(VarDecl, NULL);
-    addchild(vardecl, newnode(type->category, NULL));
+    $$ = newintermediate();
+    struct node_t *vardecl = newcategory(VarDecl);
+    addchild(vardecl, newcategory(type->category));
     addchild(vardecl, newnode(Identifier, $1));
     addchild($$, vardecl);
     addchild($$, $3);
@@ -158,7 +158,7 @@ var_spec
 func_declaration
 : FUNC func_header func_body
 {
-    $$ = newnode(FuncDecl, NULL);
+    $$ = newcategory(FuncDecl);
     addchild($$, $2);
     addchild($$, $3);
 }
@@ -167,34 +167,34 @@ func_declaration
 func_header
 : IDENTIFIER LPAR parameters RPAR type
 {
-    $$ = newnode(FuncHeader, NULL);
+    $$ = newcategory(FuncHeader);
     addchild($$, newnode(Identifier, $1));
     addchild($$, $5);
-    struct node_t *params = newnode(FuncParams, NULL);
+    struct node_t *params = newcategory(FuncParams);
     addchild(params, $3);
     addchild($$, params);
 }
 | IDENTIFIER LPAR parameters RPAR
 {
-    $$ = newnode(FuncHeader, NULL);
+    $$ = newcategory(FuncHeader);
     addchild($$, newnode(Identifier, $1));
-    struct node_t *params = newnode(FuncParams, NULL);
+    struct node_t *params = newcategory(FuncParams);
     addchild(params, $3);
     addchild($$, params);
 
 }
 | IDENTIFIER LPAR RPAR type
 {
-    $$ = newnode(FuncHeader, NULL);
+    $$ = newcategory(FuncHeader);
     addchild($$, newnode(Identifier, $1));
     addchild($$, $4);
-    addchild($$, newnode(FuncParams, NULL));
+    addchild($$, newcategory(FuncParams));
 }
 | IDENTIFIER LPAR RPAR
 {
-    $$ = newnode(FuncHeader, NULL);
+    $$ = newcategory(FuncHeader);
     addchild($$, newnode(Identifier, $1));
-    addchild($$, newnode(FuncParams, NULL));
+    addchild($$, newcategory(FuncParams));
 }
 ;
 
@@ -205,7 +205,7 @@ parameters
 }
 | parameters COMMA parameter
 {
-    $$ = newnode(Intermediate, NULL);
+    $$ = newintermediate();
     addchild($$, $1);
     addchild($$, $3);
 }
@@ -214,7 +214,7 @@ parameters
 parameter
 : IDENTIFIER type
 {
-    $$ = newnode(ParamDecl, NULL);
+    $$ = newcategory(ParamDecl);
     addchild($$, $2);
     addchild($$, newnode(Identifier, $1));
 }
@@ -223,25 +223,25 @@ parameter
 func_body
 : LBRACE vars_statements RBRACE
 {
-    $$ = newnode(FuncBody, NULL);
+    $$ = newcategory(FuncBody);
     addchild($$, $2);
 }
 | LBRACE RBRACE
 {
-    $$ = newnode(FuncBody, NULL);
+    $$ = newcategory(FuncBody);
 }
 ;
 
 vars_statements
 : vars_statements var_declaration SEMICOLON
 {
-    $$ = newnode(Intermediate, NULL);
+    $$ = newintermediate();
     addchild($$, $1);
     addchild($$, $2);
 }
 | vars_statements statement SEMICOLON
 {
-    $$ = newnode(Intermediate, NULL);
+    $$ = newintermediate();
     addchild($$, $1);
     addchild($$, $2);
 }
@@ -266,7 +266,7 @@ vars_statements
 statement
 : IDENTIFIER ASSIGN expr
 {
-    $$ = newnode(Assign, NULL);
+    $$ = newnode(Assign, $2);
     addchild($$, newnode(Identifier, $1));
     addchild($$, $3);
 }
@@ -276,37 +276,37 @@ statement
 }
 | IF expr block
 {
-    $$ = newnode(If, NULL);
+    $$ = newnode(If, $1);
     addchild($$, $2);
     addchild($$, $3);
-    addchild($$, newnode(Block, NULL));
+    addchild($$, newnode(Block, $1));
 }
 | IF expr block ELSE block
 {
-    $$ = newnode(If, NULL);
+    $$ = newnode(If, $1);
     addchild($$, $2);
     addchild($$, $3);
     addchild($$, $5);
 }
 | FOR expr block
 {
-    $$ = newnode(For, NULL);
+    $$ = newnode(For, $1);
     addchild($$, $2);
     addchild($$, $3);
 }
 | FOR block
 {
-    $$ = newnode(For, NULL);
+    $$ = newnode(For, $1);
     addchild($$, $2);
 }
 | RETURN expr
 {
-    $$ = newnode(Return, NULL);
+    $$ = newnode(Return, $1);
     addchild($$, $2);
 }
 | RETURN
 {
-    $$ = newnode(Return, NULL);
+    $$ = newnode(Return, $1);
 }
 | func_invocation
 {
@@ -318,12 +318,12 @@ statement
 }
 | PRINT LPAR expr RPAR
 {
-    $$ = newnode(Print, NULL);
+    $$ = newnode(Print, $1);
     addchild($$, $3);
 }
 | PRINT LPAR STRLIT RPAR
 {
-    $$ = newnode(Print, NULL);
+    $$ = newnode(Print, $1);
     addchild($$, newnode(StrLit, $3));
 }
 | error
@@ -335,11 +335,11 @@ statement
 block
 : LBRACE RBRACE
 {
-    $$ = newnode(Block, NULL);
+    $$ = newnode(Block, $1);
 }
 | LBRACE block_statements RBRACE
 {
-    $$ = newnode(Block, NULL);
+    $$ = newnode(Block, $1);
     addchild($$, $2);
 }
 ;
@@ -351,7 +351,7 @@ block_statements
 }
 |  block_statements statement SEMICOLON 
 {
-    $$ = newnode(Intermediate, NULL);
+    $$ = newintermediate();
     addchild($$, $1);
     addchild($$, $2);
 }
@@ -360,7 +360,7 @@ block_statements
 parse_args
 : IDENTIFIER COMMA BLANKID ASSIGN PARSEINT LPAR CMDARGS LSQ expr RSQ RPAR
 {
-    $$ = newnode(ParseArgs, NULL);
+    $$ = newnode(ParseArgs, $5);
     addchild($$, newnode(Identifier, $1));
     addchild($$, $9);
 }
@@ -373,12 +373,12 @@ parse_args
 func_invocation
 : IDENTIFIER LPAR RPAR
 {
-    $$ = newnode(Call, NULL);
+    $$ = newcategory(Call);
     addchild($$, newnode(Identifier, $1));
 }
 | IDENTIFIER LPAR func_invocation_exprs RPAR
 {
-    $$ = newnode(Call, NULL);
+    $$ = newcategory(Call);
     addchild($$, newnode(Identifier, $1));
     addchild($$, $3);
 }
@@ -395,7 +395,7 @@ func_invocation_exprs
 }
 | func_invocation_exprs COMMA expr
 {
-    $$ = newnode(Intermediate, NULL);
+    $$ = newintermediate();
     addchild($$, $1);
     addchild($$, $3);
 }
@@ -404,95 +404,95 @@ func_invocation_exprs
 expr
 : expr OR expr
 {
-    $$ = newnode(Or, NULL);
+    $$ = newnode(Or, $2);
     addchild($$, $1);
     addchild($$, $3);
 }
 | expr AND expr
 {
-    $$ = newnode(And, NULL);
+    $$ = newnode(And, $2);
     addchild($$, $1);
     addchild($$, $3);
 }
 | expr LT expr
 {
-    $$ = newnode(Lt, NULL);
+    $$ = newnode(Lt, $2);
     addchild($$, $1);
     addchild($$, $3);
 }
 | expr GT expr
 {
-    $$ = newnode(Gt, NULL);
+    $$ = newnode(Gt, $2);
     addchild($$, $1);
     addchild($$, $3);
 }
 | expr EQ expr
 {
-    $$ = newnode(Eq, NULL);
+    $$ = newnode(Eq, $2);
     addchild($$, $1);
     addchild($$, $3);
 }
 | expr NE expr
 {
-    $$ = newnode(Ne, NULL);
+    $$ = newnode(Ne, $2);
     addchild($$, $1);
     addchild($$, $3);
 }
 | expr LE expr
 {
-    $$ = newnode(Le, NULL);
+    $$ = newnode(Le, $2);
     addchild($$, $1);
     addchild($$, $3);
 }
 | expr GE expr
 {
-    $$ = newnode(Ge, NULL);
+    $$ = newnode(Ge, $2);
     addchild($$, $1);
     addchild($$, $3);
 }
 | expr PLUS expr
 {
-    $$ = newnode(Add, NULL);
+    $$ = newnode(Add, $2);
     addchild($$, $1);
     addchild($$, $3);
 }
 | expr MINUS expr    // Binary Minus
 {
-    $$ = newnode(Sub, NULL);
+    $$ = newnode(Sub, $2);
     addchild($$, $1);
     addchild($$, $3);
 }
 | expr STAR expr
 {
-    $$ = newnode(Mul, NULL);
+    $$ = newnode(Mul, $2);
     addchild($$, $1);
     addchild($$, $3);
 }
 | expr DIV expr
 {
-    $$ = newnode(Div, NULL);
+    $$ = newnode(Div, $2);
     addchild($$, $1);
     addchild($$, $3);
 }
 | expr MOD expr
 {
-    $$ = newnode(Mod, NULL);
+    $$ = newnode(Mod, $2);
     addchild($$, $1);
     addchild($$, $3);
 }
 | NOT expr
 {
-    $$ = newnode(Not, NULL);
+    $$ = newnode(Not, $1);
     addchild($$, $2);
 }
 | MINUS expr %prec UMINUS  // Unary Minus with explicit precedence
 {
-    $$ = newnode(Minus, NULL);
+    $$ = newnode(Minus, $1);
     addchild($$, $2);
 }
 | PLUS expr %prec UPLUS  // Unary Plus with explicit precedence
 {
-    $$ = newnode(Plus, NULL);
+    $$ = newnode(Plus, $1);
     addchild($$, $2);
 }
 | NATURAL
@@ -524,22 +524,22 @@ expr
 type
 : INT
 { 
-    type = newnode(Int, NULL);
+    type = newnode(Int, $1);
     $$ = type;
 }
 | FLOAT32
 {
-    type = newnode(Float32, NULL);
+    type = newnode(Float32, $1);
     $$ = type;
 }
 | BOOL
 {
-    type = newnode(Bool, NULL);
+    type = newnode(Bool, $1);
     $$ = type;
 }
 | STR
 {
-    type = newnode(String, NULL);
+    type = newnode(String, $1);
     $$ = type;
 }
 ;

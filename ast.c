@@ -16,11 +16,35 @@ static void show_node(struct node_t *root, enum category_t prev_category, int de
 static int numchildren(struct node_t *root);
 static void print_category(const enum category_t category);
 
-struct node_t *newnode(enum category_t category, char *token) {
+struct node_t *newnode(enum category_t category, struct pass_t pass) {
     struct node_t *new = malloc(sizeof(struct node_t));
     new->category = category;
     new->type = None;
-    new->token = token;
+    new->token = pass.token;
+    new->line = pass.line;
+    new->column = pass.column;
+    new->children = malloc(sizeof(struct node_list_t));
+    new->children->next = NULL;
+    new->children->node = NULL;
+    return new;
+}
+
+struct node_t *newintermediate() {
+    struct node_t *new = malloc(sizeof(struct node_t));
+    new->category = Intermediate;
+    new->type = None;
+    new->token = NULL;
+    new->children = malloc(sizeof(struct node_list_t));
+    new->children->next = NULL;
+    new->children->node = NULL;
+    return new;
+}
+
+struct node_t *newcategory(enum category_t category) {
+    struct node_t *new = malloc(sizeof(struct node_t));
+    new->category = category;
+    new->type = None;
+    new->token = NULL;
     new->children = malloc(sizeof(struct node_list_t));
     new->children->next = NULL;
     new->children->node = NULL;

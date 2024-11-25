@@ -78,6 +78,7 @@ struct node_t {
     enum category_t category;
     enum type_t type;
     char *token;
+    int line, column;
     struct node_list_t *children;
 };
 
@@ -86,7 +87,14 @@ struct node_list_t {
     struct node_t *node;
 };
 
-struct node_t *newnode(enum category_t category, char *token);
+struct pass_t {
+    char *token;
+    int line, column;
+};
+
+struct node_t *newnode(enum category_t category, struct pass_t pass);
+struct node_t *newintermediate();
+struct node_t *newcategory(enum category_t category);
 void addchild(struct node_t *parent, struct node_t *child);
 struct node_t *getchild(struct node_t *parent, int position);
 void show(struct node_t *root);
