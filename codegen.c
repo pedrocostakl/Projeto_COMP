@@ -52,6 +52,15 @@ void codegen_program(struct node_t *program) {
         }
         children = children->next;
     }
+
+    // entry point
+    struct symbol_list_t *main_symbol = search_symbol(global_symbol_table, "main");
+    if (main_symbol != NULL && main_symbol->node->category == FuncDecl) {
+        printf("define i32 @main() {\n"
+               "  %%1 = call i32 @_main(i32 0)\n"
+               "  ret i32 %%1\n"
+               "}\n");
+    }
 }
 
 void codegen_var(struct node_t *var, struct symbol_list_t *scope) {
@@ -72,7 +81,7 @@ void codegen_function(struct node_t *function) {
         struct symbol_list_t *scope = function_symbol->scope;
         printf("define ");
         print_codegen_type(function_symbol->type);
-        printf(" @%s(", function_symbol->identifier);
+        printf(" @_%s(", function_symbol->identifier);
         // procurar o node de parameters
         struct node_t *parameters = getchild(header, 1);
         if (parameters->category != FuncParams) {
@@ -233,7 +242,7 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             printf("  ");
             printf("%%%d = call ", temporary);
             print_codegen_type(expression->type);
-            printf(" @%s(", id->token);
+            printf(" @_%s(", id->token);
             children = expression->children->next->next;
             int num = 0;
             i = 0;
