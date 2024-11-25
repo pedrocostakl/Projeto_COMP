@@ -463,6 +463,16 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent) {
             }
             break;
         }
+        case Not: {
+            parent->type = TypeBool;
+            check_expressions(scope, parent->children->next->node);
+        } break;
+        case Minus:
+        case Plus: {
+            struct node_t *node = getchild(parent, 0);
+            check_expressions(scope, node);
+            parent->type = node->type;
+        }
         default:
             break;
     }
