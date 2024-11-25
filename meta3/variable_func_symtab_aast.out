@@ -1,0 +1,378 @@
+===== Global Symbol Table =====
+oneFunc	()	none
+twoFunc	(int)	none
+treeFunc	(int,float32)	none
+fourFunc	(int,float32,string)	none
+fiveFunc	(int,float32,string,bool)	none
+sixFunc	(int)	int
+sevenFunc	(int,float32)	float32
+eightFunc	(int,float32,string)	string
+nineFunc	(int,float32,string,bool)	bool
+tenFunc	(int)	int
+variable_func_declarations	()	none
+
+===== Function oneFunc() Symbol Table =====
+return		none
+
+===== Function twoFunc(int) Symbol Table =====
+return		none
+one		int	param
+
+===== Function treeFunc(int,float32) Symbol Table =====
+return		none
+one		int	param
+two		float32	param
+thisDoesNothingHere		float32
+
+===== Function fourFunc(int,float32,string) Symbol Table =====
+return		none
+one		int	param
+two		float32	param
+three		string	param
+
+===== Function fiveFunc(int,float32,string,bool) Symbol Table =====
+return		none
+one		int	param
+two		float32	param
+three		string	param
+four		bool	param
+
+===== Function sixFunc(int) Symbol Table =====
+return		int
+one		int	param
+oneInSixFunc		int
+
+===== Function sevenFunc(int,float32) Symbol Table =====
+return		float32
+one		int	param
+two		float32	param
+oneTwoSevenFunc		float32
+twoTwoSevenFunc		float32
+
+===== Function eightFunc(int,float32,string) Symbol Table =====
+return		string
+one		int	param
+two		float32	param
+three		string	param
+
+===== Function nineFunc(int,float32,string,bool) Symbol Table =====
+return		bool
+one		int	param
+two		float32	param
+three		string	param
+four		bool	param
+oneThing		bool
+
+===== Function tenFunc(int) Symbol Table =====
+return		int
+one		int	param
+a		float32
+b		float32
+c		float32
+d		float32
+j		int
+
+===== Function variable_func_declarations() Symbol Table =====
+return		none
+stringThing		string
+
+Program
+..FuncDecl
+....FuncHeader
+......Identifier(oneFunc)
+......FuncParams
+....FuncBody
+..FuncDecl
+....FuncHeader
+......Identifier(twoFunc)
+......FuncParams
+........ParamDecl
+..........Int
+..........Identifier(one)
+....FuncBody
+..FuncDecl
+....FuncHeader
+......Identifier(treeFunc)
+......FuncParams
+........ParamDecl
+..........Int
+..........Identifier(one)
+........ParamDecl
+..........Float32
+..........Identifier(two)
+....FuncBody
+......VarDecl
+........Float32
+........Identifier(thisDoesNothingHere)
+......For
+........Le - bool
+..........Identifier(one) - int
+..........Natural(123) - int
+........Block
+..........Assign - float32
+............Identifier(thisDoesNothingHere) - float32
+............Add - float32
+..............Add - float32
+................Identifier(thisDoesNothingHere) - float32
+................Identifier(two) - float32
+..............Decimal(.010e3) - float32
+..........Assign - int
+............Identifier(one) - int
+............Add - int
+..............Add - int
+................Add - int
+..................Add - int
+....................Identifier(one) - int
+....................Identifier(one) - int
+..................Identifier(one) - int
+................Identifier(one) - int
+..............Natural(1) - int
+..FuncDecl
+....FuncHeader
+......Identifier(fourFunc)
+......FuncParams
+........ParamDecl
+..........Int
+..........Identifier(one)
+........ParamDecl
+..........Float32
+..........Identifier(two)
+........ParamDecl
+..........String
+..........Identifier(three)
+....FuncBody
+..FuncDecl
+....FuncHeader
+......Identifier(fiveFunc)
+......FuncParams
+........ParamDecl
+..........Int
+..........Identifier(one)
+........ParamDecl
+..........Float32
+..........Identifier(two)
+........ParamDecl
+..........String
+..........Identifier(three)
+........ParamDecl
+..........Bool
+..........Identifier(four)
+....FuncBody
+..FuncDecl
+....FuncHeader
+......Identifier(sixFunc)
+......Int
+......FuncParams
+........ParamDecl
+..........Int
+..........Identifier(one)
+....FuncBody
+......VarDecl
+........Int
+........Identifier(oneInSixFunc)
+......Assign - int
+........Identifier(oneInSixFunc) - int
+........Identifier(one) - int
+......Return
+........Identifier(oneInSixFunc) - int
+..FuncDecl
+....FuncHeader
+......Identifier(sevenFunc)
+......Float32
+......FuncParams
+........ParamDecl
+..........Int
+..........Identifier(one)
+........ParamDecl
+..........Float32
+..........Identifier(two)
+....FuncBody
+......VarDecl
+........Float32
+........Identifier(oneTwoSevenFunc)
+......VarDecl
+........Float32
+........Identifier(twoTwoSevenFunc)
+......Assign - float32
+........Identifier(oneTwoSevenFunc) - float32
+........Decimal(.52e4) - float32
+......Assign - float32
+........Identifier(twoTwoSevenFunc) - float32
+........Add - float32
+..........Identifier(two) - float32
+..........Identifier(oneTwoSevenFunc) - float32
+......If
+........Eq - bool
+..........Identifier(one) - int
+..........Natural(1) - int
+........Block
+..........Return
+............Identifier(twoTwoSevenFunc) - float32
+........Block
+......Return
+........Identifier(oneTwoSevenFunc) - float32
+..FuncDecl
+....FuncHeader
+......Identifier(eightFunc)
+......String
+......FuncParams
+........ParamDecl
+..........Int
+..........Identifier(one)
+........ParamDecl
+..........Float32
+..........Identifier(two)
+........ParamDecl
+..........String
+..........Identifier(three)
+....FuncBody
+......Return
+........Identifier(three) - string
+..FuncDecl
+....FuncHeader
+......Identifier(nineFunc)
+......Bool
+......FuncParams
+........ParamDecl
+..........Int
+..........Identifier(one)
+........ParamDecl
+..........Float32
+..........Identifier(two)
+........ParamDecl
+..........String
+..........Identifier(three)
+........ParamDecl
+..........Bool
+..........Identifier(four)
+....FuncBody
+......VarDecl
+........Bool
+........Identifier(oneThing)
+......If
+........Identifier(four) - bool
+........Block
+..........Return
+............Identifier(four) - bool
+........Block
+......Return
+........Identifier(oneThing) - bool
+..FuncDecl
+....FuncHeader
+......Identifier(tenFunc)
+......Int
+......FuncParams
+........ParamDecl
+..........Int
+..........Identifier(one)
+....FuncBody
+......VarDecl
+........Float32
+........Identifier(a)
+......VarDecl
+........Float32
+........Identifier(b)
+......VarDecl
+........Float32
+........Identifier(c)
+......VarDecl
+........Float32
+........Identifier(d)
+......VarDecl
+........Int
+........Identifier(j)
+......Assign - int
+........Identifier(j) - int
+........Add - int
+..........Natural(6) - int
+..........Identifier(one) - int
+......Assign - float32
+........Identifier(a) - float32
+........Decimal(.01) - float32
+......Assign - float32
+........Identifier(b) - float32
+........Add - float32
+..........Decimal(.123) - float32
+..........Identifier(a) - float32
+......Assign - float32
+........Identifier(c) - float32
+........Add - float32
+..........Identifier(b) - float32
+..........Identifier(a) - float32
+......Assign - float32
+........Identifier(a) - float32
+........Identifier(c) - float32
+......Assign - float32
+........Identifier(d) - float32
+........Add - float32
+..........Identifier(a) - float32
+..........Identifier(b) - float32
+......Assign - float32
+........Identifier(a) - float32
+........Identifier(d) - float32
+......Assign - float32
+........Identifier(d) - float32
+........Add - float32
+..........Identifier(a) - float32
+..........Call - float32
+............Identifier(sevenFunc) - (int,float32)
+............Identifier(j) - int
+............Identifier(a) - float32
+......Call
+........Identifier(twoFunc) - (int)
+........Identifier(j) - int
+......Call
+........Identifier(treeFunc) - (int,float32)
+........Identifier(j) - int
+........Identifier(a) - float32
+......Return
+........Identifier(j) - int
+..FuncDecl
+....FuncHeader
+......Identifier(variable_func_declarations)
+......FuncParams
+....FuncBody
+......VarDecl
+........String
+........Identifier(stringThing)
+......Call
+........Identifier(oneFunc) - ()
+......Call
+........Identifier(twoFunc) - (int)
+........Call - int
+..........Identifier(sixFunc) - (int)
+..........Natural(1) - int
+......Call
+........Identifier(treeFunc) - (int,float32)
+........Natural(1) - int
+........Decimal(.123) - float32
+......Call
+........Identifier(fourFunc) - (int,float32,string)
+........Call - int
+..........Identifier(sixFunc) - (int)
+..........Natural(1) - int
+........Decimal(.321) - float32
+........Identifier(stringThing) - string
+......Call
+........Identifier(fiveFunc) - (int,float32,string,bool)
+........Natural(1) - int
+........Decimal(.2) - float32
+........Identifier(stringThing) - string
+........Gt - bool
+..........Natural(1) - int
+..........Natural(2) - int
+......Call - int
+........Identifier(sixFunc) - (int)
+........Natural(1) - int
+......Call - string
+........Identifier(eightFunc) - (int,float32,string)
+........Natural(1) - int
+........Decimal(.1) - float32
+........Identifier(stringThing) - string
+......Call - float32
+........Identifier(sevenFunc) - (int,float32)
+........Natural(1) - int
+........Decimal(.2) - float32
+......Call - int
+........Identifier(tenFunc) - (int)
+........Natural(1) - int

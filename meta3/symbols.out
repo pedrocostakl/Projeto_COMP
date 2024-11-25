@@ -1,0 +1,86 @@
+Line 6, column 33: Incompatible type int in return statement
+===== Global Symbol Table =====
+fna	()	none
+fnb	(int,int,int)	float32
+fnc	()	int
+ia		int
+ib		int
+fa		float32
+fb		float32
+ba		bool
+bb		bool
+
+===== Function fna() Symbol Table =====
+return		none
+
+===== Function fnb(int,int,int) Symbol Table =====
+return		float32
+ia		int	param
+fa		int	param
+ba		int	param
+
+===== Function fnc() Symbol Table =====
+return		int
+fa		int
+
+Program
+..FuncDecl
+....FuncHeader
+......Identifier(fna)
+......FuncParams
+....FuncBody
+..FuncDecl
+....FuncHeader
+......Identifier(fnb)
+......Float32
+......FuncParams
+........ParamDecl
+..........Int
+..........Identifier(ia)
+........ParamDecl
+..........Int
+..........Identifier(fa)
+........ParamDecl
+..........Int
+..........Identifier(ba)
+....FuncBody
+......Return
+........Add - int
+..........Add - int
+............Sub - int
+..............Sub - int
+................Identifier(ia) - int
+................Identifier(fa) - int
+..............Identifier(ba) - int
+............Call - int
+..............Identifier(fnc) - ()
+..........Identifier(ib) - int
+..FuncDecl
+....FuncHeader
+......Identifier(fnc)
+......Int
+......FuncParams
+....FuncBody
+......VarDecl
+........Int
+........Identifier(fa)
+......Return
+........Identifier(fa) - int
+..VarDecl
+....Int
+....Identifier(ia)
+..VarDecl
+....Int
+....Identifier(ib)
+..VarDecl
+....Float32
+....Identifier(fa)
+..VarDecl
+....Float32
+....Identifier(fb)
+..VarDecl
+....Bool
+....Identifier(ba)
+..VarDecl
+....Bool
+....Identifier(bb)

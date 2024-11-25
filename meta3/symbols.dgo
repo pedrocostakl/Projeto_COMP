@@ -1,0 +1,18 @@
+package main;
+
+func fna() {}
+
+func fnb(ia int, fa int, ba int) float32 {
+    return ia - fa - ba + fnc() + ib;
+}
+
+func fnc() int {
+    var fa int;
+    return fa;
+}
+
+var ia, ib int;
+
+var (fa, fb float32;);
+
+var (ba, bb bool;);

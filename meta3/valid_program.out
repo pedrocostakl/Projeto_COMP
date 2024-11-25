@@ -1,0 +1,614 @@
+===== Global Symbol Table =====
+ia		int
+ib		int
+ic		int
+id		int
+ie		int
+fa		float32
+fb		float32
+fc		float32
+fd		float32
+fe		float32
+ba		bool
+bb		bool
+bc		bool
+bd		bool
+sa		string
+sb		string
+sc		string
+fca	()	none
+fcb	()	int
+fcd	()	float32
+fce	()	string
+fcf	()	bool
+fcg	(int,float32)	int
+fch	(int,float32,string)	float32
+fci	(int,int,float32,float32,string)	float32
+fcj	(int,int,float32,float32,bool)	int
+main	()	none
+
+===== Function fca() Symbol Table =====
+return		none
+
+===== Function fcb() Symbol Table =====
+return		int
+fafcb		int
+
+===== Function fcd() Symbol Table =====
+return		float32
+
+===== Function fce() Symbol Table =====
+return		string
+strfce		string
+
+===== Function fcf() Symbol Table =====
+return		bool
+bafcf		bool
+
+===== Function fcg(int,float32) Symbol Table =====
+return		int
+iafcg		int	param
+fafcg		float32	param
+
+===== Function fch(int,float32,string) Symbol Table =====
+return		float32
+iafch		int	param
+fafch		float32	param
+safch		string	param
+
+===== Function fci(int,int,float32,float32,string) Symbol Table =====
+return		float32
+iafci		int	param
+ibfci		int	param
+fafci		float32	param
+fbfci		float32	param
+safci		string	param
+
+===== Function fcj(int,int,float32,float32,bool) Symbol Table =====
+return		int
+iafcj		int	param
+ibfcj		int	param
+fafcj		float32	param
+fbfcj		float32	param
+bafcj		bool	param
+fcjia		int
+fcjib		int
+
+===== Function main() Symbol Table =====
+return		none
+mia		int
+mib		int
+
+Program
+..VarDecl
+....Int
+....Identifier(ia)
+..VarDecl
+....Int
+....Identifier(ib)
+..VarDecl
+....Int
+....Identifier(ic)
+..VarDecl
+....Int
+....Identifier(id)
+..VarDecl
+....Int
+....Identifier(ie)
+..VarDecl
+....Float32
+....Identifier(fa)
+..VarDecl
+....Float32
+....Identifier(fb)
+..VarDecl
+....Float32
+....Identifier(fc)
+..VarDecl
+....Float32
+....Identifier(fd)
+..VarDecl
+....Float32
+....Identifier(fe)
+..VarDecl
+....Bool
+....Identifier(ba)
+..VarDecl
+....Bool
+....Identifier(bb)
+..VarDecl
+....Bool
+....Identifier(bc)
+..VarDecl
+....Bool
+....Identifier(bd)
+..VarDecl
+....String
+....Identifier(sa)
+..VarDecl
+....String
+....Identifier(sb)
+..VarDecl
+....String
+....Identifier(sc)
+..FuncDecl
+....FuncHeader
+......Identifier(fca)
+......FuncParams
+....FuncBody
+..FuncDecl
+....FuncHeader
+......Identifier(fcb)
+......Int
+......FuncParams
+....FuncBody
+......VarDecl
+........Int
+........Identifier(fafcb)
+......Assign - int
+........Identifier(fafcb) - int
+........Natural(132) - int
+......Return
+........Identifier(fafcb) - int
+..FuncDecl
+....FuncHeader
+......Identifier(fcd)
+......Float32
+......FuncParams
+....FuncBody
+......Return
+........Add - float32
+..........Decimal(.1e1) - float32
+..........Decimal(0.007) - float32
+..FuncDecl
+....FuncHeader
+......Identifier(fce)
+......String
+......FuncParams
+....FuncBody
+......VarDecl
+........String
+........Identifier(strfce)
+......Return
+........Identifier(strfce) - string
+..FuncDecl
+....FuncHeader
+......Identifier(fcf)
+......Bool
+......FuncParams
+....FuncBody
+......VarDecl
+........Bool
+........Identifier(bafcf)
+......Return
+........Identifier(bafcf) - bool
+..FuncDecl
+....FuncHeader
+......Identifier(fcg)
+......Int
+......FuncParams
+........ParamDecl
+..........Int
+..........Identifier(iafcg)
+........ParamDecl
+..........Float32
+..........Identifier(fafcg)
+....FuncBody
+......If
+........Gt - bool
+..........Call - float32
+............Identifier(fcd) - ()
+..........Identifier(fafcg) - float32
+........Block
+..........Call
+............Identifier(fca) - ()
+..........Return
+............Identifier(iafcg) - int
+........Block
+......Return
+........Call - int
+..........Identifier(fcb) - ()
+..FuncDecl
+....FuncHeader
+......Identifier(fch)
+......Float32
+......FuncParams
+........ParamDecl
+..........Int
+..........Identifier(iafch)
+........ParamDecl
+..........Float32
+..........Identifier(fafch)
+........ParamDecl
+..........String
+..........Identifier(safch)
+....FuncBody
+......Call - int
+........Identifier(fcg) - (int,float32)
+........Call - int
+..........Identifier(fcb) - ()
+........Call - float32
+..........Identifier(fcd) - ()
+......Print
+........Identifier(safch) - string
+......If
+........Identifier(bb) - bool
+........Block
+..........Assign - int
+............Identifier(iafch) - int
+............Add - int
+..............Identifier(ia) - int
+..............Identifier(ib) - int
+..........Assign - float32
+............Identifier(fafch) - float32
+............Identifier(fa) - float32
+..........Assign - float32
+............Identifier(fb) - float32
+............Identifier(fafch) - float32
+..........Assign - int
+............Identifier(id) - int
+............Identifier(iafch) - int
+........Block
+......Return
+........Decimal(.01) - float32
+..FuncDecl
+....FuncHeader
+......Identifier(fci)
+......Float32
+......FuncParams
+........ParamDecl
+..........Int
+..........Identifier(iafci)
+........ParamDecl
+..........Int
+..........Identifier(ibfci)
+........ParamDecl
+..........Float32
+..........Identifier(fafci)
+........ParamDecl
+..........Float32
+..........Identifier(fbfci)
+........ParamDecl
+..........String
+..........Identifier(safci)
+....FuncBody
+......Call - float32
+........Identifier(fch) - (int,float32,string)
+........Call - int
+..........Identifier(fcg) - (int,float32)
+..........Call - int
+............Identifier(fcb) - ()
+..........Call - float32
+............Identifier(fcd) - ()
+........Call - float32
+..........Identifier(fcd) - ()
+........Call - string
+..........Identifier(fce) - ()
+......Assign - int
+........Identifier(iafci) - int
+........Add - int
+..........Add - int
+............Add - int
+..............Identifier(ibfci) - int
+..............Natural(12) - int
+............Identifier(ic) - int
+..........Call - int
+............Identifier(fcb) - ()
+......If
+........Call - bool
+..........Identifier(fcf) - ()
+........Block
+..........Print
+............Identifier(safci) - string
+..........Return
+............Call - float32
+..............Identifier(fch) - (int,float32,string)
+..............Identifier(ia) - int
+..............Identifier(fa) - float32
+..............Identifier(sa) - string
+........Block
+..........Assign - float32
+............Identifier(fafci) - float32
+............Add - float32
+..............Mul - float32
+................Identifier(fa) - float32
+................Identifier(fbfci) - float32
+..............Call - float32
+................Identifier(fcd) - ()
+..........Return
+............Call - float32
+..............Identifier(fcd) - ()
+..FuncDecl
+....FuncHeader
+......Identifier(fcj)
+......Int
+......FuncParams
+........ParamDecl
+..........Int
+..........Identifier(iafcj)
+........ParamDecl
+..........Int
+..........Identifier(ibfcj)
+........ParamDecl
+..........Float32
+..........Identifier(fafcj)
+........ParamDecl
+..........Float32
+..........Identifier(fbfcj)
+........ParamDecl
+..........Bool
+..........Identifier(bafcj)
+....FuncBody
+......VarDecl
+........Int
+........Identifier(fcjia)
+......VarDecl
+........Int
+........Identifier(fcjib)
+......Assign - int
+........Identifier(fcjia) - int
+........Sub - int
+..........Add - int
+............Identifier(ia) - int
+............Identifier(ib) - int
+..........Mod - int
+............Mul - int
+..............Identifier(ic) - int
+..............Identifier(id) - int
+............Identifier(ie) - int
+......If
+........Gt - bool
+..........Identifier(fcjia) - int
+..........Call - int
+............Identifier(fcg) - (int,float32)
+............Identifier(fcjia) - int
+............Call - float32
+..............Identifier(fci) - (int,int,float32,float32,string)
+..............Call - int
+................Identifier(fcb) - ()
+..............Identifier(fcjib) - int
+..............Call - float32
+................Identifier(fch) - (int,float32,string)
+................Call - int
+..................Identifier(fcb) - ()
+................Identifier(fb) - float32
+................Identifier(sa) - string
+..............Identifier(fd) - float32
+..............Identifier(sb) - string
+........Block
+..........If
+............Identifier(ba) - bool
+............Block
+..............Assign - float32
+................Identifier(fc) - float32
+................Decimal(.01) - float32
+............Block
+..............Assign - float32
+................Identifier(fc) - float32
+................Add - float32
+..................Identifier(fc) - float32
+..................Identifier(fe) - float32
+..............If
+................Identifier(bafcj) - bool
+................Block
+..................For
+....................Call - bool
+......................Identifier(fcf) - ()
+....................Block
+......................Assign - int
+........................Identifier(fcjib) - int
+........................Sub - int
+..........................Add - int
+............................Add - int
+..............................Identifier(fcjia) - int
+..............................Div - int
+................................Call - int
+..................................Identifier(fcb) - ()
+................................Natural(12) - int
+............................Call - int
+..............................Identifier(fcg) - (int,float32)
+..............................Add - int
+................................Identifier(ia) - int
+................................Identifier(iafcj) - int
+..............................Identifier(fa) - float32
+..........................Identifier(ibfcj) - int
+......................Assign - float32
+........................Identifier(fbfcj) - float32
+........................Identifier(fafcj) - float32
+................Block
+........Block
+......For
+........Identifier(bb) - bool
+........Block
+..........If
+............Identifier(bc) - bool
+............Block
+..............Assign - bool
+................Identifier(bd) - bool
+................And - bool
+..................Identifier(bd) - bool
+..................Identifier(ba) - bool
+..............Assign - bool
+................Identifier(bd) - bool
+................Or - bool
+..................And - bool
+....................Identifier(ba) - bool
+....................Call - bool
+......................Identifier(fcf) - ()
+..................And - bool
+....................Identifier(bd) - bool
+....................Not - bool
+......................Identifier(bc) - bool
+............Block
+......Return
+........Minus - int
+..........Natural(101) - int
+..FuncDecl
+....FuncHeader
+......Identifier(main)
+......FuncParams
+....FuncBody
+......Assign - int
+........Identifier(ia) - int
+........Natural(1) - int
+......Assign - int
+........Identifier(ib) - int
+........Natural(1) - int
+......Assign - int
+........Identifier(ic) - int
+........Natural(1) - int
+......Assign - int
+........Identifier(id) - int
+........Natural(1) - int
+......Assign - int
+........Identifier(ie) - int
+........Natural(1) - int
+......Assign - float32
+........Identifier(fa) - float32
+........Decimal(.1) - float32
+......Assign - float32
+........Identifier(fb) - float32
+........Decimal(.1) - float32
+......Assign - float32
+........Identifier(fc) - float32
+........Decimal(.1) - float32
+......Assign - float32
+........Identifier(fd) - float32
+........Decimal(.1) - float32
+......Assign - float32
+........Identifier(fe) - float32
+........Decimal(.1) - float32
+......VarDecl
+........Int
+........Identifier(mia)
+......VarDecl
+........Int
+........Identifier(mib)
+......For
+........And - bool
+..........Gt - bool
+............Identifier(ia) - int
+............Identifier(ib) - int
+..........Call - bool
+............Identifier(fcf) - ()
+........Block
+..........If
+............Gt - bool
+..............Call - int
+................Identifier(fcb) - ()
+..............Call - int
+................Identifier(fcj) - (int,int,float32,float32,bool)
+................Call - int
+..................Identifier(fcg) - (int,float32)
+..................Call - int
+....................Identifier(fcb) - ()
+..................Identifier(fe) - float32
+................Identifier(mia) - int
+................Call - float32
+..................Identifier(fci) - (int,int,float32,float32,string)
+..................Call - int
+....................Identifier(fcg) - (int,float32)
+....................Call - int
+......................Identifier(fcb) - ()
+....................Call - float32
+......................Identifier(fcd) - ()
+..................Natural(123) - int
+..................Call - float32
+....................Identifier(fch) - (int,float32,string)
+....................Identifier(ia) - int
+....................Call - float32
+......................Identifier(fcd) - ()
+....................Call - string
+......................Identifier(fce) - ()
+..................Call - float32
+....................Identifier(fcd) - ()
+..................Identifier(sc) - string
+................Call - float32
+..................Identifier(fcd) - ()
+................Call - bool
+..................Identifier(fcf) - ()
+............Block
+..............Assign - int
+................Identifier(mib) - int
+................Call - int
+..................Identifier(fcj) - (int,int,float32,float32,bool)
+..................Natural(12) - int
+..................Identifier(ia) - int
+..................Identifier(fa) - float32
+..................Decimal(.1e12) - float32
+..................Identifier(ba) - bool
+............Block
+..............Assign - int
+................Identifier(mib) - int
+................Add - int
+..................Identifier(ia) - int
+..................Call - int
+....................Identifier(fcb) - ()
+......Assign - int
+........Identifier(mia) - int
+........Add - int
+..........Identifier(mib) - int
+..........Call - int
+............Identifier(fcj) - (int,int,float32,float32,bool)
+............Add - int
+..............Natural(123) - int
+..............Call - int
+................Identifier(fcg) - (int,float32)
+................Add - int
+..................Natural(456) - int
+..................Call - int
+....................Identifier(fcb) - ()
+................Add - float32
+..................Call - float32
+....................Identifier(fcd) - ()
+..................Decimal(123.321) - float32
+............Add - int
+..............Sub - int
+................Add - int
+..................Identifier(ia) - int
+..................Identifier(ib) - int
+................Div - int
+..................Identifier(ic) - int
+..................Natural(12) - int
+..............Mod - int
+................Mul - int
+..................Identifier(id) - int
+..................Identifier(ie) - int
+................Call - int
+..................Identifier(fcg) - (int,float32)
+..................Call - int
+....................Identifier(fcb) - ()
+..................Identifier(fa) - float32
+............Call - float32
+..............Identifier(fci) - (int,int,float32,float32,string)
+..............Add - int
+................Identifier(ia) - int
+................Identifier(ib) - int
+..............Natural(123) - int
+..............Sub - float32
+................Identifier(fa) - float32
+................Div - float32
+..................Call - float32
+....................Identifier(fcd) - ()
+..................Decimal(.1e12) - float32
+..............Call - float32
+................Identifier(fcd) - ()
+..............Call - string
+................Identifier(fce) - ()
+............Call - float32
+..............Identifier(fch) - (int,float32,string)
+..............Add - int
+................Natural(312) - int
+................Natural(12) - int
+..............Add - float32
+................Call - float32
+..................Identifier(fcd) - ()
+................Decimal(.1e23) - float32
+..............Call - string
+................Identifier(fce) - ()
+............Or - bool
+..............And - bool
+................Call - bool
+..................Identifier(fcf) - ()
+................Identifier(ba) - bool
+..............Identifier(bb) - bool

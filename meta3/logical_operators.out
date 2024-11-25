@@ -1,0 +1,124 @@
+===== Global Symbol Table =====
+i		float32
+f		int
+s		bool
+b		string
+main	()	none
+
+===== Function main() Symbol Table =====
+return		none
+i		int
+f		float32
+s		string
+b		bool
+
+Program
+..VarDecl
+....Float32
+....Identifier(i)
+..VarDecl
+....Int
+....Identifier(f)
+..VarDecl
+....Bool
+....Identifier(s)
+..VarDecl
+....String
+....Identifier(b)
+..FuncDecl
+....FuncHeader
+......Identifier(main)
+......FuncParams
+....FuncBody
+......Assign - float32
+........Identifier(i) - float32
+........Decimal(1.1) - float32
+......VarDecl
+........Int
+........Identifier(i)
+......Assign - int
+........Identifier(i) - int
+........Natural(1) - int
+......VarDecl
+........Float32
+........Identifier(f)
+......VarDecl
+........String
+........Identifier(s)
+......VarDecl
+........Bool
+........Identifier(b)
+......Assign - bool
+........Identifier(b) - bool
+........Ne - bool
+..........Identifier(i) - int
+..........Identifier(i) - int
+......Assign - bool
+........Identifier(b) - bool
+........Eq - bool
+..........Identifier(f) - float32
+..........Identifier(f) - float32
+......Assign - bool
+........Identifier(b) - bool
+........And - bool
+..........Identifier(b) - bool
+..........Identifier(b) - bool
+......Assign - bool
+........Identifier(b) - bool
+........Eq - bool
+..........Identifier(b) - bool
+..........Identifier(b) - bool
+......Assign - int
+........Identifier(i) - int
+........Add - int
+..........Identifier(i) - int
+..........Identifier(i) - int
+......Assign - int
+........Identifier(i) - int
+........Div - int
+..........Identifier(i) - int
+..........Identifier(i) - int
+......Assign - float32
+........Identifier(f) - float32
+........Mul - float32
+..........Identifier(f) - float32
+..........Identifier(f) - float32
+......Assign - float32
+........Identifier(f) - float32
+........Sub - float32
+..........Identifier(f) - float32
+..........Identifier(f) - float32
+......Assign - int
+........Identifier(i) - int
+........Sub - int
+..........Add - int
+............Mod - int
+..............Identifier(i) - int
+..............Identifier(i) - int
+............Mod - int
+..............Mul - int
+................Mod - int
+..................Identifier(i) - int
+..................Identifier(i) - int
+................Identifier(i) - int
+..............Identifier(i) - int
+..........Mod - int
+............Div - int
+..............Mod - int
+................Identifier(i) - int
+................Identifier(i) - int
+..............Identifier(i) - int
+............Identifier(i) - int
+......Assign - float32
+........Identifier(f) - float32
+........Minus - float32
+..........Identifier(f) - float32
+......Assign - float32
+........Identifier(f) - float32
+........Plus - float32
+..........Identifier(f) - float32
+......Print
+........Identifier(s) - string
+......ParseArgs - int
+........Identifier(i) - int
+........Natural(1) - int
