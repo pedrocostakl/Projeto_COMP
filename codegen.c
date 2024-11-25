@@ -227,9 +227,12 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
             print_codegen_type(expr->type);
             printf(" %%%d\n", tmp1);
         } break;
-        case Print:
-        case ParseArgs:
-            break;
+        case Print: {
+
+        } break;
+        case ParseArgs: {
+
+        } break;
         case Assign: {
             codegen_expression(getchild(statement, 1), scope);
         } break;
@@ -486,7 +489,7 @@ void print_label(unsigned int num, enum label_type_t label_type) {
             printf("L%uelse", num);
         } break;
         case LabelEnd: {
-            printf("L%und", num);
+            printf("L%uend", num);
         } break;
         default:
             break;
