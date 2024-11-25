@@ -278,16 +278,48 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             temporary++;
         } break;
         case Lt: {
-
+            struct node_t *expr = getchild(expression, 0);
+            int tmp1 = codegen_expression(expr, scope);
+            int tmp2 = codegen_expression(getchild(expression, 1), scope);
+            printf("  ");
+            printf("%%%d = icmp slt ", temporary);
+            print_codegen_type(expr->type);
+            printf(" %%%d, %%%d\n", tmp1, tmp2);
+            tmp = temporary;
+            temporary++;
         } break;
         case Gt: {
-
+            struct node_t *expr = getchild(expression, 0);
+            int tmp1 = codegen_expression(expr, scope);
+            int tmp2 = codegen_expression(getchild(expression, 1), scope);
+            printf("  ");
+            printf("%%%d = icmp sgt ", temporary);
+            print_codegen_type(expr->type);
+            printf(" %%%d, %%%d\n", tmp1, tmp2);
+            tmp = temporary;
+            temporary++;
         } break;
         case Le: {
-
+            struct node_t *expr = getchild(expression, 0);
+            int tmp1 = codegen_expression(expr, scope);
+            int tmp2 = codegen_expression(getchild(expression, 1), scope);
+            printf("  ");
+            printf("%%%d = icmp sle ", temporary);
+            print_codegen_type(expr->type);
+            printf(" %%%d, %%%d\n", tmp1, tmp2);
+            tmp = temporary;
+            temporary++;
         } break;
         case Ge: {
-
+            struct node_t *expr = getchild(expression, 0);
+            int tmp1 = codegen_expression(expr, scope);
+            int tmp2 = codegen_expression(getchild(expression, 1), scope);
+            printf("  ");
+            printf("%%%d = icmp sge ", temporary);
+            print_codegen_type(expr->type);
+            printf(" %%%d, %%%d\n", tmp1, tmp2);
+            tmp = temporary;
+            temporary++;
         } break;
         case Add: {
             int tmp1 = codegen_expression(getchild(expression, 0), scope);
@@ -313,7 +345,11 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             int tmp1 = codegen_expression(getchild(expression, 0), scope);
             int tmp2 = codegen_expression(getchild(expression, 1), scope);
             printf("  ");
-            printf("%%%d = mul ", temporary);
+            if (expression->type != TypeFloat32) {
+                printf("%%%d = mul ", temporary);
+            } else {
+                printf("%%%d = fmul ", temporary);
+            }
             print_codegen_type(expression->type);
             printf(" %%%d, %%%d\n", tmp1, tmp2);
             tmp = temporary;
@@ -323,13 +359,30 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             int tmp1 = codegen_expression(getchild(expression, 0), scope);
             int tmp2 = codegen_expression(getchild(expression, 1), scope);
             printf("  ");
-            printf("%%%d = sdiv ", temporary);
+            if (expression->type != TypeFloat32) {
+                printf("%%%d = sdiv ", temporary);
+            } else {
+                printf("%%%d = fdiv ", temporary);
+            }
             print_codegen_type(expression->type);
             printf(" %%%d, %%%d\n", tmp1, tmp2);
             tmp = temporary;
             temporary++;
         } break;
-        case Mod:
+        case Mod: {
+            int tmp1 = codegen_expression(getchild(expression, 0), scope);
+            int tmp2 = codegen_expression(getchild(expression, 1), scope);
+            printf("  ");
+            if (expression->type != TypeFloat32) {
+                printf("%%%d = srem ", temporary);
+            } else {
+                printf("%%%d = frem ", temporary);
+            }
+            print_codegen_type(expression->type);
+            printf(" %%%d, %%%d\n", tmp1, tmp2);
+            tmp = temporary;
+            temporary++;
+        } break;
         case Not:
         case Minus:
         case Plus:
