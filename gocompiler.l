@@ -11,6 +11,7 @@
     #include "y.tab.h"
     #include "ast.h"
     #include "semantics.h"
+    #include "codegen.h"
     
     #define BUF_SIZE 8192
 
@@ -235,7 +236,19 @@ int main(int argc, char **argv) {
         }
     }
     /* Running the yyparse in here will lead to mooshak test failure */
-    yylex();  /* Run the lexical analysis automaton */
+    //yylex();  /* Run the lexical analysis automaton */
+
+    parse = 1;
+    show_ast_type = 1;
+    yyparse();
+    if (syntax_error_flag == 0) {
+        check_program(program);
+        show_symbol_table();
+        show(program, 0, 0);
+        codegen_program(program);
+    }
+
+    clean(program);
     return 0;
 }
 

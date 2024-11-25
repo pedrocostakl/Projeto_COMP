@@ -63,41 +63,45 @@ void show(struct node_t *root, int depth, int forceblock) {
         case Intermediate:
             break;
         case Block:
-            if (forceblock == 0 && numchildren(root) < 2) {
-                break; // não continua para o print caso não seja válido
+            {
+                if (forceblock == 0 && numchildren(root) < 2) {
+                    break; // não continua para o print caso não seja válido
+                }
             }
             // se o bloco for válido, continuar para o print
         default:
-            for (int i = 0; i < depth; i++) {
-                printf("..");
-            }
-            print_category(root->category);
-            if (root->token != NULL) {
-                printf("(%s)", root->token);
-            }
-            // anotação da árvore
-            if (root->type > None && root->category != ParamDecl) {
-                printf(" - ");
-                if (root->category == Identifier) {
-                    struct symbol_list_t *symbol = search_symbol(global_symbol_table, root->token);
-                    if (symbol != NULL) {
-                        if (symbol->node->category == FuncDecl) {
-                            printf("(");
-                            print_parameters(symbol->node);
-                            printf(")");
+            {
+                for (int i = 0; i < depth; i++) {
+                    printf("..");
+                }
+                print_category(root->category);
+                if (root->token != NULL) {
+                    printf("(%s)", root->token);
+                }
+                // anotação da árvore
+                if (root->type > None && root->category != ParamDecl) {
+                    printf(" - ");
+                    if (root->category == Identifier) {
+                        struct symbol_list_t *symbol = search_symbol(global_symbol_table, root->token);
+                        if (symbol != NULL) {
+                            if (symbol->node->category == FuncDecl) {
+                                printf("(");
+                                print_parameters(symbol->node);
+                                printf(")");
+                            } else {
+                                print_type(root->type);
+                            }
                         } else {
                             print_type(root->type);
                         }
                     } else {
                         print_type(root->type);
                     }
-                } else {
-                    print_type(root->type);
                 }
+                printf("\n");
+                depth++;
+                break;
             }
-            printf("\n");
-            depth++;
-            break;
     }
     // forçar ou não o próximo Block
     if (root->category == If || root->category == For) {

@@ -9,6 +9,12 @@
 #include <stdio.h>
 #include <string.h>
 
+int semantic_errors;
+struct symbol_list_t *global_symbol_table;
+
+static void show_function(struct symbol_list_t *symbol, struct node_t *node);
+static int is_parameter(struct node_t *node, struct node_t *function);
+
 struct symbol_list_t *insert_symbol(struct symbol_list_t *table, char *identifier, enum type_t type, struct node_t *node) {
     struct symbol_list_t *new = NULL;
     struct symbol_list_t *symbol = table;
@@ -46,12 +52,6 @@ struct symbol_list_t *enter_scope(struct symbol_list_t *table) {
     table->scope = (struct symbol_list_t*)malloc(sizeof(struct symbol_list_t));
     return table->scope;
 }
-
-int semantic_errors;
-struct symbol_list_t *global_symbol_table;
-
-static void show_function(struct symbol_list_t *symbol, struct node_t *node);
-static int is_parameter(struct node_t *node, struct node_t *function);
 
 void show_symbol_table() {
     struct symbol_list_t *symbol = global_symbol_table->next;
@@ -275,16 +275,14 @@ void check_function_body(struct symbol_list_t *scope, struct node_t *function_bo
 
 void check_statement(struct symbol_list_t *scope, struct node_t *parent) {
     switch (parent->category) {
-        case Block:
-            {
+        case Block: {
                 struct node_list_t *children = parent->children->next;
                 while (children != NULL) {
                     check_statement(scope, children->node);
                     children = children->next;
                 }
             } break;
-        case If:
-            {
+        case If: {
                 struct node_t *node = getchild(parent, 0);
                 struct node_t *block1 = getchild(parent, 1);
                 struct node_t *block2 = getchild(parent, 2);
@@ -292,8 +290,7 @@ void check_statement(struct symbol_list_t *scope, struct node_t *parent) {
                 check_statement(scope, block1);
                 check_statement(scope, block2);
             } break;
-        case For:
-            {
+        case For: {
                 struct node_t *node1 = getchild(parent, 0);
                 struct node_t *node2 = getchild(parent, 1);
                 if (node2 != NULL) {
@@ -303,20 +300,17 @@ void check_statement(struct symbol_list_t *scope, struct node_t *parent) {
                     check_statement(scope, node1);
                 }
             } break;
-        case Return:
-            {
+        case Return: {
                 struct node_t *node = getchild(parent, 0);
                 if (node != NULL) {
                     check_expressions(scope, node);
                 }
             } break;
-        case Print:
-            {
+        case Print: {
                 struct node_t *node = getchild(parent, 0);
                 check_expressions(scope, node);
             } break;
-        case ParseArgs:
-            {
+        case ParseArgs: {
                 struct node_t *node1 = getchild(parent, 0);
                 struct node_t *node2 = getchild(parent, 1);
                 check_expressions(scope, node1);
@@ -327,8 +321,7 @@ void check_statement(struct symbol_list_t *scope, struct node_t *parent) {
                     parent->type = Undefined;
                 }
             } break;
-        case Assign:
-            {
+        case Assign: {
                 struct node_t *node1 = getchild(parent, 0);
                 struct node_t *node2 = getchild(parent, 1);
                 check_expressions(scope, node1);
@@ -341,8 +334,7 @@ void check_statement(struct symbol_list_t *scope, struct node_t *parent) {
 
 void check_expressions(struct symbol_list_t *scope, struct node_t *parent) {
     switch (parent->category) {
-        case Call:
-            {
+        case Call: {
                 struct node_list_t *children = parent->children->next;
                 struct node_t *node = children->node;
                 while (children != NULL) {
@@ -357,20 +349,21 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent) {
         case Decimal:
             parent->type = TypeFloat32;
             break;
-        case Identifier:
-            struct symbol_list_t *symbol = search_symbol(scope, parent->token);
-            if (symbol == NULL) {
-                symbol = search_symbol(global_symbol_table, parent->token);   
-            }
-            if (symbol != NULL) {
-                parent->type = symbol->type;
-            } else {
-                // Erro: Undefined type
-            }
-            break;
+        case Identifier: {
+                struct symbol_list_t *symbol = search_symbol(scope, parent->token);
+                if (symbol == NULL) {
+                    symbol = search_symbol(global_symbol_table, parent->token);   
+                }
+                if (symbol != NULL) {
+                    parent->type = symbol->type;
+                } else {
+                    // Erro: Undefined type
+                }
+            } break;
         case StrLit:
-            parent->type = TypeString;
-            break;
+            {
+                parent->type = TypeString;
+            } break;
         case Or:
         case And:
         case Eq:
@@ -378,8 +371,7 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent) {
         case Lt:
         case Gt:
         case Le:
-        case Ge:
-            {
+        case Ge: {
                 struct node_t *node1 = getchild(parent, 0);
                 struct node_t *node2 = getchild(parent, 1);
                 check_expressions(scope, node1);
@@ -394,8 +386,7 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent) {
         case Sub:
         case Mul:
         case Div:
-        case Mod:
-            {
+        case Mod: {
                 struct node_t *node1 = getchild(parent, 0);
                 struct node_t *node2 = getchild(parent, 1);
                 check_expressions(scope, node1);
