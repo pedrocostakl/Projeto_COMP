@@ -44,9 +44,9 @@ void codegen_program(struct node_t *program) {
     printf("declare i32 @atoi(i8 zeroext)\n\n");
 
     // declarar formatos de print
-    printf("@format_int = private constant [4 x i8] c\"%%d\\n\"\n");
-    printf("@format_float32 = private constant [6 x i8] c\".08f\\n\"\n");
-    printf("@format_strlit = private constant [4 x i8] c\"%%s\\n\"\n");
+    printf("@format_int = private constant [4 x i8] c\"%%d\\0A\\00\"\n");
+    printf("@format_float32 = private constant [6 x i8] c\"%%.8f\\0A\\00\"\n");
+    printf("@format_strlit = private constant [4 x i8] c\"%%s\\0A\\00\"\n");
     printf("\n");
 
     enum category_t category = None;
