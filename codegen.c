@@ -229,6 +229,10 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
 
             struct node_list_t *children = statement->children->next;
 
+            printf("  ");
+            printf("br label %%");
+            print_label(for_label_num, LabelFor);
+            printf("\n");
             print_label(for_label_num, LabelFor);
             printf(":\n");
 
