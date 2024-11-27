@@ -193,9 +193,9 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
             // branch
             printf("  ");
             printf("br i1 %%%d", tmp1);
-            printf(", label ");
+            printf(", label %%");
             print_label(if_label_num, LabelThen);
-            printf(", label ");
+            printf(", label %%");
             print_label(if_label_num, LabelElse);
             printf("\n");
 
@@ -205,7 +205,7 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
             children = children->next;
             codegen_statement(children->node, scope);
             printf("  ");
-            printf("br label ");
+            printf("br label %%");
             print_label(if_label_num, LabelEnd);
             printf("\n");
 
@@ -215,7 +215,7 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
             children = children->next;
             codegen_statement(children->node, scope);
             printf("  ");
-            printf("br label ");
+            printf("br label %%");
             print_label(if_label_num, LabelEnd);
             printf("\n");
 
@@ -237,9 +237,9 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
             // branch
             printf("  ");
             printf("br i1 %%%d", tmp1);
-            printf(", label ");
+            printf(", label %%");
             print_label(for_label_num, LabelThen);
-            printf(", label ");
+            printf(", label %%");
             print_label(for_label_num, LabelEnd);
             printf("\n");
 
@@ -249,7 +249,7 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
             codegen_statement(children->next->node, scope);
 
             printf("  ");
-            printf("br label ");
+            printf("br label %%");
             print_label(for_label_num, LabelFor);
             printf("\n");
 
