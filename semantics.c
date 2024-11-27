@@ -15,15 +15,16 @@ struct symbol_list_t *global_symbol_table;
 static void show_function(struct symbol_list_t *symbol, struct node_t *node);
 static int is_parameter(struct node_t *node, struct node_t *function);
 
-struct symbol_list_t *insert_symbol(struct symbol_list_t *table, char *identifier, enum type_t type, struct node_t *node) {
+struct symbol_list_t *insert_symbol(struct symbol_list_t *table, char *identifier, enum type_t type, 
+    enum symbol_type_t symbol_type, struct node_t *node) {
     struct symbol_list_t *new = NULL;
     struct symbol_list_t *symbol = table;
     while (symbol != NULL) {
-       
         if (symbol->next == NULL) {
             new = (struct symbol_list_t*)malloc(sizeof(struct symbol_list_t));
             new->identifier = strdup(identifier);
             new->type = type;
+            new->symbol_type = symbol_type;
             new->node = node;
             new->next = NULL;
             new->scope = NULL;
@@ -214,7 +215,13 @@ int check_program(struct node_t *program) {
 void check_var(struct symbol_list_t *scope, struct node_t *var) {
     struct node_t *id = getchild(var, 1);
     enum type_t type = get_type(getchild(var, 0));
-    if (insert_symbol(scope, id->token, type, var) == NULL) {
+    enum symbol_type_t var_symbol_type = None;
+    if (scope == global_symbol_table) {
+        var_symbol_type = SymbolGlobalVar;
+    } else {
+        var_symbol_type = SymbolLocalVar;
+    }
+    if (insert_symbol(scope, id->token, type, var_symbol_type, var) == NULL) {
         printf("Line %d, column %d: Symbol %s already defined\n", id->line, id->column, id->token);
         semantic_errors++;
     }
@@ -233,7 +240,7 @@ void check_function(struct symbol_list_t *scope, struct node_t *function) {
 
     // Insert Identifier
     struct node_t *id = getchild(header, 0);
-    struct symbol_list_t *new_symbol = insert_symbol(global_symbol_table, id->token, type, function);
+    struct symbol_list_t *new_symbol = insert_symbol(global_symbol_table, id->token, type, SymbolFunction, function);
     if (new_symbol == NULL) {
         printf("Line %d, column %d: Symbol %s already defined\n", id->line, id->column, id->token);
         semantic_errors++;
@@ -256,7 +263,7 @@ void check_parameters(struct symbol_list_t *scope, struct node_t *parameters) {
         enum type_t type = get_type(getchild(param, 0));
         param->type = type;
         struct node_t *id = getchild(param, 1);
-        if (insert_symbol(scope, id->token, type, param) == NULL) {
+        if (insert_symbol(scope, id->token, type, SymbolParam, param) == NULL) {
             printf("Line %d, column %d: Symbol %s already defined\n", id->line, id->column, id->token);
             semantic_errors++;
         }

@@ -360,20 +360,40 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
                 symbol = search_symbol(global_symbol_table, expression->token);
             }
             print_tab();
-            printf("%%%d = ", temporary);
-            switch (expression->type) {
-                case TypeInteger: {
-                    printf("add ");
+            switch (symbol->symbol_type) {
+                case SymbolGlobalVar: {
+                    printf("%%%d = load ", temporary);
+                    print_codegen_type(expression->type);
+                    printf(", ");
+                    print_codegen_type(expression->type);
+                    printf("* @%s", expression->token);
                 } break;
-                case TypeFloat32: {
-                    printf("fadd ");
+                case SymbolLocalVar: {
+                    printf("%%%d = load ", temporary);
+                    print_codegen_type(expression->type);
+                    printf(", ");
+                    print_codegen_type(expression->type);
+                    printf("* %%%s", expression->token);
+                } break;
+                case SymbolParam: {
+                    printf("%%%d = ", temporary);
+                    switch (expression->type) {
+                        case TypeInteger: {
+                            printf("add ");
+                        } break;
+                        case TypeFloat32: {
+                            printf("fadd ");
+                        } break;
+                        default:
+                            break;
+                    }
+                    print_codegen_type(expression->type);
+                    printf(" %%%s, ", expression->token);
+                    print_type_zero(expression->type);
                 } break;
                 default:
                     break;
             }
-            print_codegen_type(expression->type);
-            printf(" %%%s, ", expression->token);
-            print_type_zero(expression->type);
             printf("\n");
             tmp = temporary;
             temporary++;
