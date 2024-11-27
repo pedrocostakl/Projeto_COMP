@@ -329,7 +329,7 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
         } break;
         case Decimal: {
             printf("  ");
-            printf("%%%d = add double %s, 0.0\n", temporary, expression->token);
+            printf("%%%d = fadd double %s, 0.0\n", temporary, expression->token);
             tmp = temporary;
             temporary++;
         } break;
@@ -339,7 +339,17 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
                 symbol = search_symbol(global_symbol_table, expression->token);
             }
             printf("  ");
-            printf("%%%d = add ", temporary);
+            printf("%%%d = ", temporary);
+            switch (expression->type) {
+                case TypeInteger: {
+                    printf("add ");
+                } break;
+                case TypeFloat32: {
+                    printf("fadd ");
+                } break;
+                default:
+                    break;
+            }
             print_codegen_type(expression->type);
             printf(" %%%s, ", expression->token);
             print_type_zero(expression->type);
@@ -475,7 +485,17 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             int tmp1 = codegen_expression(getchild(expression, 0), scope);
             int tmp2 = codegen_expression(getchild(expression, 1), scope);
             printf("  ");
-            printf("%%%d = add ", temporary);
+            printf("%%%d = ", temporary);
+            switch (expression->type) {
+                case TypeInteger: {
+                    printf("add ");
+                } break;
+                case TypeFloat32: {
+                    printf("fadd ");
+                } break;
+                default:
+                    break;
+            }
             print_codegen_type(expression->type);
             printf(" %%%d, %%%d\n", tmp1, tmp2);
             tmp = temporary;
@@ -485,7 +505,17 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             int tmp1 = codegen_expression(getchild(expression, 0), scope);
             int tmp2 = codegen_expression(getchild(expression, 1), scope);
             printf("  ");
-            printf("%%%d = sub ", temporary);
+            printf("%%%d = ", temporary);
+            switch (expression->type) {
+                case TypeInteger: {
+                    printf("sub ");
+                } break;
+                case TypeFloat32: {
+                    printf("fsub ");
+                } break;
+                default:
+                    break;
+            }
             print_codegen_type(expression->type);
             printf(" %%%d, %%%d\n", tmp1, tmp2);
             tmp = temporary;
@@ -495,10 +525,16 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             int tmp1 = codegen_expression(getchild(expression, 0), scope);
             int tmp2 = codegen_expression(getchild(expression, 1), scope);
             printf("  ");
-            if (expression->type != TypeFloat32) {
-                printf("%%%d = mul ", temporary);
-            } else {
-                printf("%%%d = fmul ", temporary);
+            printf("%%%d = ", temporary);
+            switch (expression->type) {
+                case TypeInteger: {
+                    printf("mul ");
+                } break;
+                case TypeFloat32: {
+                    printf("fmul ");
+                } break;
+                default:
+                    break;
             }
             print_codegen_type(expression->type);
             printf(" %%%d, %%%d\n", tmp1, tmp2);
@@ -509,10 +545,16 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             int tmp1 = codegen_expression(getchild(expression, 0), scope);
             int tmp2 = codegen_expression(getchild(expression, 1), scope);
             printf("  ");
-            if (expression->type != TypeFloat32) {
-                printf("%%%d = sdiv ", temporary);
-            } else {
-                printf("%%%d = fdiv ", temporary);
+            printf("%%%d = ", temporary);
+            switch (expression->type) {
+                case TypeInteger: {
+                    printf("sdiv ");
+                } break;
+                case TypeFloat32: {
+                    printf("fdiv ");
+                } break;
+                default:
+                    break;
             }
             print_codegen_type(expression->type);
             printf(" %%%d, %%%d\n", tmp1, tmp2);
@@ -523,10 +565,16 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             int tmp1 = codegen_expression(getchild(expression, 0), scope);
             int tmp2 = codegen_expression(getchild(expression, 1), scope);
             printf("  ");
-            if (expression->type != TypeFloat32) {
-                printf("%%%d = srem ", temporary);
-            } else {
-                printf("%%%d = frem ", temporary);
+            printf("%%%d = ", temporary);
+            switch (expression->type) {
+                case TypeInteger: {
+                    printf("srem ");
+                } break;
+                case TypeFloat32: {
+                    printf("frem ");
+                } break;
+                default:
+                    break;
             }
             print_codegen_type(expression->type);
             printf(" %%%d, %%%d\n", tmp1, tmp2);
