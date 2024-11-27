@@ -511,10 +511,10 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             printf("%%%d = ", temporary);
             switch (expression->type) {
                 case TypeInteger: {
-                    printf("mul -1, ");
+                    printf("mul i32 -1, ");
                 } break;
                 case TypeFloat32: {
-                    printf("fmul -1.0, ");
+                    printf("fmul double -1.0, ");
                 } break;
                 default:
                     break;
