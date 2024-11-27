@@ -506,10 +506,25 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
 
         } break;
         case Minus: {
-
+            int tmp1 = codegen_expression(getchild(expression, 0), scope);
+            printf("  ");
+            printf("%%%d = ", temporary);
+            switch (expression->type) {
+                case TypeInteger: {
+                    printf("mul -1, ");
+                } break;
+                case TypeFloat32: {
+                    printf("fmul -1.0, ");
+                } break;
+                default:
+                    break;
+            }
+            printf("%%%d\n", tmp1);
+            tmp = temporary;
+            temporary++;
         } break;
         case Plus: {
-            
+            tmp = codegen_expression(getchild(expression, 0), scope);
         } break;
         default:
             break;
