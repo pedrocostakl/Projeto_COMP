@@ -318,21 +318,31 @@ void check_statement(struct symbol_list_t *scope, struct node_t *parent) {
                 }
             } break;
         case If: {
-                struct node_t *node = getchild(parent, 0);
+                struct node_t *condition = getchild(parent, 0);
                 struct node_t *block1 = getchild(parent, 1);
                 struct node_t *block2 = getchild(parent, 2);
-                check_expressions(scope, node);
+                check_expressions(scope, condition);
                 check_statement(scope, block1);
                 check_statement(scope, block2);
+                if (condition->type != TypeBool) {
+                    printf("Line %d, column %d: Incompatible type ", parent->line, parent->column);
+                    print_type(condition->type);
+                    printf(" in if statement\n");
+                }
             } break;
         case For: {
-                struct node_t *node1 = getchild(parent, 0);
-                struct node_t *node2 = getchild(parent, 1);
-                if (node2 != NULL) {
-                    check_expressions(scope, node1);
-                    check_statement(scope, node2);
+                struct node_t *condition = getchild(parent, 0);
+                struct node_t *block = getchild(parent, 1);
+                if (block != NULL) {
+                    check_expressions(scope, condition);
                 } else {
-                    check_statement(scope, node1);
+                    block = condition;
+                }
+                check_statement(scope, block);
+                if (condition->category != Block && condition->type != TypeBool) {
+                    printf("Line %d, column %d: Incompatible type ", parent->line, parent->column);
+                    print_type(condition->type);
+                    printf(" in for statement\n");
                 }
             } break;
         case Return: {

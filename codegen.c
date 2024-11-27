@@ -36,9 +36,18 @@ void codegen_program(struct node_t *program) {
     label_num = 0;
 
     printf("\n");
-    // funções IO pre-declaradas
+
+    // declarar funções I/O
+    printf("declare i32 @printf(ptr noalias nocapture, ...)\n");
+    printf("declare i32 @atoi(i8 zeroext)\n");
     printf("declare i32 @_read(i32)\n");
     printf("declare i32 @_write(i32)\n\n");
+
+    // declarar formatos de print
+    printf("@format_int = private constant [4 * i8] c\"%%d\\n\"\n");
+    printf("@format_float32 = private constant [4 * i8] c\".08f\\n\"\n");
+    printf("@format_strlit = private constant [4 * i8] c\"%%s\\n\"\n");
+    printf("\n");
 
     enum category_t category = None;
 
@@ -228,7 +237,33 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
             printf(" %%%d\n", tmp1);
         } break;
         case Print: {
+            struct node_t *expr = getchild(statement, 0);
+            int tmp1 = codegen_expression(expr, scope);
+            switch (expr->type) {
+                case TypeInteger: {
+                    printf("  ");
+                    printf("%%%d = getelementptr [4 * i8], [4 * i8]* @format_int, i32 0, i32 0\n", temporary);
+                    printf("  ");
+                    printf("call i32 (i8*, ...) @printf(i8* %%%d, i32 %%%d)\n", temporary, tmp1);
+                } break;
+                case TypeFloat32: {
+                    printf("  ");
+                    printf("%%%d = getelementptr [4 * i8], [4 * i8]* @format_float32, i32 0, i32 0\n", temporary);
+                    printf("  ");
+                    printf("call i32 (i8*, ...) @printf(i8* %%%d, double %%%d)\n", temporary, tmp1);
+                } break;
+                case TypeBool: {
 
+                } break;
+                case TypeString: {
+                    printf("  ");
+                    printf("%%%d = getelementptr [4 * i8], [4 * i8]* @format_strlit, i32 0, i32 0\n", temporary);
+                    printf("  ");
+                    printf("call i32 (i8*, ...) @printf(i8* %%%d, i8* %%%d)\n", temporary, tmp1);
+                } break;
+                default:
+                    break;
+            }
         } break;
         case ParseArgs: {
 
