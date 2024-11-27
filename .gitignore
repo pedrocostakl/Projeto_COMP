@@ -1,6 +1,8 @@
 *.zip
 *.output
 *.txt
+*.ll
+*.s
 
 lexer
 gocompiler

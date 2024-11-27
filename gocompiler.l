@@ -241,10 +241,11 @@ int main(int argc, char **argv) {
     show_ast_type = 1;
     yyparse();
     if (syntax_error_flag == 0) {
-        check_program(program);
-        show_symbol_table();
-        show(program, 1);
-        codegen_program(program);
+        if (check_program(program) == 0) {
+            //show_symbol_table();
+            //show(program, 1);
+            codegen_program(program);
+        }
     }
     clean(program);
     return 0;

@@ -19,7 +19,8 @@ static unsigned int label_num;
 enum label_type_t {
     LabelThen = 0,
     LabelElse,
-    LabelEnd
+    LabelEnd,
+    LabelFor
 };
 
 static void codegen_var(struct node_t *var, struct symbol_list_t *scope);
@@ -39,13 +40,13 @@ void codegen_program(struct node_t *program) {
     printf("\n");
 
     // declarar funções I/O
-    printf("declare i32 @printf(ptr noalias nocapture, ...)\n");
-    printf("declare i32 @atoi(i8 zeroext)\n");
+    printf("declare i32 @printf(i8*, ...)\n");
+    printf("declare i32 @atoi(i8 zeroext)\n\n");
 
     // declarar formatos de print
-    printf("@format_int = private constant [4 * i8] c\"%%d\\n\"\n");
-    printf("@format_float32 = private constant [4 * i8] c\".08f\\n\"\n");
-    printf("@format_strlit = private constant [4 * i8] c\"%%s\\n\"\n");
+    printf("@format_int = private constant [4 x i8] c\"%%d\\n\"\n");
+    printf("@format_float32 = private constant [6 x i8] c\".08f\\n\"\n");
+    printf("@format_strlit = private constant [4 x i8] c\"%%s\\n\"\n");
     printf("\n");
 
     enum category_t category = None;
@@ -223,9 +224,37 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
             printf(":\n");
         } break;
         case For: {
+            unsigned int for_label_num = label_num;
+            label_num++;
+
             struct node_list_t *children = statement->children->next;
-            codegen_expression(children->node, scope);
+
+            print_label(for_label_num, LabelFor);
+            printf(":\n");
+
+            int tmp1 = codegen_expression(children->node, scope);
+
+            // branch
+            printf("  ");
+            printf("br i1 %%%d", tmp1);
+            printf(", label ");
+            print_label(for_label_num, LabelThen);
+            printf(", label ");
+            print_label(for_label_num, LabelEnd);
+            printf("\n");
+
+            print_label(for_label_num, LabelThen);
+            printf(":\n");
+
             codegen_statement(children->next->node, scope);
+
+            printf("  ");
+            printf("br label ");
+            print_label(for_label_num, LabelFor);
+            printf("\n");
+
+            print_label(for_label_num, LabelEnd);
+            printf(":\n");
         } break;
         case Return: {
             struct node_t *expr = statement->children->next->node;
@@ -568,6 +597,9 @@ void print_label(unsigned int num, enum label_type_t label_type) {
         } break;
         case LabelEnd: {
             printf("L%uend", num);
+        } break;
+        case LabelFor: {
+            printf("L%ufor", num);
         } break;
         default:
             break;
