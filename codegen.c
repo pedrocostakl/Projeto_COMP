@@ -31,6 +31,7 @@ static int codegen_expression(struct node_t *expression, struct symbol_list_t *s
 
 static void print_codegen_type(enum type_t type);
 static void print_label(unsigned int num, enum label_type_t label_type);
+static void print_type_zero(enum type_t type);
 
 void codegen_program(struct node_t *program) {
     label_num = 0;
@@ -271,7 +272,14 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
             printf("%%%s = call i32 @atoi(i8* %%%d)\n", id->token, tmp1);
         } break;
         case Assign: {
-            codegen_expression(getchild(statement, 1), scope);
+            struct node_t *id = getchild(statement, 0);
+            int tmp1 = codegen_expression(getchild(statement, 1), scope);
+            printf("  ");
+            printf("%%%s = add ", id->token);
+            print_codegen_type(statement->type);
+            printf(" %%%d, ", tmp1);
+            print_type_zero(statement->type);
+            printf("\n");
         } break;
         default:
             break;
@@ -303,16 +311,8 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             printf("%%%d = add ", temporary);
             print_codegen_type(expression->type);
             printf(" %%%s, ", expression->token);
-            switch (expression->type) {
-                case TypeInteger: {
-                    printf("0\n");
-                } break;
-                case TypeFloat32: {
-                    printf("0.0\n");
-                } break;
-                default:
-                    break;
-            }
+            print_type_zero(expression->type);
+            printf("\n");
             tmp = temporary;
             temporary++;
         } break;
@@ -549,6 +549,19 @@ void print_label(unsigned int num, enum label_type_t label_type) {
         } break;
         case LabelEnd: {
             printf("L%uend", num);
+        } break;
+        default:
+            break;
+    }
+}
+
+void print_type_zero(enum type_t type) {
+    switch (type) {
+        case TypeInteger: {
+            printf("0");
+        } break;
+        case TypeFloat32: {
+            printf("0.0");
         } break;
         default:
             break;
