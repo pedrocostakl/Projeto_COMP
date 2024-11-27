@@ -24,7 +24,7 @@ enum label_type_t {
     LabelFor
 };
 
-static void codegen_var(struct node_t *var, struct symbol_list_t *scope);
+static void codegen_var(struct node_t *var, struct symbol_list_t *scope, int global);
 static void codegen_function(struct node_t *function);
 static void codegen_parameters(struct node_t *parameters, struct symbol_list_t *scope);
 static void codegen_block(struct node_t *block, struct symbol_list_t *scope);
@@ -61,7 +61,7 @@ void codegen_program(struct node_t *program) {
         }
         switch (category) {
             case VarDecl: {
-                codegen_var(node, global_symbol_table);
+                codegen_var(node, global_symbol_table, 1);
             } break;
             case FuncDecl: {
                 codegen_function(node);
@@ -82,12 +82,20 @@ void codegen_program(struct node_t *program) {
     }
 }
 
-void codegen_var(struct node_t *var, struct symbol_list_t *scope) {
+void codegen_var(struct node_t *var, struct symbol_list_t *scope, int global) {
     struct symbol_list_t *var_symbol = search_symbol(scope, getchild(var, 1)->token);
     if (var_symbol != NULL && var_symbol->node->category == VarDecl) {
-        printf("declare ");
-        print_codegen_type(var_symbol->type);
-        printf(" @%s\n", var_symbol->identifier);
+        if (global == 1) {
+            printf("@%s = global ", var_symbol->identifier);
+            print_codegen_type(var_symbol->type);
+            printf(" ");
+            print_type_zero(var_symbol->type);
+        } else {
+            print_tab();
+            printf("%%%s = alloca ", var_symbol->identifier);
+            print_codegen_type(var_symbol->type);
+        }
+        printf("\n");
     }
 }
 
@@ -139,8 +147,7 @@ void codegen_block(struct node_t *block, struct symbol_list_t *scope) {
         struct node_t *node = children->node;
         switch (node->category) {
             case VarDecl:
-                print_tab();
-                codegen_var(node, scope);
+                codegen_var(node, scope, 0);
                 break;
             case Block:
             case If:
