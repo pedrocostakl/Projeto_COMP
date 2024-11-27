@@ -40,8 +40,6 @@ void codegen_program(struct node_t *program) {
     // declarar funções I/O
     printf("declare i32 @printf(ptr noalias nocapture, ...)\n");
     printf("declare i32 @atoi(i8 zeroext)\n");
-    printf("declare i32 @_read(i32)\n");
-    printf("declare i32 @_write(i32)\n\n");
 
     // declarar formatos de print
     printf("@format_int = private constant [4 * i8] c\"%%d\\n\"\n");
@@ -266,7 +264,11 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
             }
         } break;
         case ParseArgs: {
-
+            struct node_t *id = getchild(statement, 0);
+            struct node_t *expr = getchild(statement, 1);
+            int tmp1 = codegen_expression(expr, scope);
+            printf("  ");
+            printf("%%%s = call i32 @atoi(i8* %%%d)\n", id->token, tmp1);
         } break;
         case Assign: {
             codegen_expression(getchild(statement, 1), scope);
@@ -292,9 +294,12 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             tmp = temporary;
             temporary++;
         } break;
-        case Identifier:
-        case StrLit:
-            break;
+        case Identifier: {
+
+        } break;
+        case StrLit: {
+
+        } break;
         case Call: {
             int i = 0;
             int tmps[100];
