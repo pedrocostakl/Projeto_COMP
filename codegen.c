@@ -503,7 +503,11 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             temporary++;
         } break;
         case Not: {
-
+            int tmp1 = codegen_expression(getchild(expression, 0), scope);
+            printf("  ");
+            printf("%%%d = xor i1 %%%d, 1\n", temporary, tmp1);
+            tmp = temporary;
+            temporary++;
         } break;
         case Minus: {
             int tmp1 = codegen_expression(getchild(expression, 0), scope);
