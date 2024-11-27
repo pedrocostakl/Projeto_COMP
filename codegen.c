@@ -322,12 +322,36 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
         } break;
         case Assign: {
             struct node_t *id = getchild(statement, 0);
+            struct symbol_list_t *symbol = search_symbol(scope, id->token);
+            if (symbol == NULL) {
+                symbol = search_symbol(global_symbol_table, id->token);
+            }
             int tmp1 = codegen_expression(getchild(statement, 1), scope);
             print_tab();
-            printf("%%%s = add ", id->token);
-            print_codegen_type(statement->type);
-            printf(" %%%d, ", tmp1);
-            print_type_zero(statement->type);
+            switch (symbol->symbol_type) {
+                case SymbolGlobalVar: {
+                    printf("store ");
+                    print_codegen_type(statement->type);
+                    printf(" %%%d, ", tmp1);
+                    print_codegen_type(statement->type);
+                    printf("* @%s", symbol->identifier);
+                } break;
+                case SymbolLocalVar: {
+                    printf("store ");
+                    print_codegen_type(statement->type);
+                    printf(" %%%d, ", tmp1);
+                    print_codegen_type(statement->type);
+                    printf("* %%%s", symbol->identifier);
+                } break;
+                case SymbolParam: {
+                    printf("%%%s = add ", id->token);
+                    print_codegen_type(statement->type);
+                    printf(" %%%d, ", tmp1);
+                    print_type_zero(statement->type);
+                } break;
+                default:
+                    break;
+            }
             printf("\n");
         } break;
         default:
