@@ -15,6 +15,7 @@ extern struct symbol_list_t *global_symbol_table;
 
 static int temporary;
 static unsigned int label_num;
+static enum category_t prev_category;
 
 enum label_type_t {
     LabelThen = 0,
@@ -33,11 +34,10 @@ static int codegen_expression(struct node_t *expression, struct symbol_list_t *s
 static void print_codegen_type(enum type_t type);
 static void print_label(unsigned int num, enum label_type_t label_type);
 static void print_type_zero(enum type_t type);
+static void print_tab();
 
 void codegen_program(struct node_t *program) {
     label_num = 0;
-
-    printf("\n");
 
     // declarar funções I/O
     printf("declare i32 @printf(i8*, ...)\n");
@@ -139,7 +139,7 @@ void codegen_block(struct node_t *block, struct symbol_list_t *scope) {
         struct node_t *node = children->node;
         switch (node->category) {
             case VarDecl:
-                printf("  ");
+                print_tab();
                 codegen_var(node, scope);
                 break;
             case Block:
@@ -191,7 +191,7 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
             int tmp1 = codegen_expression(children->node, scope);
 
             // branch
-            printf("  ");
+            print_tab();
             printf("br i1 %%%d", tmp1);
             printf(", label %%");
             print_label(if_label_num, LabelThen);
@@ -204,20 +204,25 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
             printf(":\n");
             children = children->next;
             codegen_statement(children->node, scope);
-            printf("  ");
-            printf("br label %%");
-            print_label(if_label_num, LabelEnd);
-            printf("\n");
-
+            if (prev_category != Return) {
+                print_tab();
+                printf("br label %%");
+                print_label(if_label_num, LabelEnd);
+                printf("\n");
+            }
+            prev_category = Intermediate;
+            
             // else
             print_label(if_label_num, LabelElse);
             printf(":\n");
             children = children->next;
             codegen_statement(children->node, scope);
-            printf("  ");
-            printf("br label %%");
-            print_label(if_label_num, LabelEnd);
-            printf("\n");
+            if (prev_category != Return) {
+                print_tab();
+                printf("br label %%");
+                print_label(if_label_num, LabelEnd);
+                printf("\n");
+            }
 
             // fim
             print_label(if_label_num, LabelEnd);
@@ -229,7 +234,7 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
 
             struct node_list_t *children = statement->children->next;
 
-            printf("  ");
+            print_tab();
             printf("br label %%");
             print_label(for_label_num, LabelFor);
             printf("\n");
@@ -239,7 +244,7 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
             int tmp1 = codegen_expression(children->node, scope);
 
             // branch
-            printf("  ");
+            print_tab();
             printf("br i1 %%%d", tmp1);
             printf(", label %%");
             print_label(for_label_num, LabelThen);
@@ -252,10 +257,12 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
 
             codegen_statement(children->next->node, scope);
 
-            printf("  ");
-            printf("br label %%");
-            print_label(for_label_num, LabelFor);
-            printf("\n");
+            if (prev_category != Return) {
+                print_tab();
+                printf("br label %%");
+                print_label(for_label_num, LabelFor);
+                printf("\n");
+            }
 
             print_label(for_label_num, LabelEnd);
             printf(":\n");
@@ -263,7 +270,7 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
         case Return: {
             struct node_t *expr = statement->children->next->node;
             int tmp1 = codegen_expression(expr, scope);
-            printf("  ");
+            print_tab();
             printf("ret ");
             print_codegen_type(expr->type);
             printf(" %%%d\n", tmp1);
@@ -273,24 +280,24 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
             int tmp1 = codegen_expression(expr, scope);
             switch (expr->type) {
                 case TypeInteger: {
-                    printf("  ");
+                    print_tab();
                     printf("%%%d = getelementptr [4 x i8], [4 x i8]* @format_int, i32 0, i32 0\n", temporary);
-                    printf("  ");
+                    print_tab();
                     printf("%%%d = call i32 (i8*, ...) @printf(i8* %%%d, i32 %%%d)\n", temporary + 1, temporary, tmp1);
                 } break;
                 case TypeFloat32: {
-                    printf("  ");
+                    print_tab();
                     printf("%%%d = getelementptr [6 x i8], [6 x i8]* @format_float32, i32 0, i32 0\n", temporary);
-                    printf("  ");
+                    print_tab();
                     printf("%%%d = call i32 (i8*, ...) @printf(i8* %%%d, double %%%d)\n", temporary + 1, temporary, tmp1);
                 } break;
                 case TypeBool: {
 
                 } break;
                 case TypeString: {
-                    printf("  ");
+                    print_tab();
                     printf("%%%d = getelementptr [4 x i8], [4 x i8]* @format_strlit, i32 0, i32 0\n", temporary);
-                    printf("  ");
+                    print_tab();
                     printf("%%%d = call i32 (i8*, ...) @printf(i8* %%%d, i8* %%%d)\n", temporary + 1, temporary, tmp1);
                 } break;
                 default:
@@ -303,13 +310,13 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
             struct node_t *id = getchild(statement, 0);
             struct node_t *expr = getchild(statement, 1);
             int tmp1 = codegen_expression(expr, scope);
-            printf("  ");
+            print_tab();
             printf("%%%s = call i32 @atoi(i8* %%%d)\n", id->token, tmp1);
         } break;
         case Assign: {
             struct node_t *id = getchild(statement, 0);
             int tmp1 = codegen_expression(getchild(statement, 1), scope);
-            printf("  ");
+            print_tab();
             printf("%%%s = add ", id->token);
             print_codegen_type(statement->type);
             printf(" %%%d, ", tmp1);
@@ -319,6 +326,9 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
         default:
             break;
     }
+    if (statement->category != Block) {
+        prev_category = statement->category;
+    }
     return tmp;
 }
 
@@ -326,13 +336,13 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
     int tmp = -1;
     switch (expression->category) {
         case Natural: {
-            printf("  ");
+            print_tab();
             printf("%%%d = add i32 %s, 0\n", temporary, expression->token);
             tmp = temporary;
             temporary++;
         } break;
         case Decimal: {
-            printf("  ");
+            print_tab();
             printf("%%%d = fadd double %s, 0.0\n", temporary, expression->token);
             tmp = temporary;
             temporary++;
@@ -342,7 +352,7 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             if (symbol == NULL) {
                 symbol = search_symbol(global_symbol_table, expression->token);
             }
-            printf("  ");
+            print_tab();
             printf("%%%d = ", temporary);
             switch (expression->type) {
                 case TypeInteger: {
@@ -375,7 +385,7 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
                 children = children->next;
                 i++;
             }
-            printf("  ");
+            print_tab();
             printf("%%%d = call ", temporary);
             print_codegen_type(expression->type);
             printf(" @_%s(", id->token);
@@ -401,7 +411,7 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             struct node_t *expr = getchild(expression, 0);
             int tmp1 = codegen_expression(expr, scope);
             int tmp2 = codegen_expression(getchild(expression, 1), scope);
-            printf("  ");
+            print_tab();
             printf("%%%d = or ", temporary);
             print_codegen_type(expr->type);
             printf(" %%%d, %%%d\n", tmp1, tmp2);
@@ -412,7 +422,7 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             struct node_t *expr = getchild(expression, 0);
             int tmp1 = codegen_expression(expr, scope);
             int tmp2 = codegen_expression(getchild(expression, 1), scope);
-            printf("  ");
+            print_tab();
             printf("%%%d = and ", temporary);
             print_codegen_type(expr->type);
             printf(" %%%d, %%%d\n", tmp1, tmp2);
@@ -423,7 +433,7 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             struct node_t *expr = getchild(expression, 0);
             int tmp1 = codegen_expression(expr, scope);
             int tmp2 = codegen_expression(getchild(expression, 1), scope);
-            printf("  ");
+            print_tab();
             printf("%%%d = icmp eq ", temporary);
             print_codegen_type(expr->type);
             printf(" %%%d, %%%d\n", tmp1, tmp2);
@@ -434,7 +444,7 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             struct node_t *expr = getchild(expression, 0);
             int tmp1 = codegen_expression(expr, scope);
             int tmp2 = codegen_expression(getchild(expression, 1), scope);
-            printf("  ");
+            print_tab();
             printf("%%%d = icmp ne ", temporary);
             print_codegen_type(expr->type);
             printf(" %%%d, %%%d\n", tmp1, tmp2);
@@ -445,7 +455,7 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             struct node_t *expr = getchild(expression, 0);
             int tmp1 = codegen_expression(expr, scope);
             int tmp2 = codegen_expression(getchild(expression, 1), scope);
-            printf("  ");
+            print_tab();
             printf("%%%d = icmp slt ", temporary);
             print_codegen_type(expr->type);
             printf(" %%%d, %%%d\n", tmp1, tmp2);
@@ -456,7 +466,7 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             struct node_t *expr = getchild(expression, 0);
             int tmp1 = codegen_expression(expr, scope);
             int tmp2 = codegen_expression(getchild(expression, 1), scope);
-            printf("  ");
+            print_tab();
             printf("%%%d = icmp sgt ", temporary);
             print_codegen_type(expr->type);
             printf(" %%%d, %%%d\n", tmp1, tmp2);
@@ -467,7 +477,7 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             struct node_t *expr = getchild(expression, 0);
             int tmp1 = codegen_expression(expr, scope);
             int tmp2 = codegen_expression(getchild(expression, 1), scope);
-            printf("  ");
+            print_tab();
             printf("%%%d = icmp sle ", temporary);
             print_codegen_type(expr->type);
             printf(" %%%d, %%%d\n", tmp1, tmp2);
@@ -478,7 +488,7 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             struct node_t *expr = getchild(expression, 0);
             int tmp1 = codegen_expression(expr, scope);
             int tmp2 = codegen_expression(getchild(expression, 1), scope);
-            printf("  ");
+            print_tab();
             printf("%%%d = icmp sge ", temporary);
             print_codegen_type(expr->type);
             printf(" %%%d, %%%d\n", tmp1, tmp2);
@@ -488,7 +498,7 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
         case Add: {
             int tmp1 = codegen_expression(getchild(expression, 0), scope);
             int tmp2 = codegen_expression(getchild(expression, 1), scope);
-            printf("  ");
+            print_tab();
             printf("%%%d = ", temporary);
             switch (expression->type) {
                 case TypeInteger: {
@@ -508,7 +518,7 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
         case Sub: {
             int tmp1 = codegen_expression(getchild(expression, 0), scope);
             int tmp2 = codegen_expression(getchild(expression, 1), scope);
-            printf("  ");
+            print_tab();
             printf("%%%d = ", temporary);
             switch (expression->type) {
                 case TypeInteger: {
@@ -528,7 +538,7 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
         case Mul: {
             int tmp1 = codegen_expression(getchild(expression, 0), scope);
             int tmp2 = codegen_expression(getchild(expression, 1), scope);
-            printf("  ");
+            print_tab();
             printf("%%%d = ", temporary);
             switch (expression->type) {
                 case TypeInteger: {
@@ -548,7 +558,7 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
         case Div: {
             int tmp1 = codegen_expression(getchild(expression, 0), scope);
             int tmp2 = codegen_expression(getchild(expression, 1), scope);
-            printf("  ");
+            print_tab();
             printf("%%%d = ", temporary);
             switch (expression->type) {
                 case TypeInteger: {
@@ -568,7 +578,7 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
         case Mod: {
             int tmp1 = codegen_expression(getchild(expression, 0), scope);
             int tmp2 = codegen_expression(getchild(expression, 1), scope);
-            printf("  ");
+            print_tab();
             printf("%%%d = ", temporary);
             switch (expression->type) {
                 case TypeInteger: {
@@ -587,14 +597,14 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
         } break;
         case Not: {
             int tmp1 = codegen_expression(getchild(expression, 0), scope);
-            printf("  ");
+            print_tab();
             printf("%%%d = xor i1 %%%d, 1\n", temporary, tmp1);
             tmp = temporary;
             temporary++;
         } break;
         case Minus: {
             int tmp1 = codegen_expression(getchild(expression, 0), scope);
-            printf("  ");
+            print_tab();
             printf("%%%d = ", temporary);
             switch (expression->type) {
                 case TypeInteger: {
@@ -616,6 +626,7 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
         default:
             break;
     }
+    prev_category = expression->category;
     return tmp;
 }
 
@@ -671,4 +682,8 @@ void print_type_zero(enum type_t type) {
         default:
             break;
     }
+}
+
+void print_tab() {
+    printf("  ");
 }
