@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include <string.h>
 
+int notIncorrectlyApplied = 0;
+int dontCheckIncorrectType = 0; //SE TEMOS ERROS NO FOR, NÃO VERFICAMOS SE O FILHO É BOOL   
 int semantic_errors;
 struct symbol_list_t *global_symbol_table;
 
@@ -28,6 +30,7 @@ struct symbol_list_t *insert_symbol(struct symbol_list_t *table, char *identifie
             new->next = NULL;
             new->scope = NULL;
             symbol->next = new;
+            new->used = 0; // O símbolo ainda não foi usado
             break;
         }
         else if (strcmp(symbol->next->identifier, identifier) == 0) {
@@ -81,9 +84,44 @@ const char *get_operator_token(enum category_t category) { //função para auxil
         case Not: return "!";
         case Minus: return "-";
         case Plus: return "+";
+        case Assign: return "=";
         default: return "<unknown>";
     }
 }
+//Para detetar símbolos que não foram usados
+
+void report_unused_symbols(struct symbol_list_t *symbol_table, int is_global) {
+    if (symbol_table == NULL) {
+        //fprintf(stderr, "Error: symbol_table is NULL\n");
+        return;
+    }
+
+    struct symbol_list_t *symbol = symbol_table->next;
+    while (symbol != NULL) {
+        if (symbol->node != NULL) {
+            //printf("Checking symbol: %s\n", symbol->identifier);
+
+            if (symbol->node != NULL &&
+            symbol->used == 0 &&
+            symbol->node->category != FuncDecl ) {
+
+            // Report unused symbols
+            printf("Line %d, column %d: Symbol %s declared but never used\n",
+                   symbol->node->line, symbol->node->column, symbol->identifier);
+        }
+        } else {
+            printf("Skipping symbol with NULL node.\n");
+        }
+
+        if (symbol->scope != NULL) {
+            printf("Entering scope of symbol: %s\n", symbol->identifier);
+            report_unused_symbols(symbol->scope, 0);
+        }
+
+        symbol = symbol->next;
+    }
+}
+
 
 
 void show_symbol_table() {
@@ -116,6 +154,16 @@ void show_symbol_table() {
             show_function(symbol, symbol->node);
         }
         symbol = symbol->next;
+    }
+}
+const char *get_type_string(enum type_t type) {
+    switch (type) {
+        case TypeInteger: return "int";
+        case TypeFloat32: return "float";
+        case TypeBool: return "bool";
+        case TypeString: return "string";
+        case Undefined: return "undef";
+        default: return "unknown";
     }
 }
 
@@ -162,11 +210,17 @@ void show_function(struct symbol_list_t *symbol, struct node_t *node) {
 }
 
 int is_parameter(struct node_t *node, struct node_t *function) {
+    if (node == NULL || function == NULL) return 0;
+
     struct node_t *header = getchild(function, 0);
+    if (header == NULL) return 0;
+
     struct node_t *parameters = getchild(header, 1);
-    if (parameters->category != FuncParams) {
+    if (parameters == NULL || parameters->category != FuncParams) {
         parameters = getchild(header, 2);
+        if (parameters == NULL) return 0;
     }
+
     struct node_list_t *children = parameters->children->next;
     while (children != NULL) {
         if (children->node == node) return 1;
@@ -184,7 +238,7 @@ static void check_function(struct symbol_list_t *scope, struct node_t *function)
 static void check_parameters(struct symbol_list_t *scope, struct node_t *parameters);
 static void check_function_body(struct symbol_list_t *scope, struct node_t *function_body);
 static void check_statement(struct symbol_list_t *scope, struct node_t *parent);
-static void check_expressions(struct symbol_list_t *scope, struct node_t *parent);
+static void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int callFunction);//1-se é call
 
 static enum type_t get_type(struct node_t *node);
 
@@ -208,6 +262,9 @@ int check_program(struct node_t *program) {
         }
         child = child->next;
     }
+
+    // Report unused symbols (global and recursively for all scopes)
+    //report_unused_symbols(global_symbol_table, 1);
     return semantic_errors;
 }
 
@@ -226,7 +283,7 @@ void check_function(struct symbol_list_t *scope, struct node_t *function) {
     // Type and parameters node
     enum type_t type = None;
     struct node_t *parameters = getchild(header, 1);
-    if (parameters->category != FuncParams) {
+    if (parameters != NULL && parameters->category != FuncParams) {
         type = get_type(parameters);
         parameters = getchild(header, 2);
     }
@@ -235,19 +292,27 @@ void check_function(struct symbol_list_t *scope, struct node_t *function) {
     struct node_t *id = getchild(header, 0);
     struct symbol_list_t *new_symbol = insert_symbol(global_symbol_table, id->token, type, function);
     if (new_symbol == NULL) {
-        printf("Line %d, column %d: Symbol %s already defined\n", id->line, id->column, id->token);
+        printf("Line %d, column %d: Symbol %s() already defined\n", id->line, id->column, id->token);
         semantic_errors++;
     }
 
     struct symbol_list_t *function_scope = enter_scope(new_symbol);
 
     // Parameters
-    check_parameters(function_scope, parameters);
+    if (parameters != NULL) {
+        check_parameters(function_scope, parameters);
+    }
 
     // Function body
     struct node_t *function_body = getchild(function, 1);
-    check_function_body(function_scope, function_body);
+    if (function_body != NULL) {
+        check_function_body(function_scope, function_body);
+    }
+
+    // Report unused symbols in the function's local scope
+    report_unused_symbols(function_scope, 0);
 }
+
 
 void check_parameters(struct symbol_list_t *scope, struct node_t *parameters) {
     int position = 0;
@@ -256,9 +321,12 @@ void check_parameters(struct symbol_list_t *scope, struct node_t *parameters) {
         enum type_t type = get_type(getchild(param, 0));
         param->type = type;
         struct node_t *id = getchild(param, 1);
-        if (insert_symbol(scope, id->token, type, param) == NULL) {
+        struct symbol_list_t *symbol = insert_symbol(scope, id->token, type, param);
+        if (symbol == NULL) {
             printf("Line %d, column %d: Symbol %s already defined\n", id->line, id->column, id->token);
             semantic_errors++;
+        } else {
+            symbol->used = 1; // Mark parameter as used
         }
         position++;
         param = getchild(parameters, position);
@@ -274,7 +342,14 @@ void check_function_body(struct symbol_list_t *scope, struct node_t *function_bo
                 check_var(scope, node);
                 break;}
             case Block:
-            case If:
+            case If:{
+                struct node_t *node = getchild(function_body, 0);
+                struct node_t *block1 = getchild(function_body, 1);
+                struct node_t *block2 = getchild(function_body, 2);
+                check_expressions(scope, node,0);
+                check_statement(scope, block1);
+                check_statement(scope, block2);
+                break;}
             case For:
             case Return:
             case Print:
@@ -299,7 +374,7 @@ void check_function_body(struct symbol_list_t *scope, struct node_t *function_bo
             case Not:
             case Minus:
             case Plus:{
-                check_expressions(scope, node);
+                check_expressions(scope, node,0);
                 break;}
             default:
                 break;
@@ -313,24 +388,45 @@ void check_statement(struct symbol_list_t *scope, struct node_t *parent) {
         case Block: {
                 struct node_list_t *children = parent->children->next;
                 while (children != NULL) {
-                    check_statement(scope, children->node);
-                    children = children->next;
+                    check_statement(scope, children->node);     
+                    check_expressions(scope, children->node,0); //PODE HAVER EXPRESSIONS DENTRO DE UM BLOCK
+                    children = children->next; //PARA ALÉM DE STATEMENTS
                 }
             } break;
         case If: {
-                struct node_t *node = getchild(parent, 0);
-                struct node_t *block1 = getchild(parent, 1);
-                struct node_t *block2 = getchild(parent, 2);
-                check_expressions(scope, node);
-                check_statement(scope, block1);
-                check_statement(scope, block2);
+                 struct node_t *node1 = getchild(parent, 0);
+                struct node_t *node2 = getchild(parent, 1);
+                if (node2 != NULL) {
+                    check_expressions(scope, node1,0);
+                    check_statement(scope, node2);
+                    if(node1->type != TypeBool){
+                        if(dontCheckIncorrectType == 0){
+                         printf("Line %d, column %d: Incompatible type ",  parent->line, parent->column);
+                    print_type(node1->type);
+                    printf(" in  if statement");//FAZER FUNCAO PARA BUSCAR CATEGORY
+                    printf("\n");}
+                    parent->type = Undefined;
+                        
+                    }
+                } else {
+                    check_statement(scope, node1);
+                }
             } break;
         case For: {
                 struct node_t *node1 = getchild(parent, 0);
                 struct node_t *node2 = getchild(parent, 1);
                 if (node2 != NULL) {
-                    check_expressions(scope, node1);
+                    check_expressions(scope, node1,0);
                     check_statement(scope, node2);
+                    if(node1->type != TypeBool){
+                        if(dontCheckIncorrectType == 0){
+                         printf("Line %d, column %d: Incompatible type ",  parent->line, parent->column);
+                    print_type(node1->type);
+                    printf(" in  for statement");
+                    printf("\n");}
+                    parent->type = Undefined;
+                        
+                    }
                 } else {
                     check_statement(scope, node1);
                 }
@@ -338,18 +434,18 @@ void check_statement(struct symbol_list_t *scope, struct node_t *parent) {
         case Return: {
                 struct node_t *node = getchild(parent, 0);
                 if (node != NULL) {
-                    check_expressions(scope, node);
+                    check_expressions(scope, node,0);
                 }
             } break;
         case Print: {
                 struct node_t *node = getchild(parent, 0);
-                check_expressions(scope, node);
+                check_expressions(scope, node,0);
             } break;
         case ParseArgs: {
                 struct node_t *node1 = getchild(parent, 0);
                 struct node_t *node2 = getchild(parent, 1);
-                check_expressions(scope, node1);
-                check_expressions(scope, node2);
+                check_expressions(scope, node1,0);
+                check_expressions(scope, node2,0);
                 if (node1->type == node2->type) {
                     parent->type = node1->type;
                 } else {
@@ -357,13 +453,20 @@ void check_statement(struct symbol_list_t *scope, struct node_t *parent) {
                 }
             } break;
         case Assign: {
+            
                 struct node_t *node1 = getchild(parent, 0);
                 struct node_t *node2 = getchild(parent, 1);
-                check_expressions(scope, node1);
-                check_expressions(scope, node2);
+                check_expressions(scope, node1,0);
+                check_expressions(scope, node2,0);
                 if (node1->type == node2->type) {
                     parent->type = node1->type;
                 } else {
+                    printf("Line %d, column %d: Operator '%s' cannot be applied to types ", 
+                    parent->line, parent->column, get_operator_token(parent->category));
+                    print_type(node1->type);
+                    printf(" and ");
+                    print_type(node2->type);
+                    printf("\n");
                     parent->type = Undefined;
                 }
             } break;
@@ -372,17 +475,50 @@ void check_statement(struct symbol_list_t *scope, struct node_t *parent) {
     }
 }
 
-void check_expressions(struct symbol_list_t *scope, struct node_t *parent) {
+void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int callFunction) {
+    notIncorrectlyApplied = 0;
+    dontCheckIncorrectType = 0;
+    //printf("Checking: %s\n", parent->token);
     switch (parent->category) {
         case Call: {
-                struct node_list_t *children = parent->children->next;
-                struct node_t *node = children->node;
-                while (children != NULL) {
-                    check_expressions(scope, children->node);
-                    children = children->next;
-                } 
-                parent->type = node->type;
-            } break;
+            struct node_list_t *children = parent->children->next;
+
+            // The first child is the function identifier
+            struct node_t *function_id = children->node;
+            struct symbol_list_t *symbol = search_symbol(scope, function_id->token);
+            if (symbol == NULL) {
+                symbol = search_symbol(global_symbol_table, function_id->token);
+            }
+
+            // Gather argument types for the error message
+            char arg_types[256] = "("; // Buffer to store argument types for the error message
+            struct node_list_t *arg_list = children->next;
+            int first = 1;
+            while (arg_list != NULL) {
+                struct node_t *arg = arg_list->node;
+                check_expressions(scope, arg, 0); // Analyze the argument type
+                if (!first) {
+                    strcat(arg_types, ", ");
+                }
+                strcat(arg_types, get_type_string(arg->type)); // Add the argument's type
+                first = 0;
+                arg_list = arg_list->next;
+            }
+            strcat(arg_types, ")");
+            //PARA NÃO IMPRIMIR NO CASO DE h(!i)
+            if ((symbol == NULL || symbol->node->category != FuncDecl)) {
+                // Report undefined function with argument types
+                if(notIncorrectlyApplied == 0){
+                printf("Line %d, column %d: Cannot find symbol %s%s\n",
+                    function_id->line, function_id->column, function_id->token, arg_types);}
+                parent->type = Undefined;
+                
+                break;
+            }
+
+            // Mark the function as used
+            symbol->used = 1;
+            break;}
         case Natural: {
             parent->type = TypeInteger;
             break;}
@@ -397,9 +533,15 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent) {
             }
             if (symbol != NULL) {
                 parent->type = symbol->type;
+                symbol->used = 1; //Símbolo foi usado
             } else {
                 // Erro: Undefined type
-                printf("Line %d, column %d: Cannot find symbol %s\n", parent->line, parent->column, parent->token);
+                if(callFunction == 1){
+                    printf("Line %d, column %d: Cannot find symbol %s()\n", parent->line, parent->column, parent->token);
+                }
+                else{
+                     printf("Line %d, column %d: Cannot find symbol %s\n", parent->line, parent->column, parent->token);
+                }
                 parent->type = Undefined;
             }
             break;
@@ -412,19 +554,13 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent) {
         case And:
         case Eq:
         case Ne:
-        case Lt:
-        case Gt:
-        case Le:
-        case Ge: {
+        case Lt:{
             struct node_t *node1 = getchild(parent, 0);
             struct node_t *node2 = getchild(parent, 1);
-            check_expressions(scope, node1);
-            check_expressions(scope, node2);
-            if (node1->type == Undefined || node2->type == Undefined) {
-                parent->type = Undefined;
-            } 
-            else if (node1->type == node2->type /*&&
-                (node1->type == TypeInteger || node1->type == TypeFloat32)*/) {
+            check_expressions(scope, node1,0);
+            check_expressions(scope, node2,0);
+            if (node1->type == node2->type &&
+                (node1->type == TypeInteger || node1->type == TypeFloat32)) {
                 parent->type = TypeBool;
             } else {
                 printf("Line %d, column %d: Operator '%s' cannot be applied to types ", 
@@ -434,8 +570,33 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent) {
                 print_type(node2->type);
                 printf("\n");
                 parent->type = Undefined;
+                dontCheckIncorrectType = 1;
             }
-        } break;
+         break;}
+        case Gt:
+        case Le:
+        case Ge: {
+            struct node_t *node1 = getchild(parent, 0);
+            struct node_t *node2 = getchild(parent, 1);
+            check_expressions(scope, node1,0);
+            check_expressions(scope, node2,0);
+            if (node1->type == Undefined || node2->type == Undefined) {
+                parent->type = Undefined;
+            } 
+            else if (node1->type == node2->type &&
+                (node1->type == TypeInteger || node1->type == TypeFloat32)) {
+                parent->type = TypeBool;
+            } else {
+                printf("Line %d, column %d: Operator '%s' cannot be applied to types ", 
+                    parent->line, parent->column, get_operator_token(parent->category));
+                print_type(node1->type);
+                printf(" and ");
+                print_type(node2->type);
+                printf("\n");
+                parent->type = Undefined;
+                 dontCheckIncorrectType = 1;
+            }
+         break;}
         case Add:
         case Sub:
         case Mul:
@@ -443,8 +604,8 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent) {
         case Mod: {
             struct node_t *node1 = getchild(parent, 0);
             struct node_t *node2 = getchild(parent, 1);
-            check_expressions(scope, node1);
-            check_expressions(scope, node2);
+            check_expressions(scope, node1,0);
+            check_expressions(scope, node2,0);
 
             if (node1->type == Undefined || node2->type == Undefined) {
                 parent->type = Undefined;
@@ -459,24 +620,41 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent) {
                 print_type(node2->type);
                 printf("\n");
                 parent->type = Undefined;
+                dontCheckIncorrectType = 1;
             }
             break;
         }
         case Not: {
-            parent->type = TypeBool;
-            check_expressions(scope, parent->children->next->node);
+            /*parent->type = TypeBool;
+            check_expressions(scope, parent->children->next->node,0);*/
+
+            struct node_t *node1 = getchild(parent, 0);
+            check_expressions(scope, node1,0);
+
+            if (node1->type == Undefined) {
+                parent->type = Undefined;
+            } else if (node1->type!=TypeBool) {
+                parent->type = Undefined;
+                printf("Line %d, column %d: Operator '%s' cannot be applied to type ", 
+                    parent->line, parent->column, get_operator_token(parent->category));
+                print_type(node1->type);
+                printf("\n");
+                notIncorrectlyApplied = 1;
+                parent->type = Undefined;
+            }else{
+                parent->type = TypeBool;
+            }
         } break;
         case Minus:
         case Plus: {
             struct node_t *node = getchild(parent, 0);
-            check_expressions(scope, node);
+            check_expressions(scope, node,0);
             parent->type = node->type;
         }
         default:
             break;
     }
 }
-
 enum type_t get_type(struct node_t *node) {
     if (node == NULL) return None;
     switch (node->category) {
