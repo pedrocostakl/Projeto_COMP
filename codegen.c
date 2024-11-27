@@ -76,7 +76,7 @@ void codegen_program(struct node_t *program) {
     struct symbol_list_t *main_symbol = search_symbol(global_symbol_table, "main");
     if (main_symbol != NULL && main_symbol->node->category == FuncDecl) {
         printf("define i32 @main() {\n"
-               "  %%1 = call i32 @_main(i32 0)\n"
+               "  %%1 = call i32 @_main()\n"
                "  ret i32 %%1\n"
                "}\n");
     }
@@ -270,28 +270,30 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
             switch (expr->type) {
                 case TypeInteger: {
                     printf("  ");
-                    printf("%%%d = getelementptr [4 * i8], [4 * i8]* @format_int, i32 0, i32 0\n", temporary);
+                    printf("%%%d = getelementptr [4 x i8], [4 x i8]* @format_int, i32 0, i32 0\n", temporary);
                     printf("  ");
-                    printf("call i32 (i8*, ...) @printf(i8* %%%d, i32 %%%d)\n", temporary, tmp1);
+                    printf("%%%d = call i32 (i8*, ...) @printf(i8* %%%d, i32 %%%d)\n", temporary + 1, temporary, tmp1);
                 } break;
                 case TypeFloat32: {
                     printf("  ");
-                    printf("%%%d = getelementptr [4 * i8], [4 * i8]* @format_float32, i32 0, i32 0\n", temporary);
+                    printf("%%%d = getelementptr [6 x i8], [6 x i8]* @format_float32, i32 0, i32 0\n", temporary);
                     printf("  ");
-                    printf("call i32 (i8*, ...) @printf(i8* %%%d, double %%%d)\n", temporary, tmp1);
+                    printf("%%%d = call i32 (i8*, ...) @printf(i8* %%%d, double %%%d)\n", temporary + 1, temporary, tmp1);
                 } break;
                 case TypeBool: {
 
                 } break;
                 case TypeString: {
                     printf("  ");
-                    printf("%%%d = getelementptr [4 * i8], [4 * i8]* @format_strlit, i32 0, i32 0\n", temporary);
+                    printf("%%%d = getelementptr [4 x i8], [4 x i8]* @format_strlit, i32 0, i32 0\n", temporary);
                     printf("  ");
-                    printf("call i32 (i8*, ...) @printf(i8* %%%d, i8* %%%d)\n", temporary, tmp1);
+                    printf("%%%d = call i32 (i8*, ...) @printf(i8* %%%d, i8* %%%d)\n", temporary + 1, temporary, tmp1);
                 } break;
                 default:
                     break;
             }
+            temporary += 2;
+            tmp = temporary;
         } break;
         case ParseArgs: {
             struct node_t *id = getchild(statement, 0);
