@@ -290,12 +290,31 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
         } break;
         case Decimal: {
             printf("  ");
-            printf("%%%d = add double %s, 0\n", temporary, expression->token);
+            printf("%%%d = add double %s, 0.0\n", temporary, expression->token);
             tmp = temporary;
             temporary++;
         } break;
         case Identifier: {
-
+            struct symbol_list_t *symbol = search_symbol(scope, expression->token);
+            if (symbol == NULL) {
+                symbol = search_symbol(global_symbol_table, expression->token);
+            }
+            printf("  ");
+            printf("%%%d = add ", temporary);
+            print_codegen_type(expression->type);
+            printf(" %%%s, ", expression->token);
+            switch (expression->type) {
+                case TypeInteger: {
+                    printf("0\n");
+                } break;
+                case TypeFloat32: {
+                    printf("0.0\n");
+                } break;
+                default:
+                    break;
+            }
+            tmp = temporary;
+            temporary++;
         } break;
         case StrLit: {
 
