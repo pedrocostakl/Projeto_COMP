@@ -11,9 +11,9 @@
 
 #include "semantics.h"
 
-#define FORMAT_INT             @format_int
-#define FORMAT_FLOAT32         @format_float32
-#define FORMAT_STRLIT          @format_strlit
+#define FORMAT_INT             "@format_int"
+#define FORMAT_FLOAT32         "@format_float32"
+#define FORMAT_STRLIT          "@format_strlit"
 
 extern struct symbol_list_t *global_symbol_table;
 
@@ -48,9 +48,9 @@ void codegen_program(struct node_t *program) {
     printf("declare i32 @atoi(i8 zeroext)\n\n");
 
     // declarar formatos de print
-    printf("@format_int = private constant [4 x i8] c\"%%d\\0A\\00\"\n");
-    printf("@format_float32 = private constant [6 x i8] c\"%%.8f\\0A\\00\"\n");
-    printf("@format_strlit = private constant [4 x i8] c\"%%s\\0A\\00\"\n");
+    printf("%s = private constant [4 x i8] c\"%%d\\0A\\00\"\n", FORMAT_INT);
+    printf("%s = private constant [6 x i8] c\"%%.8f\\0A\\00\"\n", FORMAT_FLOAT32);
+    printf("%s = private constant [4 x i8] c\"%%s\\0A\\00\"\n", FORMAT_STRLIT);
     printf("\n");
 
     int var_num = 0;
@@ -145,8 +145,14 @@ void codegen_function(struct node_t *function) {
             children = children->next;
         }
         // gerar código da função
+        label_num = 0;
         codegen_block(body, scope);
-        printf("}\n\n");
+        print_tab();
+        printf("ret ");
+        print_codegen_type(function_symbol->type);
+        printf(" ");
+        print_type_zero(function_symbol->type);
+        printf("\n}\n\n");
     }
 }
 
@@ -314,13 +320,13 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
             switch (expr->type) {
                 case TypeInteger: {
                     print_tab();
-                    printf("%%%d = getelementptr [4 x i8], [4 x i8]* @format_int, i32 0, i32 0\n", temporary);
+                    printf("%%%d = getelementptr [4 x i8], [4 x i8]* %s, i32 0, i32 0\n", temporary, FORMAT_INT);
                     print_tab();
                     printf("%%%d = call i32 (i8*, ...) @printf(i8* %%%d, i32 %%%d)\n", temporary + 1, temporary, tmp1);
                 } break;
                 case TypeFloat32: {
                     print_tab();
-                    printf("%%%d = getelementptr [6 x i8], [6 x i8]* @format_float32, i32 0, i32 0\n", temporary);
+                    printf("%%%d = getelementptr [6 x i8], [6 x i8]* %s, i32 0, i32 0\n", temporary, FORMAT_FLOAT32);
                     print_tab();
                     printf("%%%d = call i32 (i8*, ...) @printf(i8* %%%d, double %%%d)\n", temporary + 1, temporary, tmp1);
                 } break;
@@ -329,7 +335,7 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
                 } break;
                 case TypeString: {
                     print_tab();
-                    printf("%%%d = getelementptr [4 x i8], [4 x i8]* @format_strlit, i32 0, i32 0\n", temporary);
+                    printf("%%%d = getelementptr [4 x i8], [4 x i8]* %s, i32 0, i32 0\n", temporary, FORMAT_STRLIT);
                     print_tab();
                     printf("%%%d = call i32 (i8*, ...) @printf(i8* %%%d, i8* %%%d)\n", temporary + 1, temporary, tmp1);
                 } break;
@@ -751,6 +757,7 @@ void print_label(unsigned int num, enum label_type_t label_type) {
 
 void print_type_zero(enum type_t type) {
     switch (type) {
+        case None:
         case TypeInteger: {
             printf("0");
         } break;
