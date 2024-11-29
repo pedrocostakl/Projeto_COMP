@@ -11,6 +11,10 @@
 
 #include "semantics.h"
 
+#define FORMAT_INT             @format_int
+#define FORMAT_FLOAT32         @format_float32
+#define FORMAT_STRLIT          @format_strlit
+
 extern struct symbol_list_t *global_symbol_table;
 
 static int temporary;
@@ -49,20 +53,30 @@ void codegen_program(struct node_t *program) {
     printf("@format_strlit = private constant [4 x i8] c\"%%s\\0A\\00\"\n");
     printf("\n");
 
-    enum category_t category = None;
-
-    // geração dos nodes de declaração global
-    struct node_list_t *children = program->children->next;
+    int var_num = 0;
+    struct node_list_t *children;
+    // variáveis globais
+    children = program->children->next;
     while (children != NULL) {
         struct node_t *node = children->node;
-        if (node->category != category) {
-            printf("\n");
-            category = node->category;
-        }
-        switch (category) {
+        switch (node->category) {
             case VarDecl: {
                 codegen_var(node, global_symbol_table, 1);
+                var_num++;
             } break;
+            default:
+                break;
+        }
+        children = children->next;
+    }
+    if (var_num > 0) {
+        printf("\n");
+    }
+    // funções
+    children = program->children->next;
+    while (children != NULL) {
+        struct node_t *node = children->node;
+        switch (node->category) {
             case FuncDecl: {
                 codegen_function(node);
             } break;
@@ -116,7 +130,22 @@ void codegen_function(struct node_t *function) {
         }
         codegen_parameters(parameters, scope);
         printf(") {\n");
-        codegen_block(getchild(function, 1), scope);
+        struct node_t *body = getchild(function, 1);
+        // declarar variáveis locais
+        struct node_list_t *children = body->children->next;
+        while (children != NULL) {
+            struct node_t *node = children->node;
+            switch (node->category) {
+                case VarDecl: {
+                    codegen_var(node, scope, 0);
+                } break;
+                default:
+                    break;
+            }
+            children = children->next;
+        }
+        // gerar código da função
+        codegen_block(body, scope);
         printf("}\n\n");
     }
 }
@@ -146,9 +175,6 @@ void codegen_block(struct node_t *block, struct symbol_list_t *scope) {
     while (children != NULL) {
         struct node_t *node = children->node;
         switch (node->category) {
-            case VarDecl:
-                codegen_var(node, scope, 0);
-                break;
             case Block:
             case If:
             case For:
@@ -559,6 +585,7 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
                     printf("fadd ");
                 } break;
                 default:
+                    printf("add ");
                     break;
             }
             print_codegen_type(expression->type);
