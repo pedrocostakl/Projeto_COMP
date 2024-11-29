@@ -93,6 +93,10 @@ void codegen_program(struct node_t *program) {
                "  %%1 = call i32 @_main()\n"
                "  ret i32 %%1\n"
                "}\n");
+    } else {
+        printf("define i32 @main() {\n"
+               "  ret i32 0\n"
+               "}\n");
     }
 }
 
