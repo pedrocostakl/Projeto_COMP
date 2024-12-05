@@ -22,6 +22,7 @@ extern struct symbol_list_t *global_symbol_table;
 static int temporary;
 static unsigned int label_num;
 static enum category_t prev_category;
+static struct node_t *global_program;
 
 enum label_type_t {
     LabelThen = 0,
@@ -45,8 +46,10 @@ static void print_label(unsigned int num, enum label_type_t label_type);
 static void print_type_zero(enum type_t type);
 static void print_tab();
 static unsigned int get_strlit_hash(const char *strlit);
+static int is_strlit_declared(struct node_t *parent, unsigned int hash);
 
 void codegen_program(struct node_t *program) {
+    global_program = program;
     label_num = 0;
 
     // declarar funções I/O
@@ -790,13 +793,34 @@ void codegen_string_literals(struct node_t *parent) {
             memmove(strlit, strlit + 1, len - 1);
             strlit[len -2] = '\0';
             len -= 1; // retirar as duas " e adicionar o \00
-            printf("@.%u = private constant [%d x i8] c\"%s\\00\"\n", get_strlit_hash(strlit), len, strlit);
+            unsigned int hash = get_strlit_hash(strlit);
+            if (is_strlit_declared(global_program, hash) == 0) {
+                printf("@.%u = private constant [%d x i8] c\"%s\\00\"\n", get_strlit_hash(strlit), len, strlit);
+            }
+            node->strlit_hash = hash;
             free(strlit);
         } else {
             codegen_string_literals(node);
         }
         children = children->next;
     }
+}
+
+int is_strlit_declared(struct node_t *parent, unsigned int hash) {
+    struct node_list_t *children = parent->children->next;
+    while (children != NULL) {
+        struct node_t *node = children->node;
+        if (node->category == StrLit) {
+            if (node->strlit_hash == hash) {
+                return 1;
+            }
+        } else {
+            int res = is_strlit_declared(node, hash);
+            if (res == 1) return 1;
+        }
+        children = children->next;
+    }
+    return 0;
 }
 
 void print_codegen_type(enum type_t type) {

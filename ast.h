@@ -80,6 +80,7 @@ struct node_t {
     char *token;
     int line, column;
     struct node_list_t *children;
+    unsigned int strlit_hash; // usado para verificar se a strlit já foi declarada (codegen)
 };
 
 struct node_list_t {
