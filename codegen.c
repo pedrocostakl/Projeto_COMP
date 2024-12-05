@@ -34,11 +34,13 @@ static void codegen_parameters(struct node_t *parameters, struct symbol_list_t *
 static void codegen_block(struct node_t *block, struct symbol_list_t *scope);
 static int codegen_statement(struct node_t *statement, struct symbol_list_t *scope);
 static int codegen_expression(struct node_t *expression, struct symbol_list_t *scope);
+static void codegen_string_literals(struct node_t *parent);
 
 static void print_codegen_type(enum type_t type);
 static void print_label(unsigned int num, enum label_type_t label_type);
 static void print_type_zero(enum type_t type);
 static void print_tab();
+static unsigned int get_strlit_hash(const char *strlit);
 
 void codegen_program(struct node_t *program) {
     label_num = 0;
@@ -47,10 +49,11 @@ void codegen_program(struct node_t *program) {
     printf("declare i32 @printf(i8*, ...)\n");
     printf("declare i32 @atoi(i8 zeroext)\n\n");
 
-    // declarar formatos de print
+    // declarar formatos de print e string literals
     printf("%s = private constant [4 x i8] c\"%%d\\0A\\00\"\n", FORMAT_INT);
     printf("%s = private constant [6 x i8] c\"%%.8f\\0A\\00\"\n", FORMAT_FLOAT32);
     printf("%s = private constant [4 x i8] c\"%%s\\0A\\00\"\n", FORMAT_STRLIT);
+    codegen_string_literals(program);
     printf("\n");
 
     int var_num = 0;
@@ -326,27 +329,39 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
                     print_tab();
                     printf("%%%d = getelementptr [4 x i8], [4 x i8]* %s, i32 0, i32 0\n", temporary, FORMAT_INT);
                     print_tab();
-                    printf("%%%d = call i32 (i8*, ...) @printf(i8* %%%d, i32 %%%d)\n", temporary + 1, temporary, tmp1);
+                    temporary++;
+                    printf("%%%d = call i32 (i8*, ...) @printf(i8* %%%d, i32 %%%d)\n", temporary, temporary - 1, tmp1);
                 } break;
                 case TypeFloat32: {
                     print_tab();
                     printf("%%%d = getelementptr [6 x i8], [6 x i8]* %s, i32 0, i32 0\n", temporary, FORMAT_FLOAT32);
                     print_tab();
-                    printf("%%%d = call i32 (i8*, ...) @printf(i8* %%%d, double %%%d)\n", temporary + 1, temporary, tmp1);
+                    temporary++;
+                    printf("%%%d = call i32 (i8*, ...) @printf(i8* %%%d, double %%%d)\n", temporary, temporary - 1, tmp1);
                 } break;
                 case TypeBool: {
 
                 } break;
                 case TypeString: {
+                    char *strlit = strdup(expr->token);
+                    int len = strlen(strlit);
+                    memmove(strlit, strlit + 1, len - 1);
+                    strlit[len -2] = '\0';
+                    len -= 1; // retirar as duas " e adicionar o \00
+
                     print_tab();
                     printf("%%%d = getelementptr [4 x i8], [4 x i8]* %s, i32 0, i32 0\n", temporary, FORMAT_STRLIT);
                     print_tab();
-                    printf("%%%d = call i32 (i8*, ...) @printf(i8* %%%d, i8* %%%d)\n", temporary + 1, temporary, tmp1);
+                    temporary++;
+                    printf("%%%d = getelementptr [%d x i8], [%d x i8]* @_%u_, i32 0, i32 0\n", temporary, len, len, get_strlit_hash(strlit));
+                    print_tab();
+                    temporary++;
+                    printf("%%%d = call i32 (i8*, ...) @printf(i8* %%%d, i8* %%%d)\n", temporary, temporary - 2, temporary - 1);
                 } break;
                 default:
                     break;
             }
-            temporary += 2;
+            temporary++;
             tmp = temporary;
         } break;
         case ParseArgs: {
@@ -718,6 +733,25 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
     return tmp;
 }
 
+void codegen_string_literals(struct node_t *parent) {
+    struct node_list_t *children = parent->children->next;
+    while (children != NULL) {
+        struct node_t *node = children->node;
+        if (node->category == StrLit) {
+            char *strlit = strdup(node->token);
+            int len = strlen(strlit);
+            memmove(strlit, strlit + 1, len - 1);
+            strlit[len -2] = '\0';
+            len -= 1; // retirar as duas " e adicionar o \00
+            printf("@_%u_ = private constant [%d x i8] c\"%s\\00\"\n", get_strlit_hash(strlit), len, strlit);
+            free(strlit);
+        } else {
+            codegen_string_literals(node);
+        }
+        children = children->next;
+    }
+}
+
 void print_codegen_type(enum type_t type) {
     switch (type) {
         case None: {
@@ -775,4 +809,13 @@ void print_type_zero(enum type_t type) {
 
 void print_tab() {
     printf("  ");
+}
+
+unsigned int get_strlit_hash(const char *strlit) {
+    unsigned int hash = 0;
+    while (*strlit) {
+        hash = hash * 31 + (unsigned char)(*strlit);
+        strlit++;
+    }
+    return hash;
 }
