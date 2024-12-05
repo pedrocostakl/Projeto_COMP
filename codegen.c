@@ -54,15 +54,21 @@ void codegen_program(struct node_t *program) {
 
     // declarar funções I/O
     printf("declare i32 @printf(i8*, ...)\n");
-    printf("declare i32 @atoi(i8 zeroext)\n\n");
+    printf("declare i32 @atoi(i8*)\n\n");
 
-    // declarar formatos de print e string literals
+    // declarar formatos de print
     printf("%s = private constant [4 x i8] c\"%%d\\0A\\00\"\n", FORMAT_INT);
     printf("%s = private constant [6 x i8] c\"%%.8f\\0A\\00\"\n", FORMAT_FLOAT32);
     printf("%s = private constant [6 x i8] c\"true\\0A\\00\"\n", FORMAT_BOOL_TRUE);
     printf("%s = private constant [7 x i8] c\"false\\0A\\00\"\n", FORMAT_BOOL_FALSE);
     printf("%s = private constant [4 x i8] c\"%%s\\0A\\00\"\n", FORMAT_STRLIT);
+
+    // declarar string literals globais
     codegen_string_literals(program);
+    printf("\n");
+
+    // declarar variáveis globais de argumentos
+    printf("@.argv = global i8** null\n");
     printf("\n");
 
     int var_num = 0;
@@ -101,12 +107,13 @@ void codegen_program(struct node_t *program) {
     // entry point
     struct symbol_list_t *main_symbol = search_symbol(global_symbol_table, "main");
     if (main_symbol != NULL && main_symbol->node->category == FuncDecl) {
-        printf("define i32 @main() {\n"
+        printf("define i32 @main(i32 %%argc, i8** %%argv) {\n"
+               "  store i8** %%argv, i8*** @.argv\n"
                "  %%1 = call i32 @_main()\n"
                "  ret i32 %%1\n"
                "}\n");
     } else {
-        printf("define i32 @main() {\n"
+        printf("define i32 @main(i32 %%argc, i8** %%argv) {\n"
                "  ret i32 0\n"
                "}\n");
     }
@@ -417,9 +424,37 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
         case ParseArgs: {
             struct node_t *id = getchild(statement, 0);
             struct node_t *expr = getchild(statement, 1);
+            struct symbol_list_t *symbol = search_symbol(scope, id->token);
+            if (symbol == NULL) {
+                symbol = search_symbol(global_symbol_table, id->token);
+            }
             int tmp1 = codegen_expression(expr, scope);
             print_tab();
-            printf("%%%s = call i32 @atoi(i8* %%%d)\n", id->token, tmp1);
+            printf("%%%d = load i8**, i8*** @.argv\n", temporary);
+            temporary++;
+            print_tab();
+            printf("%%%d = getelementptr i8*, i8** %%%d, i32 %%%d\n", temporary, temporary - 1, tmp1);
+            temporary++;
+            print_tab();
+            printf("%%%d = load i8*, i8** %%%d\n", temporary, temporary - 1);
+            temporary++;
+            print_tab();
+            printf("%%%d = call i32 @atoi(i8* %%%d)\n", temporary, temporary - 1);
+            print_tab();
+            switch (symbol->symbol_type) {
+                case SymbolGlobalVar: {
+                    printf("store i32 %%%d, i32* @%s\n", temporary, symbol->identifier);
+                } break;
+                case SymbolLocalVar: {
+                    printf("store i32 %%%d, i32* %%%s\n", temporary, symbol->identifier);
+                } break;
+                case SymbolParam: {
+                    printf("%%%s = add i32 %%%d, i32 0\n", id->token, temporary);
+                } break;
+                default:
+                    break;
+            }
+            temporary++;
         } break;
         case Assign: {
             struct node_t *id = getchild(statement, 0);
