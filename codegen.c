@@ -11,9 +11,11 @@
 
 #include "semantics.h"
 
-#define FORMAT_INT             "@format_int"
-#define FORMAT_FLOAT32         "@format_float32"
-#define FORMAT_STRLIT          "@format_strlit"
+#define FORMAT_INT             "@.format_int"
+#define FORMAT_FLOAT32         "@.format_float32"
+#define FORMAT_BOOL_TRUE       "@.format_bool_true"
+#define FORMAT_BOOL_FALSE      "@.format_bool_false"
+#define FORMAT_STRLIT          "@.format_strlit"
 
 extern struct symbol_list_t *global_symbol_table;
 
@@ -25,7 +27,9 @@ enum label_type_t {
     LabelThen = 0,
     LabelElse,
     LabelEnd,
-    LabelFor
+    LabelFor,
+    LabelPrintTrue,
+    LabelPrintFalse
 };
 
 static void codegen_var(struct node_t *var, struct symbol_list_t *scope, int global);
@@ -52,6 +56,8 @@ void codegen_program(struct node_t *program) {
     // declarar formatos de print e string literals
     printf("%s = private constant [4 x i8] c\"%%d\\0A\\00\"\n", FORMAT_INT);
     printf("%s = private constant [6 x i8] c\"%%.8f\\0A\\00\"\n", FORMAT_FLOAT32);
+    printf("%s = private constant [6 x i8] c\"true\\0A\\00\"\n", FORMAT_BOOL_TRUE);
+    printf("%s = private constant [7 x i8] c\"false\\0A\\00\"\n", FORMAT_BOOL_FALSE);
     printf("%s = private constant [4 x i8] c\"%%s\\0A\\00\"\n", FORMAT_STRLIT);
     codegen_string_literals(program);
     printf("\n");
@@ -340,7 +346,48 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
                     printf("%%%d = call i32 (i8*, ...) @printf(i8* %%%d, double %%%d)\n", temporary, temporary - 1, tmp1);
                 } break;
                 case TypeBool: {
+                    int print_label_num = label_num;
+                    label_num++;
 
+                    // branch
+                    print_tab();
+                    printf("br i1 %%%d", tmp1);
+                    printf(", label %%");
+                    print_label(print_label_num, LabelPrintTrue);
+                    printf(", label %%");
+                    print_label(print_label_num, LabelPrintFalse);
+                    printf("\n");
+
+                    // imprimir true
+                    print_label(print_label_num, LabelPrintTrue);
+                    printf(":\n");
+                    print_tab();
+                    printf("%%%d = getelementptr [6 x i8], [6 x i8]* %s, i32 0, i32 0\n", temporary, FORMAT_BOOL_TRUE);
+                    print_tab();
+                    temporary++;
+                    printf("%%%d = call i32 (i8*, ...) @printf(i8* %%%d)\n", temporary, temporary - 1);
+                    temporary++;
+                    print_tab();
+                    printf("br label %%");
+                    print_label(print_label_num, LabelEnd);
+                    printf("\n");
+
+                    // imprimir false
+                    print_label(print_label_num, LabelPrintFalse);
+                    printf(":\n");
+                    print_tab();
+                    printf("%%%d = getelementptr [7 x i8], [7 x i8]* %s, i32 0, i32 0\n", temporary, FORMAT_BOOL_FALSE);
+                    print_tab();
+                    temporary++;
+                    printf("%%%d = call i32 (i8*, ...) @printf(i8* %%%d)\n", temporary, temporary - 1);
+                    print_tab();
+                    printf("br label %%");
+                    print_label(print_label_num, LabelEnd);
+                    printf("\n");
+
+                    // terminar
+                    print_label(print_label_num, LabelEnd);
+                    printf(":\n");
                 } break;
                 case TypeString: {
                     char *strlit = strdup(expr->token);
@@ -353,7 +400,7 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
                     printf("%%%d = getelementptr [4 x i8], [4 x i8]* %s, i32 0, i32 0\n", temporary, FORMAT_STRLIT);
                     print_tab();
                     temporary++;
-                    printf("%%%d = getelementptr [%d x i8], [%d x i8]* @_%u_, i32 0, i32 0\n", temporary, len, len, get_strlit_hash(strlit));
+                    printf("%%%d = getelementptr [%d x i8], [%d x i8]* @.%u, i32 0, i32 0\n", temporary, len, len, get_strlit_hash(strlit));
                     print_tab();
                     temporary++;
                     printf("%%%d = call i32 (i8*, ...) @printf(i8* %%%d, i8* %%%d)\n", temporary, temporary - 2, temporary - 1);
@@ -743,7 +790,7 @@ void codegen_string_literals(struct node_t *parent) {
             memmove(strlit, strlit + 1, len - 1);
             strlit[len -2] = '\0';
             len -= 1; // retirar as duas " e adicionar o \00
-            printf("@_%u_ = private constant [%d x i8] c\"%s\\00\"\n", get_strlit_hash(strlit), len, strlit);
+            printf("@.%u = private constant [%d x i8] c\"%s\\00\"\n", get_strlit_hash(strlit), len, strlit);
             free(strlit);
         } else {
             codegen_string_literals(node);
@@ -787,6 +834,12 @@ void print_label(unsigned int num, enum label_type_t label_type) {
         } break;
         case LabelFor: {
             printf("L%ufor", num);
+        } break;
+        case LabelPrintTrue: {
+            printf("L%uprint_true", num);
+        } break;
+        case LabelPrintFalse: {
+            printf("L%uprint_false", num);
         } break;
         default:
             break;
