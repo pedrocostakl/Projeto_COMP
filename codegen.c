@@ -90,7 +90,8 @@ void codegen_program(struct node_t *program) {
     if (var_num > 0) {
         printf("\n");
     }
-    // funções
+
+    // definição de funções
     children = program->children->next;
     while (children != NULL) {
         struct node_t *node = children->node;
