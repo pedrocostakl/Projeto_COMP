@@ -524,7 +524,7 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             temporary++;
         } break;
         case StrLit: {
-
+            // String literals são geradas no início da geração do programa
         } break;
         case Call: {
             int i = 0;
@@ -797,30 +797,13 @@ void codegen_string_literals(struct node_t *parent) {
             if (is_strlit_declared(global_program, hash) == 0) {
                 printf("@.%u = private constant [%d x i8] c\"%s\\00\"\n", get_strlit_hash(strlit), len, strlit);
             }
-            node->strlit_hash = hash;
+            node->hash = hash;
             free(strlit);
         } else {
             codegen_string_literals(node);
         }
         children = children->next;
     }
-}
-
-int is_strlit_declared(struct node_t *parent, unsigned int hash) {
-    struct node_list_t *children = parent->children->next;
-    while (children != NULL) {
-        struct node_t *node = children->node;
-        if (node->category == StrLit) {
-            if (node->strlit_hash == hash) {
-                return 1;
-            }
-        } else {
-            int res = is_strlit_declared(node, hash);
-            if (res == 1) return 1;
-        }
-        children = children->next;
-    }
-    return 0;
 }
 
 void print_codegen_type(enum type_t type) {
@@ -895,4 +878,21 @@ unsigned int get_strlit_hash(const char *strlit) {
         strlit++;
     }
     return hash;
+}
+
+int is_strlit_declared(struct node_t *parent, unsigned int hash) {
+    struct node_list_t *children = parent->children->next;
+    while (children != NULL) {
+        struct node_t *node = children->node;
+        if (node->category == StrLit) {
+            if (node->hash == hash) {
+                return 1;
+            }
+        } else {
+            int res = is_strlit_declared(node, hash);
+            if (res == 1) return 1;
+        }
+        children = children->next;
+    }
+    return 0;
 }

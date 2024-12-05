@@ -26,6 +26,7 @@ struct node_t *newnode(enum category_t category, struct pass_t pass) {
     new->children = malloc(sizeof(struct node_list_t));
     new->children->next = NULL;
     new->children->node = NULL;
+    new->hash = 0;
     return new;
 }
 
