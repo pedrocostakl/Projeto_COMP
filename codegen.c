@@ -139,10 +139,12 @@ void codegen_var(struct node_t *var, struct symbol_list_t *scope, int global) {
 void codegen_function(struct node_t *function) {
     temporary = 1;
     struct node_t *header = getchild(function, 0);
+    struct node_list_t *children;
     
     struct symbol_list_t *function_symbol = search_symbol(global_symbol_table, getchild(header, 0)->token);
     if (function_symbol != NULL && function_symbol->node->category == FuncDecl) {
         struct symbol_list_t *scope = function_symbol->scope;
+        // imprimir o define
         printf("define ");
         print_codegen_type(function_symbol->type);
         printf(" @_%s(", function_symbol->identifier);
@@ -151,8 +153,25 @@ void codegen_function(struct node_t *function) {
         if (parameters->category != FuncParams) {
             parameters = getchild(header, 2);
         }
-        codegen_parameters(parameters, scope);
+        // imprimir os parametros
+        int num = 0;
+        children = parameters->children->next;
+        while (children != NULL) {
+            struct node_t *param = children->node;
+            struct symbol_list_t *param_symbol = search_symbol(scope, getchild(param, 1)->token);
+            if (param_symbol != NULL) {
+                if (num > 0) {
+                    printf(", ");
+                }
+                print_codegen_type(param_symbol->type);
+                printf(" %%%s", param_symbol->identifier);
+                num++;
+            }
+            children = children->next;
+        }
         printf(") {\n");
+        // declarar parametros
+        codegen_parameters(parameters, scope);
         struct node_t *body = getchild(function, 1);
         // declarar variáveis locais
         struct node_list_t *children = body->children->next;
@@ -170,6 +189,7 @@ void codegen_function(struct node_t *function) {
         // gerar código da função
         label_num = 0;
         codegen_block(body, scope);
+        // adicionar o statement de return default
         print_tab();
         printf("ret ");
         print_codegen_type(function_symbol->type);
@@ -180,19 +200,24 @@ void codegen_function(struct node_t *function) {
 }
 
 void codegen_parameters(struct node_t *parameters, struct symbol_list_t *scope) {
-    int num = 0;
     if (parameters->category == FuncParams) {
         struct node_list_t *children = parameters->children->next;
         while (children != NULL) {
             struct node_t *param = children->node;
             struct symbol_list_t *param_symbol = search_symbol(scope, getchild(param, 1)->token);
             if (param_symbol != NULL) {
-                if (num > 0) {
-                    printf(", ");
-                }
+                // alocar espaço na stack
+                print_tab();
+                printf("%%.param_%s = alloca ", param_symbol->identifier);
                 print_codegen_type(param_symbol->type);
-                printf(" %%%s", param_symbol->identifier);
-                num++;
+                printf("\n");
+                // guardar o valor original do parametro
+                print_tab();
+                printf("store ");
+                print_codegen_type(param_symbol->type);
+                printf(" %%%s, ", param_symbol->identifier);
+                print_codegen_type(param_symbol->type);
+                printf("* %%.param_%s\n", param_symbol->identifier);
             }
             children = children->next;
         }
@@ -449,7 +474,7 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
                     printf("store i32 %%%d, i32* %%%s\n", temporary, symbol->identifier);
                 } break;
                 case SymbolParam: {
-                    printf("%%%s = add i32 %%%d, i32 0\n", id->token, temporary);
+                    printf("store i32 %%%d, i32* %%.param_%s\n", temporary, symbol->identifier);
                 } break;
                 default:
                     break;
@@ -470,25 +495,25 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
                     print_codegen_type(statement->type);
                     printf(" %%%d, ", tmp1);
                     print_codegen_type(statement->type);
-                    printf("* @%s", symbol->identifier);
+                    printf("* @%s\n", symbol->identifier);
                 } break;
                 case SymbolLocalVar: {
                     printf("store ");
                     print_codegen_type(statement->type);
                     printf(" %%%d, ", tmp1);
                     print_codegen_type(statement->type);
-                    printf("* %%%s", symbol->identifier);
+                    printf("* %%%s\n", symbol->identifier);
                 } break;
                 case SymbolParam: {
-                    printf("%%%s = add ", id->token);
+                    printf("store ");
                     print_codegen_type(statement->type);
                     printf(" %%%d, ", tmp1);
-                    print_type_zero(statement->type);
+                    print_codegen_type(statement->type);
+                    printf("* %%.param_%s\n", symbol->identifier);
                 } break;
                 default:
                     break;
             }
-            printf("\n");
         } break;
         default:
             break;
@@ -526,35 +551,25 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
                     print_codegen_type(expression->type);
                     printf(", ");
                     print_codegen_type(expression->type);
-                    printf("* @%s", expression->token);
+                    printf("* @%s\n", symbol->identifier);
                 } break;
                 case SymbolLocalVar: {
                     printf("%%%d = load ", temporary);
                     print_codegen_type(expression->type);
                     printf(", ");
                     print_codegen_type(expression->type);
-                    printf("* %%%s", expression->token);
+                    printf("* %%%s\n", symbol->identifier);
                 } break;
                 case SymbolParam: {
-                    printf("%%%d = ", temporary);
-                    switch (expression->type) {
-                        case TypeInteger: {
-                            printf("add ");
-                        } break;
-                        case TypeFloat32: {
-                            printf("fadd ");
-                        } break;
-                        default:
-                            break;
-                    }
+                    printf("%%%d = load ", temporary);
                     print_codegen_type(expression->type);
-                    printf(" %%%s, ", expression->token);
-                    print_type_zero(expression->type);
+                    printf(", ");
+                    print_codegen_type(expression->type);
+                    printf("* %%.param_%s\n", symbol->identifier);
                 } break;
                 default:
                     break;
             }
-            printf("\n");
             tmp = temporary;
             temporary++;
         } break;
