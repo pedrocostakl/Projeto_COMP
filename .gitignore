@@ -3,6 +3,8 @@
 *.txt
 *.ll
 *.s
+*.tex
+*.log
 
 lexer
 gocompiler

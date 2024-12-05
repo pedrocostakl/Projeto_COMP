@@ -17,12 +17,12 @@
 #define FORMAT_BOOL_FALSE      "@.format_bool_false"
 #define FORMAT_STRLIT          "@.format_strlit"
 
-extern struct symbol_list_t *global_symbol_table;
-
 static int temporary;
 static unsigned int label_num;
 static enum category_t prev_category;
 static struct node_t *global_program;
+
+extern struct symbol_list_t *global_symbol_table;
 
 enum label_type_t {
     LabelThen = 0,
