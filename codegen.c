@@ -645,7 +645,12 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             int tmp1 = codegen_expression(expr, scope);
             int tmp2 = codegen_expression(getchild(expression, 1), scope);
             print_tab();
-            printf("%%%d = icmp eq ", temporary);
+            printf("%%%d = ", temporary);
+            if (expr->type != TypeFloat32) {
+                printf("icmp eq ");
+            } else {
+                printf("fcmp oeq ");
+            }
             print_codegen_type(expr->type);
             printf(" %%%d, %%%d\n", tmp1, tmp2);
             tmp = temporary;
@@ -656,7 +661,12 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             int tmp1 = codegen_expression(expr, scope);
             int tmp2 = codegen_expression(getchild(expression, 1), scope);
             print_tab();
-            printf("%%%d = icmp ne ", temporary);
+            printf("%%%d = ", temporary);
+            if (expr->type != TypeFloat32) {
+                printf("icmp ne ");
+            } else {
+                printf("fcmp une ");
+            }
             print_codegen_type(expr->type);
             printf(" %%%d, %%%d\n", tmp1, tmp2);
             tmp = temporary;
@@ -667,7 +677,12 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             int tmp1 = codegen_expression(expr, scope);
             int tmp2 = codegen_expression(getchild(expression, 1), scope);
             print_tab();
-            printf("%%%d = icmp slt ", temporary);
+            printf("%%%d = ", temporary);
+            if (expr->type != TypeFloat32) {
+                printf("icmp slt ");
+            } else {
+                printf("fcmp olt ");
+            }
             print_codegen_type(expr->type);
             printf(" %%%d, %%%d\n", tmp1, tmp2);
             tmp = temporary;
@@ -678,7 +693,12 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             int tmp1 = codegen_expression(expr, scope);
             int tmp2 = codegen_expression(getchild(expression, 1), scope);
             print_tab();
-            printf("%%%d = icmp sgt ", temporary);
+            printf("%%%d = ", temporary);
+            if (expr->type != TypeFloat32) {
+                printf("icmp sgt ");
+            } else {
+                printf("fcmp ogt ");
+            }
             print_codegen_type(expr->type);
             printf(" %%%d, %%%d\n", tmp1, tmp2);
             tmp = temporary;
@@ -689,7 +709,12 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             int tmp1 = codegen_expression(expr, scope);
             int tmp2 = codegen_expression(getchild(expression, 1), scope);
             print_tab();
-            printf("%%%d = icmp sle ", temporary);
+            printf("%%%d = ", temporary);
+            if (expr->type != TypeFloat32) {
+                printf("icmp sle ");
+            } else {
+                printf("fcmp ole ");
+            }
             print_codegen_type(expr->type);
             printf(" %%%d, %%%d\n", tmp1, tmp2);
             tmp = temporary;
@@ -700,7 +725,12 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             int tmp1 = codegen_expression(expr, scope);
             int tmp2 = codegen_expression(getchild(expression, 1), scope);
             print_tab();
-            printf("%%%d = icmp sge ", temporary);
+            printf("%%%d = ", temporary);
+            if (expr->type != TypeFloat32) {
+                printf("icmp sge ");
+            } else {
+                printf("fcmp oge ");
+            }
             print_codegen_type(expr->type);
             printf(" %%%d, %%%d\n", tmp1, tmp2);
             tmp = temporary;
