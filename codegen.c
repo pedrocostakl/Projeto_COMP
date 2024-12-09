@@ -53,30 +53,37 @@ void codegen_program(struct node_t *program) {
     label_num = 0;
 
     // declarar funções I/O
+    printf("; C language I/O functions\n");
     printf("declare i32 @printf(i8*, ...)\n");
     printf("declare i32 @atoi(i8*)\n\n");
 
     // declarar formatos de print
+    printf("; global string literals responsible for the printf formats\n");
     printf("%s = private constant [4 x i8] c\"%%d\\0A\\00\"\n", FORMAT_INT);
     printf("%s = private constant [6 x i8] c\"%%.8f\\0A\\00\"\n", FORMAT_FLOAT32);
     printf("%s = private constant [6 x i8] c\"true\\0A\\00\"\n", FORMAT_BOOL_TRUE);
     printf("%s = private constant [7 x i8] c\"false\\0A\\00\"\n", FORMAT_BOOL_FALSE);
     printf("%s = private constant [4 x i8] c\"%%s\\0A\\00\"\n", FORMAT_STRLIT);
+    printf("\n");
 
     // declarar string literals globais
+    printf("; string literals used in the program\n");
     codegen_string_literals(program);
     printf("\n");
 
     // declarar variáveis globais de argumentos
+    printf("; global program arguments\n");
     printf("@.argv = global i8** null\n");
     printf("\n");
 
     int var_num = 0;
-    struct node_list_t *children;
+    struct symbol_list_t *symbol;
+
     // variáveis globais
-    children = program->children->next;
-    while (children != NULL) {
-        struct node_t *node = children->node;
+    printf("; global program variables\n");
+    symbol = global_symbol_table->next;
+    while (symbol != NULL) {
+        struct node_t *node = symbol->node;
         switch (node->category) {
             case VarDecl: {
                 codegen_var(node, global_symbol_table, 1);
@@ -85,16 +92,16 @@ void codegen_program(struct node_t *program) {
             default:
                 break;
         }
-        children = children->next;
+        symbol = symbol->next;
     }
     if (var_num > 0) {
         printf("\n");
     }
 
     // definição de funções
-    children = program->children->next;
-    while (children != NULL) {
-        struct node_t *node = children->node;
+    symbol = global_symbol_table->next;
+    while (symbol != NULL) {
+        struct node_t *node = symbol->node;
         switch (node->category) {
             case FuncDecl: {
                 codegen_function(node);
@@ -102,10 +109,11 @@ void codegen_program(struct node_t *program) {
             default:
                 break;
         }
-        children = children->next;
+        symbol = symbol->next;
     }
 
     // entry point
+    printf("; entry point\n");
     struct symbol_list_t *main_symbol = search_symbol(global_symbol_table, "main");
     if (main_symbol != NULL && main_symbol->node->category == FuncDecl) {
         printf("define i32 @main(i32 %%argc, i8** %%argv) {\n"
