@@ -14,6 +14,7 @@ struct symbol_list_t {
 	struct node_t *node;
 	struct symbol_list_t *next;
 	struct symbol_list_t *scope;
+	int used;
 };
 
 struct symbol_list_t *insert_symbol(struct symbol_list_t *table, char *identifier, enum type_t type, struct node_t *node);

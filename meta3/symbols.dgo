@@ -11,6 +11,8 @@ func fnc() int {
     return fa;
 }
 
+func noreturn(fnc bool) int {}
+
 var ia, ib int;
 
 var (fa, fb float32;);

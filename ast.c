@@ -21,7 +21,7 @@ struct node_t *newnode(enum category_t category, struct pass_t pass) {
     new->category = category;
     new->type = None;
     new->token = pass.token;
-    new->line = pass.line;
+    new->line = pass.line + 1;
     new->column = pass.column;
     new->children = malloc(sizeof(struct node_list_t));
     new->children->next = NULL;
@@ -40,11 +40,13 @@ struct node_t *newintermediate() {
     return new;
 }
 
-struct node_t *newcategory(enum category_t category) {
+struct node_t *newcategory(enum category_t category, struct pass_t pass) {
     struct node_t *new = malloc(sizeof(struct node_t));
     new->category = category;
     new->type = None;
     new->token = NULL;
+    new->line = pass.line + 1;
+    new->column = pass.column;
     new->children = malloc(sizeof(struct node_list_t));
     new->children->next = NULL;
     new->children->node = NULL;
@@ -64,8 +66,8 @@ void addchild(struct node_t *parent, struct node_t *child) {
         children->next = new;
     } else {
         children->next = child->children->next;
-        free(child);
         free(child->children);
+        free(child);
     }
     
 }
@@ -132,10 +134,19 @@ void show_node(struct node_t *root, enum category_t prev_category, int depth, in
                     if (root->category == Identifier) {
                         struct symbol_list_t *symbol = search_symbol(global_symbol_table, root->token);
                         if (symbol != NULL) {
-                            if (symbol->node->category == FuncDecl) {
-                                printf("(");
-                                print_parameters(symbol->node);
-                                printf(")");
+                            // evitar dar print params da func como -()
+                            if (symbol->node->category == FuncDecl && prev_category != FuncHeader && prev_category != ParamDecl) {
+                               if (root->type == Undefined) {
+                                // If type is Undefined, prioritize printing the type
+                                print_type(root->type);
+                                } 
+                                else {
+                                    // Print function parameters if valid
+                                    printf("(");
+                                    print_parameters(symbol->node);
+                                    printf(")");
+                                }
+
                             } else {
                                 print_type(root->type);
                             }
@@ -147,11 +158,18 @@ void show_node(struct node_t *root, enum category_t prev_category, int depth, in
                     }
                 } else if (root->category == Identifier) {
                     struct symbol_list_t *symbol = search_symbol(global_symbol_table, root->token);
-                    if (symbol != NULL && symbol->node->category == FuncDecl && prev_category != FuncHeader) {
-                        printf(" - ");
+                    if (symbol != NULL && symbol->node->category == FuncDecl && prev_category != FuncHeader
+                    && prev_category != ParamDecl) {
+                          printf(" - ");
+                      if (root->type == Undefined) {
+                        // Print undefined type
+                        print_type(root->type);
+                    } else {
+                        // Print function parameters
                         printf("(");
                         print_parameters(symbol->node);
                         printf(")");
+                    }
                     }
                 }
                 printf("\n");

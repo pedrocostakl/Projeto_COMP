@@ -1,0 +1,44 @@
+package main;
+
+/* 
+    Os todos os tipos de parametros devem aparecer na tabela de simbolos global:
+    (int,int,float32)
+
+    No entanto, na tabela de simbolos local da funcao, quando existem simbolos 
+    repetidos deve aparecer apenas o primeiro parametro que aparece com esse simbolo:
+    ===== Function func_(int,int,float32) Symbol Table =====
+    return		string
+    a		int	param
+    b		float32	param
+*/
+func func_(a int, a int, b float32) string { 
+    return; 
+}
+
+var a float32;
+
+/*
+    Parametros podem ter o mesmo nome que variaveis globais,
+    porque o scope eh diferente.
+    Mas variaveis locais nao podem ter o mesmo nome de 
+    parametros da mesma funcao (ou de outras variaveis locais)
+*/
+func func2(a float32) {
+    var a int;
+    return a;
+}
+
+func main() {
+    func2(1);
+
+    fmt.Println("Teste");
+
+    var b int;
+
+    /*
+        O tipo de um assign é sempre o tipo do filho esquerdo,
+        mesmo que o filho direito seja undef.
+    */
+    b = b + func3();
+    a = 1.0 / main;
+}

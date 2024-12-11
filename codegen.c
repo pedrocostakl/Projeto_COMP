@@ -66,10 +66,10 @@ void codegen_program(struct node_t *program) {
     // entry point
     struct symbol_list_t *main_symbol = search_symbol(global_symbol_table, "main");
     if (main_symbol != NULL && main_symbol->node->category == FuncDecl) {
-        printf("define i32 @main() {\n"
+        /*printf("define i32 @main() {\n"
                "  %%1 = call i32 @_main(i32 0)\n"
                "  ret i32 %%1\n"
-               "}\n");
+               "}\n");*/
     }
 }
 
@@ -113,7 +113,7 @@ void codegen_parameters(struct node_t *parameters, struct symbol_list_t *scope) 
             struct symbol_list_t *param_symbol = search_symbol(scope, getchild(param, 1)->token);
             if (param_symbol != NULL) {
                 if (num > 0) {
-                    printf(", ");
+                    printf(",");
                 }
                 print_codegen_type(param_symbol->type);
                 printf(" %%%s", param_symbol->identifier);
@@ -281,7 +281,7 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             while (children != NULL) {
                 struct node_t *expr = children->node;
                 if (num > 0) {
-                    printf(", ");
+                    printf(",");
                 }
                 print_codegen_type(expr->type);
                 printf(" %%%d", tmps[i]);

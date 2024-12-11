@@ -10,7 +10,7 @@
 
     #include "ast.h"
     #include "semantics.h"
-    #include "codegen.h"
+    
 
     #include "y.tab.h"
     
@@ -65,7 +65,7 @@ else                                        { print_token("ELSE"); semicolon = 0
 for                                         { print_token("FOR"); semicolon = 0; if (parse) return FOR; }
 if                                          { print_token("IF"); semicolon = 0; if (parse) return IF; }
 package                                     { print_token("PACKAGE"); semicolon = 0; if (parse) return PACKAGE; }
-return                                      { print_token("RETURN"); semicolon = 1; if (parse) return RETURN; }
+return                                      { print_token("RETURN"); semicolon = 1; PASS_TOKEN(); if (parse) return RETURN; }
 var                                         { print_token("VAR"); semicolon = 0; if (parse) return VAR; }
 func                                        { print_token("FUNC"); semicolon = 0; if (parse) return FUNC; }
 
@@ -94,13 +94,14 @@ func                                        { print_token("FUNC"); semicolon = 0
 "&&"                                        { print_token("AND"); semicolon = 0; if (parse) return AND; }
 "||"                                        { print_token("OR"); semicolon = 0; if (parse) return OR; }
 
+
 int                                         { print_token("INT"); semicolon = 0; if (parse) return INT; } /* Types */
 float32                                     { print_token("FLOAT32"); semicolon = 0; if (parse) return FLOAT32; }
 bool                                        { print_token("BOOL"); semicolon = 0; if (parse) return BOOL; }
 string                                      { print_token("STRING"); semicolon = 0; if (parse) return STR; }
 
 fmt.Println                                 { print_token("PRINT"); semicolon = 0; if (parse) return PRINT; } /* Functions */
-strconv.Atoi                                { print_token("PARSEINT"); semicolon = 0; if (parse) return PARSEINT; }
+strconv\.Atoi                                { print_token("PARSEINT"); semicolon = 0; if (parse) return PARSEINT; }
 os.Args                                     { print_token("CMDARGS"); semicolon = 0; if (parse) return CMDARGS; }
 
 {reserved}                                  { reserved(); if (parse) return RESERVED; } /* Reserved keywords */
@@ -228,25 +229,20 @@ int main(int argc, char **argv) {
             show_ast_type = 1;
             yyparse();
             if (syntax_error_flag == 0) {
-                if (check_program(program) == 0) {
+                if(check_program(program)==0){
                     show_symbol_table();
                     show(program, 1);
+               
+                }
+                else{
+                     //show_symbol_table();//só para debug
+                     //show(program, 1);
                 }
             }
             clean(program);
             return 0;
         }
     }
-    parse = 1;
-    show_ast_type = 1;
-    yyparse();
-    if (syntax_error_flag == 0) {
-        check_program(program);
-        show_symbol_table();
-        show(program, 1);
-        codegen_program(program);
-    }
-    clean(program);
     return 0;
 }
 
@@ -258,7 +254,7 @@ void user_action() {
     tok_column = column;
     column += yyleng;
     last_action_newline = 0;
-
+    
     yylval.pass.token = NULL;
     yylval.pass.line = tok_line;
     yylval.pass.column = tok_column;

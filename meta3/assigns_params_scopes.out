@@ -1,0 +1,87 @@
+Line 14, column 19: Symbol a already defined
+Line 15, column 5: Incompatible type void in return statement
+Line 27, column 9: Symbol a already defined
+Line 28, column 12: Incompatible type float32 in return statement
+Line 32, column 5: Cannot find symbol func2(int)
+Line 42, column 13: Cannot find symbol func3()
+Line 42, column 11: Operator + cannot be applied to types int, undef
+Line 42, column 7: Operator = cannot be applied to types int, undef
+Line 43, column 15: Cannot find symbol main
+Line 43, column 13: Operator / cannot be applied to types float32, undef
+Line 43, column 7: Operator = cannot be applied to types float32, undef
+===== Global Symbol Table =====
+func_	(int,int,float32)	string
+a		float32
+func2	(float32)	none
+main	()	none
+
+===== Function func_(int,int,float32) Symbol Table =====
+return		string
+a		int	param
+b		float32	param
+
+===== Function func2(float32) Symbol Table =====
+return		none
+a		float32	param
+
+===== Function main() Symbol Table =====
+return		none
+b		int
+
+Program
+..FuncDecl
+....FuncHeader
+......Identifier(func_)
+......String
+......FuncParams
+........ParamDecl
+..........Int
+..........Identifier(a)
+........ParamDecl
+..........Int
+..........Identifier(a)
+........ParamDecl
+..........Float32
+..........Identifier(b)
+....FuncBody
+......Return
+..VarDecl
+....Float32
+....Identifier(a)
+..FuncDecl
+....FuncHeader
+......Identifier(func2)
+......FuncParams
+........ParamDecl
+..........Float32
+..........Identifier(a)
+....FuncBody
+......VarDecl
+........Int
+........Identifier(a)
+......Return
+........Identifier(a) - float32
+..FuncDecl
+....FuncHeader
+......Identifier(main)
+......FuncParams
+....FuncBody
+......Call - undef
+........Identifier(func2) - undef
+........Natural(1) - int
+......Print
+........StrLit("Teste") - string
+......VarDecl
+........Int
+........Identifier(b)
+......Assign - int
+........Identifier(b) - int
+........Add - undef
+..........Identifier(b) - int
+..........Call - undef
+............Identifier(func3) - undef
+......Assign - float32
+........Identifier(a) - float32
+........Div - undef
+..........Decimal(1.0) - float32
+..........Identifier(main) - undef
