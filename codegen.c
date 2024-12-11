@@ -40,7 +40,6 @@ static void codegen_block(struct node_t *block, struct symbol_list_t *scope);
 static int codegen_statement(struct node_t *statement, struct symbol_list_t *scope);
 static int codegen_expression(struct node_t *expression, struct symbol_list_t *scope);
 static void codegen_string_literals(struct node_t *parent);
-
 static void print_codegen_type(enum type_t type);
 static void print_label(unsigned int num, enum label_type_t label_type);
 static void print_type_zero(enum type_t type);

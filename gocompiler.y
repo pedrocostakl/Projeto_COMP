@@ -306,7 +306,7 @@ statement
 }
 | RETURN
 {
-    $$ = newcategory(Return);
+    $$ = newnode(Return, $1);
 }
 | func_invocation
 {
