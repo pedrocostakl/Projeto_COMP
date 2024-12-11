@@ -83,15 +83,6 @@ struct node_t *getchild(struct node_t *parent, int position) {
     return NULL;
 }
 
-void addChildBeginning(struct node_t *parent, struct node_t *child) {
-    
-
-    struct node_list_t *new = malloc(sizeof(struct node_list_t));
-    new->node = child;
-    new->next = parent->children;
-    parent->children = new;
-}
-
 void show(struct node_t *root, int anotate) {
     show_node(root, root->category, 0, 0, anotate);
 }

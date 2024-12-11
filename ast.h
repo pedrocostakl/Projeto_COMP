@@ -98,12 +98,9 @@ struct node_t *newintermediate();
 struct node_t *newcategory(enum category_t category);
 void addchild(struct node_t *parent, struct node_t *child);
 struct node_t *getchild(struct node_t *parent, int position);
-void addChildBeginning(struct node_t *parent, struct node_t *child);
 void show(struct node_t *root, int anotate);
 void clean(struct node_t *root);
 
 void print_type(const enum type_t type);
-int removeIntermediates(struct node_t *root,struct node_list_t *previous, struct node_list_t *next, struct node_t * previous_node);
-void remove_intermediate_nodes(struct node_t *node);
 
 #endif /* AST_H */
