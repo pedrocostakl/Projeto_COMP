@@ -140,11 +140,11 @@ void report_unused_symbols(struct symbol_list_t *symbol_table, int is_global) {
                    //printf("%d\n",symbol->node->category);
         }
         } else {
-            printf("Skipping symbol with NULL node.\n");
+            //printf("Skipping symbol with NULL node.\n");
         }
 
         if (symbol->scope != NULL) {
-            printf("Entering scope of symbol: %s\n", symbol->identifier);
+            //printf("Entering scope of symbol: %s\n", symbol->identifier);
             report_unused_symbols(symbol->scope, 0);
         }
 
@@ -547,7 +547,7 @@ void check_statement(struct symbol_list_t *scope, struct node_t *parent, enum ty
                 struct node_t *node = getchild(parent, 0);
                 check_expressions(scope, node,0);
                 if(node->type == Undefined){ //só imprime expr válidas
-                    printf("Line %d, column %d: Incompatible type ",parent->line, parent->column);
+                    printf("Line %d, column %d: Incompatible type ",node->line, node->column);
                     print_type(node->type);
                     printf(" in fmt.Println statement");
                     printf("\n");
@@ -656,6 +656,7 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                 /*printf("Line: %d Column:%d notIncorrectlyApplied = %d\n", function_id->line, function_id->column,notIncorrectlyApplied);*/
                 printf("%s\n", error_message);
                 parent->type = Undefined;
+                function_id->type = Undefined;
                 parent->errorOperationOccurred = 1;
                 semantic_errors++;
                 return;
@@ -694,6 +695,7 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                 //printf("Line: %d Column:%d notIncorrectlyApplied = %d\n", function_id->line, function_id->column,notIncorrectlyApplied);
                 printf("%s\n", error_message);
                 parent->type = Undefined;
+                function_id->type = Undefined;
                 semantic_errors++;
                 parent->errorOperationOccurred = 1;
             } else {
@@ -749,6 +751,19 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
             struct node_t *node2 = getchild(parent, 1);
             check_expressions(scope, node1,0);
             check_expressions(scope, node2,0);
+
+             if(node1->category == Identifier){
+                struct symbol_list_t *symbol = search_symbol(global_symbol_table, node1->token);
+                if(symbol != NULL && symbol->node->category == FuncDecl){
+                    node1->type = Undefined;
+                }
+            }
+             if(node2->category == Identifier){
+                struct symbol_list_t *symbol = search_symbol(global_symbol_table, node2->token);
+                if(symbol != NULL && symbol->node->category == FuncDecl){
+                    node2->type = Undefined;
+                }
+            }
             if (node1->type == node2->type &&
                 (node1->type == TypeBool)) {
                 parent->type = TypeBool;
@@ -775,6 +790,19 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
             struct node_t *node2 = getchild(parent, 1);
             check_expressions(scope, node1,0);
             check_expressions(scope, node2,0);
+
+             if(node1->category == Identifier){
+                struct symbol_list_t *symbol = search_symbol(global_symbol_table, node1->token);
+                if(symbol != NULL && symbol->node->category == FuncDecl){
+                    node1->type = Undefined;
+                }
+            }
+             if(node2->category == Identifier){
+                struct symbol_list_t *symbol = search_symbol(global_symbol_table, node2->token);
+                if(symbol != NULL && symbol->node->category == FuncDecl){
+                    node2->type = Undefined;
+                }
+            }
             if (node1->type == node2->type &&
                 (node1->type == TypeBool)) {
                 parent->type = TypeBool;
@@ -802,6 +830,19 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
             struct node_t *node2 = getchild(parent, 1);
             check_expressions(scope, node1,0);
             check_expressions(scope, node2,0);
+
+             if(node1->category == Identifier){
+                struct symbol_list_t *symbol = search_symbol(global_symbol_table, node1->token);
+                if(symbol != NULL && symbol->node->category == FuncDecl){
+                    node1->type = Undefined;
+                }
+            }
+             if(node2->category == Identifier){
+                struct symbol_list_t *symbol = search_symbol(global_symbol_table, node2->token);
+                if(symbol != NULL && symbol->node->category == FuncDecl){
+                    node2->type = Undefined;
+                }
+            }
             if (node1->type == node2->type) {
                 parent->type = TypeBool;
             } else {
@@ -831,6 +872,19 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
             struct node_t *node2 = getchild(parent, 1);
             check_expressions(scope, node1,0);
             check_expressions(scope, node2,0);
+
+             if(node1->category == Identifier){
+                struct symbol_list_t *symbol = search_symbol(global_symbol_table, node1->token);
+                if(symbol != NULL && symbol->node->category == FuncDecl){
+                    node1->type = Undefined;
+                }
+            }
+             if(node2->category == Identifier){
+                struct symbol_list_t *symbol = search_symbol(global_symbol_table, node2->token);
+                if(symbol != NULL && symbol->node->category == FuncDecl){
+                    node2->type = Undefined;
+                }
+            }
             if (node1->type == node2->type) {
                 parent->type = TypeBool;
             } else {
@@ -858,6 +912,19 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
             struct node_t *node2 = getchild(parent, 1);
             check_expressions(scope, node1,0);
             check_expressions(scope, node2,0);
+
+             if(node1->category == Identifier){
+                struct symbol_list_t *symbol = search_symbol(global_symbol_table, node1->token);
+                if(symbol != NULL && symbol->node->category == FuncDecl){
+                    node1->type = Undefined;
+                }
+            }
+             if(node2->category == Identifier){
+                struct symbol_list_t *symbol = search_symbol(global_symbol_table, node2->token);
+                if(symbol != NULL && symbol->node->category == FuncDecl){
+                    node2->type = Undefined;
+                }
+            }
             if (node1->type == node2->type &&
                 (node1->type == TypeInteger || node1->type == TypeFloat32)) {
                 parent->type = TypeBool;
@@ -886,6 +953,19 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
             struct node_t *node2 = getchild(parent, 1);
             check_expressions(scope, node1,0);
             check_expressions(scope, node2,0);
+
+             if(node1->category == Identifier){
+                struct symbol_list_t *symbol = search_symbol(global_symbol_table, node1->token);
+                if(symbol != NULL && symbol->node->category == FuncDecl){
+                    node1->type = Undefined;
+                }
+            }
+             if(node2->category == Identifier){
+                struct symbol_list_t *symbol = search_symbol(global_symbol_table, node2->token);
+                if(symbol != NULL && symbol->node->category == FuncDecl){
+                    node2->type = Undefined;
+                }
+            }
             if (node1->type == node2->type &&
                 (node1->type == TypeInteger || node1->type == TypeFloat32)) {
                 parent->type = TypeBool;
@@ -914,6 +994,19 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
             struct node_t *node2 = getchild(parent, 1);
             check_expressions(scope, node1,0);
             check_expressions(scope, node2,0);
+
+             if(node1->category == Identifier){
+                struct symbol_list_t *symbol = search_symbol(global_symbol_table, node1->token);
+                if(symbol != NULL && symbol->node->category == FuncDecl){
+                    node1->type = Undefined;
+                }
+            }
+             if(node2->category == Identifier){
+                struct symbol_list_t *symbol = search_symbol(global_symbol_table, node2->token);
+                if(symbol != NULL && symbol->node->category == FuncDecl){
+                    node2->type = Undefined;
+                }
+            }
             if (node1->type == node2->type &&
                 (node1->type == TypeInteger || node1->type == TypeFloat32)) {
                 parent->type = TypeBool;
@@ -942,6 +1035,20 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
             struct node_t *node2 = getchild(parent, 1);
             check_expressions(scope, node1,0);
             check_expressions(scope, node2,0);
+
+             if(node1->category == Identifier){
+                struct symbol_list_t *symbol = search_symbol(global_symbol_table, node1->token);
+                if(symbol != NULL && symbol->node->category == FuncDecl){
+                    node1->type = Undefined;
+                }
+            }
+             if(node2->category == Identifier){
+                struct symbol_list_t *symbol = search_symbol(global_symbol_table, node2->token);
+                if(symbol != NULL && symbol->node->category == FuncDecl){
+                    node2->type = Undefined;
+                }
+            }
+
             if (node1->type == Undefined || node2->type == Undefined) {
                 parent->type = Undefined;
             } 
@@ -975,6 +1082,19 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
             struct node_t *node2 = getchild(parent, 1);
             check_expressions(scope, node1,0);
             check_expressions(scope, node2,0);
+
+             if(node1->category == Identifier){
+                struct symbol_list_t *symbol = search_symbol(global_symbol_table, node1->token);
+                if(symbol != NULL && symbol->node->category == FuncDecl){
+                    node1->type = Undefined;
+                }
+            }
+             if(node2->category == Identifier){
+                struct symbol_list_t *symbol = search_symbol(global_symbol_table, node2->token);
+                if(symbol != NULL && symbol->node->category == FuncDecl){
+                    node2->type = Undefined;
+                }
+            }
             if (node1->type == node2->type &&
                 (node1->type == TypeInteger || node1->type == TypeFloat32)) {
                 if(node1->type== TypeInteger){
@@ -1005,6 +1125,18 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
             struct node_t *node2 = getchild(parent, 1);
             check_expressions(scope, node1,0);
             check_expressions(scope, node2,0);
+            if(node1->category == Identifier){
+                struct symbol_list_t *symbol = search_symbol(global_symbol_table, node1->token);
+                if(symbol != NULL &&symbol->node->category == FuncDecl){
+                    node1->type = Undefined;
+                }
+            }
+             if(node2->category == Identifier){
+                struct symbol_list_t *symbol = search_symbol(global_symbol_table, node2->token);
+                if(symbol != NULL && symbol->node->category == FuncDecl){
+                    node2->type = Undefined;
+                }
+            }
             if (node1->type == node2->type &&
                 (node1->type == TypeInteger || node1->type == TypeFloat32)) {
                 if(node1->type== TypeInteger){
@@ -1033,6 +1165,18 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
             struct node_t *node2 = getchild(parent, 1);
             check_expressions(scope, node1,0);
             check_expressions(scope, node2,0);
+             if(node1->category == Identifier){
+                struct symbol_list_t *symbol = search_symbol(global_symbol_table, node1->token);
+                if(symbol != NULL && symbol->node->category == FuncDecl){
+                    node1->type = Undefined;
+                }
+            }
+             if(node2->category == Identifier){
+                struct symbol_list_t *symbol = search_symbol(global_symbol_table, node2->token);
+                if(symbol != NULL && symbol->node->category == FuncDecl){
+                    node2->type = Undefined;
+                }
+            }
             if (node1->type == node2->type &&
                 (node1->type == TypeInteger || node1->type == TypeFloat32)) {
                 if(node1->type== TypeInteger){
@@ -1061,6 +1205,18 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
             struct node_t *node2 = getchild(parent, 1);
             check_expressions(scope, node1,0);
             check_expressions(scope, node2,0);
+             if(node1->category == Identifier){
+                struct symbol_list_t *symbol = search_symbol(global_symbol_table, node1->token);
+                if(symbol != NULL && symbol->node->category == FuncDecl){
+                    node1->type = Undefined;
+                }
+            }
+             if(node2->category == Identifier){
+                struct symbol_list_t *symbol = search_symbol(global_symbol_table, node2->token);
+                if(symbol != NULL && symbol->node->category == FuncDecl){
+                    node2->type = Undefined;
+                }
+            }
             if (node1->type == node2->type &&
                 (node1->type == TypeInteger || node1->type == TypeFloat32)) {
                 if(node1->type== TypeInteger){
@@ -1089,6 +1245,18 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
             struct node_t *node2 = getchild(parent, 1);
             check_expressions(scope, node1,0);
             check_expressions(scope, node2,0);
+             if(node1->category == Identifier){
+                struct symbol_list_t *symbol = search_symbol(global_symbol_table, node1->token);
+                if(symbol != NULL && symbol->node->category == FuncDecl){
+                    node1->type = Undefined;
+                }
+            }
+             if(node2->category == Identifier){
+                struct symbol_list_t *symbol = search_symbol(global_symbol_table, node2->token);
+                if(symbol != NULL && symbol->node->category == FuncDecl){
+                    node2->type = Undefined;
+                }
+            }
 
             if (node1->type == Undefined || node2->type == Undefined) {
                 parent->type = Undefined;
@@ -1114,7 +1282,12 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
         case Not: {
             struct node_t *node1 = getchild(parent, 0);
             check_expressions(scope, node1,0);
-
+            if(node1->category == Identifier){
+                struct symbol_list_t *symbol = search_symbol(global_symbol_table, node1->token);
+                if(symbol != NULL && symbol->node->category == FuncDecl){
+                    node1->type = Undefined;
+                }
+            }
             if (node1->type == Undefined) {
                 parent->type = Undefined;
             } else if (node1->type!=TypeBool) {

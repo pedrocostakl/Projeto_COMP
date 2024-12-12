@@ -129,13 +129,32 @@ void show_node(struct node_t *root, enum category_t prev_category, int depth, in
                     break;
                 }
                 // anotação da árvore
-                if (root->type > None && root->category != ParamDecl) {
+                if (root->type > None && root->category != ParamDecl && root->category != VarDecl) {
                     printf(" - ");
                     if (root->category == Identifier) {
                         struct symbol_list_t *symbol = search_symbol(global_symbol_table, root->token);
                         if (symbol != NULL) {
+                           /*switch (symbol->node->category)
+                            {
+                            case FuncDecl:
+                                printf("FuncDecl");
+                                break;
+                            case VarDecl:
+                                  printf("VarDecl");
+                                break;
+                            case ParamDecl:
+                                  printf("ParamDecl");
+                                break;
+                            case FuncHeader:
+                                printf("FuncHeader");
+                                break;
+                            default:
+                                printf("%d", symbol->node->category);
+                                break;
+                            }*/
                             // evitar dar print params da func como -()
-                            if (symbol->node->category == FuncDecl && prev_category != FuncHeader && prev_category != ParamDecl) {
+                            if (symbol->node->category == FuncDecl && prev_category != FuncHeader 
+                            && prev_category != ParamDecl && prev_category != VarDecl && prev_category != Call) {
                                if (root->type == Undefined) {
                                 // If type is Undefined, prioritize printing the type
                                 print_type(root->type);
@@ -159,7 +178,7 @@ void show_node(struct node_t *root, enum category_t prev_category, int depth, in
                 } else if (root->category == Identifier) {
                     struct symbol_list_t *symbol = search_symbol(global_symbol_table, root->token);
                     if (symbol != NULL && symbol->node->category == FuncDecl && prev_category != FuncHeader
-                    && prev_category != ParamDecl) {
+                    && prev_category != ParamDecl && prev_category != VarDecl) {
                           printf(" - ");
                       if (root->type == Undefined) {
                         // Print undefined type

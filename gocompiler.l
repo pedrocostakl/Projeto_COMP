@@ -229,15 +229,18 @@ int main(int argc, char **argv) {
             show_ast_type = 1;
             yyparse();
             if (syntax_error_flag == 0) {
-                if(check_program(program)==0){
+                check_program(program);
+                show_symbol_table();
+                show(program, 1);
+                /*if(check_program(program)==0){
                     show_symbol_table();
                     show(program, 1);
                
                 }
                 else{
-                     //show_symbol_table();//só para debug
-                     //show(program, 1);
-                }
+                     show_symbol_table();//só para debug
+                     show(program, 1);
+                }*/
             }
             clean(program);
             return 0;
