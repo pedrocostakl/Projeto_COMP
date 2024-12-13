@@ -67,6 +67,7 @@
 %token<pass> CMDARGS
 %token<pass> RESERVED
 
+
 %token<pass> IDENTIFIER STRLIT NATURAL DECIMAL
 
 %type<node> program type declarations var_declaration var_spec func_declaration func_header parameters parameter
@@ -94,12 +95,20 @@
 program
 : PACKAGE IDENTIFIER SEMICOLON declarations
 {
-    $$ = program = newcategory(Program);
+    struct pass_t pass;
+    pass.token = strdup("return");  // Optionally set the token to "return"
+    pass.line = @1.first_line;      // Use the position of the RETURN keyword
+    pass.column = @1.first_column;
+    $$ = program = newcategory(Program,pass);
     addchild(program, $4);
 }
 | PACKAGE IDENTIFIER SEMICOLON
 {
-    $$ = program = newcategory(Program);
+    struct pass_t pass;
+    pass.token = strdup("return");  // Optionally set the token to "return"
+    pass.line = @1.first_line;      // Use the position of the RETURN keyword
+    pass.column = @1.first_column;
+    $$ = program = newcategory(Program,pass);
 }
 ;
 
@@ -140,15 +149,23 @@ var_declaration
 var_spec
 : IDENTIFIER type
 {
-    $$ = newcategory(VarDecl);
+    struct pass_t pass;
+    pass.token = strdup("return");  // Optionally set the token to "return"
+    pass.line = @1.first_line;      // Use the position of the RETURN keyword
+    pass.column = @1.first_column;
+    $$ = newcategory(VarDecl,pass);
     addchild($$, $2);
     addchild($$, newnode(Identifier, $1));
 }
 | IDENTIFIER COMMA var_spec
 {
+    struct pass_t pass;
+    pass.token = strdup("return");  // Optionally set the token to "return"
+    pass.line = @1.first_line;      // Use the position of the RETURN keyword
+    pass.column = @1.first_column;
     $$ = newintermediate();
-    struct node_t *vardecl = newcategory(VarDecl);
-    addchild(vardecl, newcategory(type->category));
+    struct node_t *vardecl = newcategory(VarDecl,pass);
+    addchild(vardecl, newcategory(type->category,pass));
     addchild(vardecl, newnode(Identifier, $1));
     addchild($$, vardecl);
     addchild($$, $3);
@@ -158,7 +175,11 @@ var_spec
 func_declaration
 : FUNC func_header func_body
 {
-    $$ = newcategory(FuncDecl);
+    struct pass_t pass;
+    pass.token = strdup("return");  // Optionally set the token to "return"
+    pass.line = @1.first_line;      // Use the position of the RETURN keyword
+    pass.column = @1.first_column;
+    $$ = newcategory(FuncDecl,pass);
     addchild($$, $2);
     addchild($$, $3);
 }
@@ -167,34 +188,50 @@ func_declaration
 func_header
 : IDENTIFIER LPAR parameters RPAR type
 {
-    $$ = newcategory(FuncHeader);
+    struct pass_t pass;
+    pass.token = strdup("return");  // Optionally set the token to "return"
+    pass.line = @1.first_line;      // Use the position of the RETURN keyword
+    pass.column = @1.first_column;
+    $$ = newcategory(FuncHeader,pass);
     addchild($$, newnode(Identifier, $1));
     addchild($$, $5);
-    struct node_t *params = newcategory(FuncParams);
+    struct node_t *params = newcategory(FuncParams,pass);
     addchild(params, $3);
     addchild($$, params);
 }
 | IDENTIFIER LPAR parameters RPAR
 {
-    $$ = newcategory(FuncHeader);
+    struct pass_t pass;
+    pass.token = strdup("return");  // Optionally set the token to "return"
+    pass.line = @1.first_line;      // Use the position of the RETURN keyword
+    pass.column = @1.first_column;
+    $$ = newcategory(FuncHeader,pass);
     addchild($$, newnode(Identifier, $1));
-    struct node_t *params = newcategory(FuncParams);
+    struct node_t *params = newcategory(FuncParams,pass);
     addchild(params, $3);
     addchild($$, params);
 
 }
 | IDENTIFIER LPAR RPAR type
 {
-    $$ = newcategory(FuncHeader);
+    struct pass_t pass;
+    pass.token = strdup("return");  // Optionally set the token to "return"
+    pass.line = @1.first_line;      // Use the position of the RETURN keyword
+    pass.column = @1.first_column;
+    $$ = newcategory(FuncHeader,pass);
     addchild($$, newnode(Identifier, $1));
     addchild($$, $4);
-    addchild($$, newcategory(FuncParams));
+    addchild($$, newcategory(FuncParams,pass));
 }
 | IDENTIFIER LPAR RPAR
 {
-    $$ = newcategory(FuncHeader);
+    struct pass_t pass;
+    pass.token = strdup("return");  // Optionally set the token to "return"
+    pass.line = @1.first_line;      // Use the position of the RETURN keyword
+    pass.column = @1.first_column;
+    $$ = newcategory(FuncHeader,pass);
     addchild($$, newnode(Identifier, $1));
-    addchild($$, newcategory(FuncParams));
+    addchild($$, newcategory(FuncParams,pass));
 }
 ;
 
@@ -214,7 +251,11 @@ parameters
 parameter
 : IDENTIFIER type
 {
-    $$ = newcategory(ParamDecl);
+    struct pass_t pass;
+    pass.token = strdup("return");  // Optionally set the token to "return"
+    pass.line = @1.first_line;      // Use the position of the RETURN keyword
+    pass.column = @1.first_column;
+    $$ = newcategory(ParamDecl,pass);
     addchild($$, $2);
     addchild($$, newnode(Identifier, $1));
 }
@@ -223,12 +264,20 @@ parameter
 func_body
 : LBRACE vars_statements RBRACE
 {
-    $$ = newcategory(FuncBody);
+    struct pass_t pass;
+    pass.token = strdup("return");  // Optionally set the token to "return"
+    pass.line = @1.first_line;      // Use the position of the RETURN keyword
+    pass.column = @1.first_column;
+    $$ = newcategory(FuncBody,pass);
     addchild($$, $2);
 }
 | LBRACE RBRACE
 {
-    $$ = newcategory(FuncBody);
+    struct pass_t pass;
+    pass.token = strdup("return");  // Optionally set the token to "return"
+    pass.line = @1.first_line;      // Use the position of the RETURN keyword
+    pass.column = @1.first_column;
+    $$ = newcategory(FuncBody,pass);
 }
 ;
 
@@ -276,10 +325,14 @@ statement
 }
 | IF expr block
 {
+    struct pass_t pass;
+    pass.token = strdup("return");  // Optionally set the token to "return"
+    pass.line = @1.first_line;      // Use the position of the RETURN keyword
+    pass.column = @1.first_column;
     $$ = newnode(If, $1);
     addchild($$, $2);
     addchild($$, $3);
-    addchild($$, newcategory(Block));
+    addchild($$, newcategory(Block,pass));
 }
 | IF expr block ELSE block
 {
@@ -290,23 +343,36 @@ statement
 }
 | FOR expr block
 {
-    $$ = newcategory(For);
+    struct pass_t pass;
+    pass.token = strdup("return");  // Optionally set the token to "return"
+    pass.line = @1.first_line;      // Use the position of the RETURN keyword
+    pass.column = @1.first_column;
+    $$ = newcategory(For,pass);
     addchild($$, $2);
     addchild($$, $3);
 }
 | FOR block
 {
-    $$ = newcategory(For);
+    
+    struct pass_t pass;
+    pass.token = strdup("return");  // Optionally set the token to "return"
+    pass.line = @1.first_line;      // Use the position of the RETURN keyword
+    pass.column = @1.first_column;
+    $$ = newcategory(For,pass);
     addchild($$, $2);
 }
 | RETURN expr
 {
-    $$ = newcategory(Return);
+    struct pass_t pass;
+    pass.token = strdup("return");  // Optionally set the token to "return"
+    pass.line = @1.first_line;      // Use the position of the RETURN keyword
+    pass.column = @1.first_column;
+    $$ = newcategory(Return, pass);
     addchild($$, $2);
 }
 | RETURN
 {
-    $$ = newnode(Return, $1);
+    $$ = newcategory(Return,$1);
 }
 | func_invocation
 {
@@ -318,12 +384,21 @@ statement
 }
 | PRINT LPAR expr RPAR
 {
-    $$ = newcategory(Print);
+    struct pass_t pass;
+    pass.token = strdup("return");  // Optionally set the token to "return"
+    pass.line = @1.first_line;      // Use the position of the RETURN keyword
+    pass.column = @1.first_column;
+    struct node_t *aux_node = newnode(Intermediate, pass);
+    aux_node = $3;
+    pass.line = aux_node->line;
+    pass.column = aux_node->column;
+
+    $$ = newcategory(Print,pass);
     addchild($$, $3);
 }
 | PRINT LPAR STRLIT RPAR
 {
-    $$ = newcategory(Print);
+    $$ = newcategory(Print,$1);
     addchild($$, newnode(StrLit, $3));
 }
 | error
@@ -335,11 +410,19 @@ statement
 block
 : LBRACE RBRACE
 {
-    $$ = newcategory(Block);
+    struct pass_t pass;
+    pass.token = strdup("return");  // Optionally set the token to "return"
+    pass.line = @1.first_line;      // Use the position of the RETURN keyword
+    pass.column = @1.first_column;
+    $$ = newcategory(Block,pass);
 }
 | LBRACE block_statements RBRACE
 {
-    $$ = newcategory(Block);
+    struct pass_t pass;
+    pass.token = strdup("return");  // Optionally set the token to "return"
+    pass.line = @1.first_line;      // Use the position of the RETURN keyword
+    pass.column = @1.first_column;
+    $$ = newcategory(Block,pass);
     addchild($$, $2);
 }
 ;
@@ -360,7 +443,8 @@ block_statements
 parse_args
 : IDENTIFIER COMMA BLANKID ASSIGN PARSEINT LPAR CMDARGS LSQ expr RSQ RPAR
 {
-    $$ = newcategory(ParseArgs);
+    
+    $$ = newcategory(ParseArgs,$5);
     addchild($$, newnode(Identifier, $1));
     addchild($$, $9);
 }
@@ -373,12 +457,24 @@ parse_args
 func_invocation
 : IDENTIFIER LPAR RPAR
 {
-    $$ = newcategory(Call);
+    /*struct pass_t pass;
+    pass.token = strdup("return");  // Optionally set the token to "return"
+    pass.line = @1.first_line;      // Use the position of the RETURN keyword
+    pass.column = @1.first_column;*/
+    $$ = newcategory(Call,$1);
     addchild($$, newnode(Identifier, $1));
 }
 | IDENTIFIER LPAR func_invocation_exprs RPAR
 {
-    $$ = newcategory(Call);
+    struct pass_t pass;
+    pass.token = strdup("return");  // Optionally set the token to "return"
+    pass.line = @1.first_line;      // Use the position of the RETURN keyword
+    pass.column = @1.first_column;
+    //struct node_t *aux_node = newnode(Intermediate, pass);
+    pass = $1;
+    pass.line = pass.line -1;
+    
+    $$ = newcategory(Call,pass);
     addchild($$, newnode(Identifier, $1));
     addchild($$, $3);
 }
@@ -524,22 +620,38 @@ expr
 type
 : INT
 { 
-    type = newcategory(Int);
+    struct pass_t pass;
+    pass.token = strdup("return");  // Optionally set the token to "return"
+    pass.line = @1.first_line;      // Use the position of the RETURN keyword
+    pass.column = @1.first_column;
+    type = newcategory(Int,pass);
     $$ = type;
 }
 | FLOAT32
 {
-    type = newcategory(Float32);
+    struct pass_t pass;
+    pass.token = strdup("return");  // Optionally set the token to "return"
+    pass.line = @1.first_line;      // Use the position of the RETURN keyword
+    pass.column = @1.first_column;
+    type = newcategory(Float32,pass);
     $$ = type;
 }
 | BOOL
 {
-    type = newcategory(Bool);
+    struct pass_t pass;
+    pass.token = strdup("return");  // Optionally set the token to "return"
+    pass.line = @1.first_line;      // Use the position of the RETURN keyword
+    pass.column = @1.first_column;
+    type = newcategory(Bool,pass);
     $$ = type;
 }
 | STR
 {
-    type = newcategory(String);
+    struct pass_t pass;
+    pass.token = strdup("return");  // Optionally set the token to "return"
+    pass.line = @1.first_line;      // Use the position of the RETURN keyword
+    pass.column = @1.first_column;
+    type = newcategory(String,pass);
     $$ = type;
 }
 ;

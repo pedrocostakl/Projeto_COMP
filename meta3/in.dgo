@@ -1,0 +1,8 @@
+package main;
+func a(p int) bool{
+    p = 1;
+    var b int;
+    a(b);
+};
+var a bool;
+func b() {}

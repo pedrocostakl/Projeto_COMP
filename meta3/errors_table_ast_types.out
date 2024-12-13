@@ -1,0 +1,173 @@
+Line 9, column 6: Symbol fnb already defined
+Line 6, column 35: Cannot find symbol ib
+Line 6, column 33: Operator + cannot be applied to types int, undef
+Line 6, column 33: Incompatible type undef in return statement
+Line 12, column 18: Symbol x already defined
+Line 12, column 33: Symbol t already defined
+Line 12, column 39: Symbol z already defined
+Line 14, column 9: Cannot find symbol a
+Line 14, column 13: Cannot find symbol b
+Line 14, column 11: Operator + cannot be applied to types undef, undef
+Line 14, column 7: Operator = cannot be applied to types int, undef
+Line 15, column 6: Cannot find symbol a()
+Line 15, column 12: Cannot find symbol b()
+Line 15, column 10: Operator + cannot be applied to types undef, undef
+Line 15, column 4: Operator = cannot be applied to types int, undef
+Line 16, column 6: Cannot find symbol a()
+Line 16, column 12: Cannot find symbol a
+Line 16, column 10: Operator + cannot be applied to types undef, undef
+Line 16, column 4: Operator = cannot be applied to types int, undef
+Line 17, column 6: Cannot find symbol a
+Line 17, column 10: Cannot find symbol b()
+Line 17, column 8: Operator + cannot be applied to types undef, undef
+Line 17, column 4: Operator = cannot be applied to types int, undef
+Line 12, column 12: Symbol t declared but never used
+Line 12, column 15: Symbol y declared but never used
+Line 12, column 21: Symbol z declared but never used
+Line 12, column 24: Symbol f declared but never used
+Line 12, column 27: Symbol h declared but never used
+Line 12, column 30: Symbol j declared but never used
+Line 12, column 36: Symbol c declared but never used
+Line 21, column 17: Incompatible type void in return statement
+===== Global Symbol Table =====
+fna	()	none
+fnb	(int,int,int)	float32
+fnc	()	int
+fnd	()	int
+
+===== Function fna() Symbol Table =====
+return		none
+
+===== Function fnb(int,int,int) Symbol Table =====
+return		float32
+ia		int	param
+fa		int	param
+ba		int	param
+
+===== Function fnc() Symbol Table =====
+return		int
+x		int
+t		int
+y		int
+z		int
+f		int
+h		int
+j		int
+c		int
+fa		int
+
+===== Function fnd() Symbol Table =====
+return		int
+
+Program
+..FuncDecl
+....FuncHeader
+......Identifier(fna)
+......FuncParams
+....FuncBody
+..FuncDecl
+....FuncHeader
+......Identifier(fnb)
+......Float32
+......FuncParams
+........ParamDecl
+..........Int
+..........Identifier(ia)
+........ParamDecl
+..........Int
+..........Identifier(fa)
+........ParamDecl
+..........Int
+..........Identifier(ba)
+....FuncBody
+......Return
+........Add - undef
+..........Add - int
+............Sub - int
+..............Sub - int
+................Identifier(ia) - int
+................Identifier(fa) - int
+..............Identifier(ba) - int
+............Call - int
+..............Identifier(fnc) - ()
+..........Identifier(ib) - undef
+..FuncDecl
+....FuncHeader
+......Identifier(fnb)
+......FuncParams
+....FuncBody
+..FuncDecl
+....FuncHeader
+......Identifier(fnc)
+......Int
+......FuncParams
+....FuncBody
+......VarDecl
+........Int
+........Identifier(x)
+......VarDecl
+........Int
+........Identifier(t)
+......VarDecl
+........Int
+........Identifier(y)
+......VarDecl
+........Int
+........Identifier(x)
+......VarDecl
+........Int
+........Identifier(z)
+......VarDecl
+........Int
+........Identifier(f)
+......VarDecl
+........Int
+........Identifier(h)
+......VarDecl
+........Int
+........Identifier(j)
+......VarDecl
+........Int
+........Identifier(t)
+......VarDecl
+........Int
+........Identifier(c)
+......VarDecl
+........Int
+........Identifier(z)
+......VarDecl
+........Int
+........Identifier(fa)
+......Assign - int
+........Identifier(x) - int
+........Add - undef
+..........Identifier(a) - undef
+..........Identifier(b) - undef
+......Assign - int
+........Identifier(x) - int
+........Add - undef
+..........Call - undef
+............Identifier(a) - undef
+..........Call - undef
+............Identifier(b) - undef
+......Assign - int
+........Identifier(x) - int
+........Add - undef
+..........Call - undef
+............Identifier(a) - undef
+..........Identifier(a) - undef
+......Assign - int
+........Identifier(x) - int
+........Add - undef
+..........Identifier(a) - undef
+..........Call - undef
+............Identifier(b) - undef
+......Return
+........Identifier(fa) - int
+..FuncDecl
+....FuncHeader
+......Identifier(fnd)
+......Int
+......FuncParams
+....FuncBody
+......Return

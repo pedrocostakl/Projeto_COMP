@@ -79,6 +79,8 @@ struct node_t {
     enum type_t type;
     char *token;
     int line, column;
+    int errorOccurred;
+    int errorOperationOccurred; // assign undef só em resultados de operações
     struct node_list_t *children;
     unsigned int hash; // usado para verificar se uma strlit já foi declarada (codegen)
 };
@@ -95,7 +97,7 @@ struct pass_t {
 
 struct node_t *newnode(enum category_t category, struct pass_t pass);
 struct node_t *newintermediate();
-struct node_t *newcategory(enum category_t category);
+struct node_t *newcategory(enum category_t category, struct pass_t pass);
 void addchild(struct node_t *parent, struct node_t *child);
 struct node_t *getchild(struct node_t *parent, int position);
 void show(struct node_t *root, int anotate);

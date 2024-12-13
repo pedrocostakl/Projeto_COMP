@@ -1,0 +1,40 @@
+Line 7, column 5: Symbol a already defined
+===== Global Symbol Table =====
+a	(int)	bool
+b	()	none
+
+===== Function a(int) Symbol Table =====
+return		bool
+p		int	param
+b		int
+
+===== Function b() Symbol Table =====
+return		none
+
+Program
+..FuncDecl
+....FuncHeader
+......Identifier(a)
+......Bool
+......FuncParams
+........ParamDecl
+..........Int
+..........Identifier(p)
+....FuncBody
+......Assign - int
+........Identifier(p) - int
+........Natural(1) - int
+......VarDecl
+........Int
+........Identifier(b)
+......Call - bool
+........Identifier(a) - (int)
+........Identifier(b) - int
+..VarDecl
+....Bool
+....Identifier(a)
+..FuncDecl
+....FuncHeader
+......Identifier(b)
+......FuncParams
+....FuncBody

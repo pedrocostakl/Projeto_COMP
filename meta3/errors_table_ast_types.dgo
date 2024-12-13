@@ -1,0 +1,21 @@
+package main;
+
+func fna() {}
+
+func fnb(ia int, fa int, ba int) float32 {
+    return ia - fa - ba + fnc() + ib;
+}
+
+func fnb(){}  /* check if was not created a new empty table */
+
+func fnc() int {
+    var x, t, y, x, z, f, h, j, t, c, z int; /* check line and column numbers */
+    var fa int;
+    x = a + b; /* check types and AST types: undef undef */
+	x = a() + b();
+	x = a() + a;
+	x = a + b();
+    return fa;
+}
+
+func fnd()int { return; } /* check table return type */
