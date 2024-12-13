@@ -25,6 +25,8 @@ func main () {
     b = b && b;
     b = b == b;
 
+    b = -b;
+
     i = i + i;
     i = i / i;
 

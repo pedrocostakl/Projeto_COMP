@@ -43,7 +43,7 @@ func fch(iafch int, fafch float32, safch string) float32 {
         fcb(),
         fcd());
     fmt.Println(safch);
-    if bb {
+    if 33 {
         iafch = ia + ib;
         fafch = fa;
         fb = fafch;

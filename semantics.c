@@ -582,7 +582,7 @@ void check_statement(struct symbol_list_t *scope, struct node_t *parent, enum ty
                 // Skip type checking if a prior error occurred in the assignment expression
                 if (node1->errorOccurred || node2->errorOccurred) {
                     parent->errorOccurred = 1;
-                    parent->type = Undefined;
+                    parent->type = node1->type;
                     break;
                 }
 
@@ -764,9 +764,10 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                     node2->type = Undefined;
                 }
             }
+            parent->type = TypeBool;
             if (node1->type == node2->type &&
                 (node1->type == TypeBool)) {
-                parent->type = TypeBool;
+                
             } else {
                 if(parent->errorOccurred == 0){
                     printf("Line %d, column %d: Operator %s cannot be applied to types ", 
@@ -775,8 +776,6 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                     printf(", ");
                     print_type(node2->type);
                     printf("\n");
-                     parent->type = Undefined;
-                    
                 }
                 semantic_errors++;
                     parent->errorOccurred = 1;
@@ -803,9 +802,10 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                     node2->type = Undefined;
                 }
             }
+            parent->type = TypeBool;
             if (node1->type == node2->type &&
                 (node1->type == TypeBool)) {
-                parent->type = TypeBool;
+               
             } else {
                 if(parent->errorOccurred == 0){
                     printf("Line %d, column %d: Operator %s cannot be applied to types ", 
@@ -814,7 +814,6 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                     printf(", ");
                     print_type(node2->type);
                     printf("\n");
-                     parent->type = Undefined;
                     
                 }
                 semantic_errors++;
@@ -843,8 +842,9 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                     node2->type = Undefined;
                 }
             }
+            parent->type = TypeBool;
             if (node1->type == node2->type) {
-                parent->type = TypeBool;
+                
             } else {
                 if(parent->errorOccurred){
                     printf("Line %d, column %d: Operator %s cannot be applied to types ", 
@@ -854,7 +854,6 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                     print_type(node2->type);
                     printf("\n");
                      semantic_errors++;
-                    parent->type = Undefined;
                     parent->errorOccurred = 1;
                     dontCheckIncorrectType = 1;
                     notIncorrectlyApplied = 1;
@@ -885,8 +884,9 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                     node2->type = Undefined;
                 }
             }
+            parent->type = TypeBool;
             if (node1->type == node2->type) {
-                parent->type = TypeBool;
+               
             } else {
                 if(parent->errorOccurred == 0){
                     printf("Line %d, column %d: Operator %s cannot be applied to types ", 
@@ -896,7 +896,7 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                     print_type(node2->type);
                     printf("\n");
                     semantic_errors++;
-                    parent->type = Undefined;
+                    
                     parent->errorOccurred = 1;
                     dontCheckIncorrectType = 1;
                     notIncorrectlyApplied = 1;
@@ -925,9 +925,10 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                     node2->type = Undefined;
                 }
             }
+            parent->type = TypeBool;
             if (node1->type == node2->type &&
                 (node1->type == TypeInteger || node1->type == TypeFloat32)) {
-                parent->type = TypeBool;
+               
             } else {
                 if(parent->errorOccurred == 0){
                     printf("Line %d, column %d: Operator %s cannot be applied to types ", 
@@ -937,7 +938,7 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                     print_type(node2->type);
                     printf("\n");
                     semantic_errors++;
-                    parent->type = Undefined;
+                    
                     parent->errorOccurred = 1;
                     dontCheckIncorrectType = 1;
                     notIncorrectlyApplied = 1;
@@ -966,9 +967,10 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                     node2->type = Undefined;
                 }
             }
+            parent->type = TypeBool;
             if (node1->type == node2->type &&
                 (node1->type == TypeInteger || node1->type == TypeFloat32)) {
-                parent->type = TypeBool;
+                
             } else {
                 if(parent->errorOccurred == 0){
                     printf("Line %d, column %d: Operator %s cannot be applied to types ", 
@@ -978,7 +980,7 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                     print_type(node2->type);
                     printf("\n");
                     semantic_errors++;
-                    parent->type = Undefined;
+                    
                     parent->errorOccurred = 1;
                     dontCheckIncorrectType = 1;
                     notIncorrectlyApplied = 1;
@@ -1007,9 +1009,10 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                     node2->type = Undefined;
                 }
             }
+            parent->type = TypeBool;
             if (node1->type == node2->type &&
                 (node1->type == TypeInteger || node1->type == TypeFloat32)) {
-                parent->type = TypeBool;
+                
             } else {
                 if(parent->errorOccurred == 0){
                      printf("Line %d, column %d: Operator %s cannot be applied to types ", 
@@ -1019,7 +1022,7 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                     print_type(node2->type);
                     printf("\n");
                     semantic_errors++;
-                    parent->type = Undefined;
+                   
                     parent->errorOccurred = 1;
                     dontCheckIncorrectType = 1;
                     notIncorrectlyApplied = 1;
@@ -1049,12 +1052,10 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                 }
             }
 
-            if (node1->type == Undefined || node2->type == Undefined) {
-                parent->type = Undefined;
-            } 
-            else if (node1->type == node2->type &&
+            parent->type = TypeBool;
+            if (node1->type == node2->type &&
                 (node1->type == TypeInteger || node1->type == TypeFloat32)) {
-                parent->type = TypeBool;
+                
             } else {
                 if(parent->errorOccurred == 0){
                     printf("Line %d, column %d: Operator %s cannot be applied to types ", 
@@ -1063,13 +1064,13 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                     printf(", ");
                     print_type(node2->type);
                     printf("\n");
-                    parent->type = Undefined;
+                    
                     semantic_errors++;
                     parent->errorOccurred = 1;
                     dontCheckIncorrectType = 1;
                     notIncorrectlyApplied = 1;
                 }
-                parent->type = Undefined;
+                
                     semantic_errors++;
                     parent->errorOccurred = 1;
                     dontCheckIncorrectType = 1;
@@ -1258,9 +1259,7 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                 }
             }
 
-            if (node1->type == Undefined || node2->type == Undefined) {
-                parent->type = Undefined;
-            } else if (node1->type == node2->type &&
+            if (node1->type == node2->type &&
                 (node1->type == TypeInteger || node1->type == TypeFloat32)) {
                 parent->type = node1->type;
             } else {
@@ -1288,9 +1287,8 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                     node1->type = Undefined;
                 }
             }
-            if (node1->type == Undefined) {
-                parent->type = Undefined;
-            } else if (node1->type!=TypeBool) {
+            parent->type = TypeBool;
+             if (node1->type!=TypeBool) {
                 if (notIncorrectlyApplied==0 && parent->errorOccurred == 0) { // Only log the error once
                     printf("Line %d, column %d: Operator %s cannot be applied to type ", 
                         parent->line, parent->column, get_operator_token(parent->category));
@@ -1298,22 +1296,30 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                     printf("\n");
                     semantic_errors++;
                     notIncorrectlyApplied = 1;// Flag to suppress related errors
-                    parent->type = Undefined;
+                    
                     parent->errorOccurred = 1;
                 }
                 notIncorrectlyApplied = 1;// Flag to suppress related errors
-                    parent->type = Undefined;
-                    parent->errorOccurred = 1;
-            }else{
-                parent->type = TypeBool;
+                parent->errorOccurred = 1;
             }
-
         break;}
         case Minus:
         case Plus: {
             struct node_t *node = getchild(parent, 0);
             check_expressions(scope, node,0);
-            parent->type = node->type;
+            if(node->type == TypeFloat32 || node->type == TypeInteger){
+                parent->type = node->type;
+            }
+            else{
+                printf("Line %d, column %d: Operator %s cannot be applied to type ", 
+                        parent->line, parent->column, get_operator_token(parent->category));
+                    print_type(node->type);
+                    printf("\n");
+                    parent->type = Undefined;
+                    semantic_errors++;
+                    parent->errorOperationOccurred = 1;
+                    dontCheckIncorrectType = 1;
+            }
         break;}
  
         default:
