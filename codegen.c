@@ -445,7 +445,7 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
                     printf("%%%d = getelementptr [4 x i8], [4 x i8]* %s, i32 0, i32 0\n", temporary, FORMAT_STRLIT);
                     print_tab();
                     temporary++;
-                    printf("%%%d = getelementptr [%d x i8], [%d x i8]* @.%u, i32 0, i32 0\n", temporary, len, len, get_strlit_hash(strlit));
+                    printf("%%%d = getelementptr [%d x i8], [%d x i8]* @.strlit_%u, i32 0, i32 0\n", temporary, len, len, get_strlit_hash(strlit));
                     print_tab();
                     temporary++;
                     printf("%%%d = call i32 (i8*, ...) @printf(i8* %%%d, i8* %%%d)\n", temporary, temporary - 2, temporary - 1);
@@ -886,7 +886,7 @@ void codegen_string_literals(struct node_t *parent) {
             len -= 1; // retirar as duas " e adicionar o \00
             unsigned int hash = get_strlit_hash(strlit);
             if (is_strlit_declared(global_program, hash) == 0) {
-                printf("@.%u = private constant [%d x i8] c\"%s\\00\"\n", get_strlit_hash(strlit), len, strlit);
+                printf("@.strlit_%u = private constant [%d x i8] c\"%s\\00\"\n", get_strlit_hash(strlit), len, strlit);
             }
             node->hash = hash;
             free(strlit);
@@ -967,6 +967,9 @@ unsigned int get_strlit_hash(const char *strlit) {
     while (*strlit) {
         hash = hash * 31 + (unsigned char)(*strlit);
         strlit++;
+    }
+    if (hash == 0) {
+        hash = 1;
     }
     return hash;
 }
