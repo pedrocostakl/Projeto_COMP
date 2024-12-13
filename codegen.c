@@ -47,7 +47,9 @@ static void print_tab();
 static unsigned int get_strlit_hash(const char *strlit);
 static int is_strlit_declared(struct node_t *parent, unsigned int hash);
 static int logical_strlen(const char *str);
-static float decimal_value(const char *token);
+static int octal_natural(const char *token, int *value);
+static int hexadecimal_natural(const char *token, int *value);
+static int expoent_decimal(const char *token, float *value);
 
 void codegen_program(struct node_t *program) {
     global_program = program;
@@ -539,14 +541,25 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
     switch (expression->category) {
         case Natural: {
             print_tab();
-            printf("%%%d = add i32 %s, 0\n", temporary, expression->token);
+            int value = 0;
+            if (octal_natural(expression->token, &value) == 1) {
+                printf("%%%d = add i32 %d, 0\n", temporary, value);
+            } else if (hexadecimal_natural(expression->token, &value) == 1) {
+                printf("%%%d = add i32 %d, 0\n", temporary, value);
+            } else {
+                printf("%%%d = add i32 %s, 0\n", temporary, expression->token);
+            }
             tmp = temporary;
             temporary++;
         } break;
         case Decimal: {
             print_tab();
-            float value = decimal_value(expression->token);
-            printf("%%%d = fadd double %f, 0.0\n", temporary, value);
+            float value = 0;
+            if (expoent_decimal(expression->token, &value) == 0) {
+                printf("%%%d = fadd double %s, 0.0\n", temporary, expression->token);
+            } else {
+                printf("%%%d = fadd double %f, 0.0\n", temporary, value);
+            }
             tmp = temporary;
             temporary++;
         } break;
@@ -880,7 +893,7 @@ void codegen_string_literals(struct node_t *parent) {
         struct node_t *node = children->node;
         if (node->category == StrLit) {
             char *strlit = strdup(node->token);
-            int len = logical_strlen(strlit);
+            int len = strlen(strlit);
             memmove(strlit, strlit + 1, len - 1);
             strlit[len -2] = '\0';
             len -= 1; // retirar as duas " e adicionar o \00
@@ -968,9 +981,6 @@ unsigned int get_strlit_hash(const char *strlit) {
         hash = hash * 31 + (unsigned char)(*strlit);
         strlit++;
     }
-    if (hash == 0) {
-        hash = 1;
-    }
     return hash;
 }
 
@@ -1006,7 +1016,61 @@ int logical_strlen(const char *str) {
     return len;
 }
 
-float decimal_value(const char *token) {
+int octal_natural(const char *token, int *value) {
+    if (value == NULL) return 0;
+
+    int pos = strlen(token) - 2;
+    if (*token == '0' && *(token + 1) != 'x' && *(token + 1) != 'X') {
+        const char *ch = token + 1;
+        while (pos >= 0) {
+            int val = 0;
+            int octal = 1;
+            for (int i = 0; i < pos; i++) {
+                octal *= 8;
+            }
+            val = *ch - 48;
+            *value += val * octal;
+            ch++;
+            pos--;
+        }
+        return 1;
+    }
+    return 0;
+}
+
+int hexadecimal_natural(const char *token, int *value) {
+    if (value == NULL) return 0;
+
+    *value = 0;
+    int pos = strlen(token) - 3;
+    if (*token == '0' && (*(token + 1) == 'x' || *(token + 1) == 'X')) {
+        const char *ch = token + 2;
+        while (pos >= 0) {
+            int val = 0;
+            int hex = 1;
+            for (int i = 0; i < pos; i++) {
+                hex *= 16;
+            }
+            if (*ch >= 48 && *ch <= 57) {
+                val = *ch - 48;
+            } else if (*ch >= 65 && *ch <= 70) {
+                val = *ch - 65 + 10;
+            } else if (*ch >= 97 && *ch <= 102) {
+                val = *ch - 97 + 10;
+            }
+            *value += val * hex;            
+            ch++;
+            pos--;
+        }
+        return 1;
+    }
+    return 0;
+}
+
+int expoent_decimal(const char *token, float *value) {
+    if (value == NULL) return 0;
+
+    *value = 0.0;
     const char *ch = token;
     const char *exp_pos = NULL;
     while (*ch) {
@@ -1029,13 +1093,16 @@ float decimal_value(const char *token) {
         base = atof(base_str);
         exp = atoi(exp_str);
 
-        int power = 1;
+        int power = 1 * (exp / abs(exp));
+        exp = abs(exp);
         while (exp != 0) {
             power *= 10;
             exp--;
         }
-        return base * power;
+        *value = base * power;
+        return 1;
     } else {
-        return atof(token);
+        *value = atof(token);
+        return 0;
     }
 }
