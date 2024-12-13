@@ -1,0 +1,15 @@
+package main;
+
+func main() {
+    var a float32;
+    a = -0.0;
+    fmt.Println(a);
+    fmt.Println(-a);
+
+    a = 0.0;
+    fmt.Println(a);
+    fmt.Println(-a);
+
+    fmt.Println(0.0);
+    fmt.Println(-0.0);
+}

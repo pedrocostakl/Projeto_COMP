@@ -1,0 +1,14 @@
+a+b result:
+15
+a-b result:
+-5
+a*b result:
+50
+a/b result:
+0
+a%b result:
+5
+-a+b result:
+5
+-(b+a) result:
+-15

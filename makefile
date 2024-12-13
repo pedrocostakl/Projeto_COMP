@@ -9,14 +9,14 @@ YACC_FILE=gocompiler.y
 YACC_OUTPUT=y.tab.c
 AST_SOURCE=ast.c
 SEMANTICS_SOURCE=semantics.c
-#CODEGEN_SOURCE=codegen.c
+CODEGEN_SOURCE=codegen.c
 
 # Default rule, executed when `make` is run
 all: $(TARGET)
 
 # Rule to build the lexer executable
 $(TARGET): $(YACC_OUTPUT) $(LEX_OUTPUT)
-	$(CC) -Wall $(AST_SOURCE) $(SEMANTICS_SOURCE) $(YACC_OUTPUT) $(LEX_OUTPUT) -o $(TARGET)
+	$(CC) -Wall $(AST_SOURCE) $(SEMANTICS_SOURCE) $(CODEGEN_SOURCE) $(YACC_OUTPUT) $(LEX_OUTPUT) -o $(TARGET)
 
 # Rule to generate the y.tab.c file from yacc file
 $(YACC_OUTPUT): $(YACC_FILE)

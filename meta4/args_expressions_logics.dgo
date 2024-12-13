@@ -1,0 +1,18 @@
+// To get the same output use the arguments not equal arguments like 2 and 3
+package main;
+
+func main() {
+    var argument1, argument2 int;
+
+    argument1,_ = strconv.Atoi(os.Args[1]);
+    argument2,_ = strconv.Atoi(os.Args[2]);
+
+    fmt.Println("a==a&&b==b result:");
+    fmt.Println(argument1==argument1&&argument2==argument2);
+    fmt.Println("a==a||b!=b result:");
+    fmt.Println(argument1==argument1||argument2!=argument2);
+    fmt.Println("!(a==a) result:");
+    fmt.Println(!(argument1==argument1));
+    fmt.Println("!(b==a) result:");
+    fmt.Println(!(argument2==argument1));
+}

@@ -11,11 +11,10 @@
 #define BUF_SIZE 160000
 int notIncorrectlyApplied = 0;
 int dontCheckIncorrectType = 0; //SE TEMOS ERROS NO FOR, NÃO VERFICAMOS SE O FILHO É BOOL   
-int  unaryError = 0; 
+int unaryError = 0; 
 int checkErrors = 0; //Flag to check and print errors
 int semantic_errors;
 struct symbol_list_t *global_symbol_table;
-
 
 static void show_function(struct symbol_list_t *symbol, struct node_t *node);
 static int is_parameter(struct node_t *node, struct node_t *function);
@@ -153,8 +152,6 @@ void report_unused_symbols(struct symbol_list_t *symbol_table, int is_global) {
     }
 }
 
-
-
 void show_symbol_table() {
     struct symbol_list_t *symbol = global_symbol_table->next;
     printf("===== Global Symbol Table =====\n");
@@ -187,6 +184,7 @@ void show_symbol_table() {
         symbol = symbol->next;
     }
 }
+
 const char *get_type_string(enum type_t type) {
     switch (type) {
         case TypeInteger: return "int";
@@ -265,7 +263,7 @@ int is_parameter(struct node_t *node, struct node_t *function) {
  */
 
 static void check_var(struct symbol_list_t *scope, struct node_t *var);
-static void check_function(struct symbol_list_t *scope, struct node_t *function, int checkBody);
+static void check_function(struct symbol_list_t *scope, struct node_t *function, int check_body);
 static void check_parameters(struct symbol_list_t *scope, struct node_t *parameters);
 static void check_function_body(struct symbol_list_t *scope, struct node_t *function_body,  enum type_t function_return_type);
 static void check_statement(struct symbol_list_t *scope, struct node_t *parent,  enum type_t function_return_type);
@@ -285,7 +283,7 @@ int check_program(struct node_t *program) {
                 break;
             }
             case FuncDecl:{
-                check_function(global_symbol_table, node,0);
+                check_function(global_symbol_table, node, 0);
                 break;
             }
             default:
@@ -298,7 +296,7 @@ int check_program(struct node_t *program) {
         struct node_t *node = child->node;
         switch (node->category) {
             case FuncDecl:{
-                check_function(global_symbol_table, node,1);
+                check_function(global_symbol_table, node, 1);
                 break;
             }
             default:
@@ -327,11 +325,9 @@ void check_var(struct symbol_list_t *scope, struct node_t *var) {
     }
 }
 
-void check_function(struct symbol_list_t *scope, struct node_t *function, int checkBody) {
+void check_function(struct symbol_list_t *scope, struct node_t *function, int check_body) {
     struct node_t *header = getchild(function, 0);
    
-    
-
     // Type and parameters node
     enum type_t type = None;
     struct node_t *parameters = getchild(header, 1);
@@ -339,61 +335,40 @@ void check_function(struct symbol_list_t *scope, struct node_t *function, int ch
         type = get_type(parameters);
         parameters = getchild(header, 2);
     }
+
     struct node_t *id; 
     struct symbol_list_t *new_symbol;
+    struct symbol_list_t *function_scope;
     id = getchild(header, 0);
 
-<<<<<<< HEAD
-    // Insert Identifier
-    struct node_t *id = getchild(header, 0);
-    struct symbol_list_t *new_symbol = insert_symbol(global_symbol_table, id->token, type, SymbolFunction, function);
-    if (new_symbol == NULL) {
-        printf("Line %d, column %d: Symbol %s already defined\n", id->line, id->column, id->token);
-        semantic_errors++;
-=======
     // If the function body should be skipped, only check if the function already exists
-    if(checkBody == 0){
+    if (check_body == 0) {
         // Insert Identifier
-        new_symbol = insert_symbol(global_symbol_table, id->token, type, function);
+        new_symbol = insert_symbol(global_symbol_table, id->token, type, 0, function);
         if (new_symbol == NULL) {
             printf("Line %d, column %d: Symbol %s already defined\n", id->line, id->column, id->token);
             semantic_errors++;
             return; // Skip further processing since the function is already defined
         }
->>>>>>> meta3Branch
-    }
-    else{
+        function_scope = enter_scope(new_symbol);
+        check_parameters(function_scope, parameters);
+    } else {
         new_symbol = search_symbol(global_symbol_table, id->token);
         if (new_symbol != NULL && new_symbol->node != function) {
             // Function already defined, skip the body
             //printf("Line %d, column %d: Skipping redefinition of function %s\n", id->line, id->column, id->token);
             return;
         }
-    }
-    
-
-    struct symbol_list_t *function_scope = enter_scope(new_symbol);
-
-    // Parameters should only be checked when processing the function body (checkBody == 1)
-    if (parameters != NULL && checkBody == 1) {
-        check_parameters(function_scope, parameters);
-    }
-    
-
-    // Get function return type
-    struct node_t *return_type_node = getchild(header, 1);
-    enum type_t function_return_type = get_type(return_type_node);
-    // Function body
-    struct node_t *function_body = getchild(function, 1);
-    if (function_body != NULL && checkBody == 1) {
+        function_scope = new_symbol->scope;
+        // Get function return type
+        struct node_t *return_type_node = getchild(header, 1);
+        enum type_t function_return_type = get_type(return_type_node);
+        // Function body
+        struct node_t *function_body = getchild(function, 1);
         check_function_body(function_scope, function_body, function_return_type);
-    }
-
-    // Report unused symbols in the function's local scope
-    if(checkBody == 1)
         report_unused_symbols(function_scope, 0);
+    }
 }
-
 
 void check_parameters(struct symbol_list_t *scope, struct node_t *parameters) {
     int position = 0;
@@ -402,12 +377,8 @@ void check_parameters(struct symbol_list_t *scope, struct node_t *parameters) {
         enum type_t type = get_type(getchild(param, 0));
         param->type = type;
         struct node_t *id = getchild(param, 1);
-<<<<<<< HEAD
-        if (insert_symbol(scope, id->token, type, SymbolParam, param) == NULL) {
-=======
-        struct symbol_list_t *symbol = insert_symbol(scope, id->token, type, param);
+        struct symbol_list_t *symbol = insert_symbol(scope, id->token, type, SymbolParam, param);
         if (symbol == NULL) {
->>>>>>> meta3Branch
             printf("Line %d, column %d: Symbol %s already defined\n", id->line, id->column, id->token);
             semantic_errors++;
         } else {
@@ -513,33 +484,6 @@ void check_statement(struct symbol_list_t *scope, struct node_t *parent, enum ty
             break;
         }
         case If: {
-<<<<<<< HEAD
-                struct node_t *condition = getchild(parent, 0);
-                struct node_t *block1 = getchild(parent, 1);
-                struct node_t *block2 = getchild(parent, 2);
-                check_expressions(scope, condition);
-                check_statement(scope, block1);
-                check_statement(scope, block2);
-                if (condition->type != TypeBool) {
-                    printf("Line %d, column %d: Incompatible type ", parent->line, parent->column);
-                    print_type(condition->type);
-                    printf(" in if statement\n");
-                }
-            } break;
-        case For: {
-                struct node_t *condition = getchild(parent, 0);
-                struct node_t *block = getchild(parent, 1);
-                if (block != NULL) {
-                    check_expressions(scope, condition);
-                } else {
-                    block = condition;
-                }
-                check_statement(scope, block);
-                if (condition->category != Block && condition->type != TypeBool) {
-                    printf("Line %d, column %d: Incompatible type ", parent->line, parent->column);
-                    print_type(condition->type);
-                    printf(" in for statement\n");
-=======
             struct node_t *node1 = getchild(parent, 0);
             struct node_t *node2 = getchild(parent, 1);
             struct node_t *else_block = getchild(parent, 2);
@@ -587,7 +531,6 @@ void check_statement(struct symbol_list_t *scope, struct node_t *parent, enum ty
                     }
                 } else {
                     check_statement(scope, node1, function_return_type);
->>>>>>> meta3Branch
                 }
             break;
         }

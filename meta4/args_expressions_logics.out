@@ -1,0 +1,8 @@
+a==a&&b==b result:
+true
+a==a||b!=b result:
+true
+!(a==a) result:
+false
+!(b==a) result:
+true

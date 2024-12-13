@@ -1,0 +1,18 @@
+package main;
+
+var i int;
+
+func main() {
+    i = 2;
+    fmt.Println(i);
+
+    var i int;
+    i = 3
+    fmt.Println(i);
+
+    test_i_value()
+}
+
+func test_i_value() {
+    fmt.Println(i);
+}

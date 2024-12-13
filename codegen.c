@@ -46,6 +46,8 @@ static void print_type_zero(enum type_t type);
 static void print_tab();
 static unsigned int get_strlit_hash(const char *strlit);
 static int is_strlit_declared(struct node_t *parent, unsigned int hash);
+static int logical_strlen(const char *str);
+static float decimal_value(const char *token);
 
 void codegen_program(struct node_t *program) {
     global_program = program;
@@ -434,7 +436,7 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
                 } break;
                 case TypeString: {
                     char *strlit = strdup(expr->token);
-                    int len = strlen(strlit);
+                    int len = logical_strlen(strlit);
                     memmove(strlit, strlit + 1, len - 1);
                     strlit[len -2] = '\0';
                     len -= 1; // retirar as duas " e adicionar o \00
@@ -543,7 +545,8 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
         } break;
         case Decimal: {
             print_tab();
-            printf("%%%d = fadd double %s, 0.0\n", temporary, expression->token);
+            float value = decimal_value(expression->token);
+            printf("%%%d = fadd double %f, 0.0\n", temporary, value);
             tmp = temporary;
             temporary++;
         } break;
@@ -877,7 +880,7 @@ void codegen_string_literals(struct node_t *parent) {
         struct node_t *node = children->node;
         if (node->category == StrLit) {
             char *strlit = strdup(node->token);
-            int len = strlen(strlit);
+            int len = logical_strlen(strlit);
             memmove(strlit, strlit + 1, len - 1);
             strlit[len -2] = '\0';
             len -= 1; // retirar as duas " e adicionar o \00
@@ -983,4 +986,53 @@ int is_strlit_declared(struct node_t *parent, unsigned int hash) {
         children = children->next;
     }
     return 0;
+}
+
+int logical_strlen(const char *str) {
+    int len = 0;
+    int escape = 0;
+    while (*str) {
+        if (*str == '\\' && escape == 0) {
+            escape = 1;
+        } else {
+            escape = 0;
+            len++;
+        }
+        str++;
+    }
+    return len;
+}
+
+float decimal_value(const char *token) {
+    const char *ch = token;
+    const char *exp_pos = NULL;
+    while (*ch) {
+        if (*ch == 'e' || *ch == 'E') {
+            exp_pos = ch;
+            break;
+        }
+        ch++;
+    }
+    if (exp_pos != NULL) {
+        float base;
+        int exp;
+        char base_str[32];
+        char exp_str[32];
+
+        size_t base_len = exp_pos - token;
+        snprintf(base_str, base_len + 1, "%s", token);
+        snprintf(exp_str, sizeof(exp_str), "%s", exp_pos + 1);
+
+        base = atof(base_str);
+        exp = atoi(exp_str);
+
+        int power = 1;
+        while (exp != 0) {
+            power *= 10;
+            exp--;
+        }
+        return base * power;
+    } else {
+        return atof(token);
+    }
 }

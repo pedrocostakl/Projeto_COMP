@@ -1,0 +1,24 @@
+// To get the same output for ints do 5 and 10
+package main;
+
+func main() {
+    var argument1, argument2 int;
+
+    argument1,_ = strconv.Atoi(os.Args[1]);
+    argument2,_ = strconv.Atoi(os.Args[2]);
+
+    fmt.Println("a+b result:");
+    fmt.Println(argument1+argument2);
+    fmt.Println("a-b result:");
+    fmt.Println(argument1-argument2);
+    fmt.Println("a*b result:");
+    fmt.Println(argument1*argument2);
+    fmt.Println("a/b result:");
+    fmt.Println(argument1/argument2);
+    fmt.Println("a%b result:");
+    fmt.Println(argument1%argument2);
+    fmt.Println("-a+b result:");
+    fmt.Println(-argument1+argument2);
+    fmt.Println("-(b+a) result:");
+    fmt.Println(-(argument2+argument1));
+}
