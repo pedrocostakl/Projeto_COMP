@@ -46,10 +46,10 @@ static void print_type_zero(enum type_t type);
 static void print_tab();
 static unsigned int get_strlit_hash(const char *strlit);
 static int is_strlit_declared(struct node_t *parent, unsigned int hash);
-static int logical_strlen(const char *str);
 static int octal_natural(const char *token, int *value);
 static int hexadecimal_natural(const char *token, int *value);
 static int expoent_decimal(const char *token, float *value);
+static int get_logical_strlit(const char *token, char **strlit);
 
 void codegen_program(struct node_t *program) {
     global_program = program;
@@ -437,11 +437,8 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
                     printf(":\n");
                 } break;
                 case TypeString: {
-                    char *strlit = strdup(expr->token);
-                    int len = logical_strlen(strlit);
-                    memmove(strlit, strlit + 1, len - 1);
-                    strlit[len -2] = '\0';
-                    len -= 1; // retirar as duas " e adicionar o \00
+                    char *strlit = NULL;
+                    int len = get_logical_strlit(expr->token, &strlit);
 
                     print_tab();
                     printf("%%%d = getelementptr [4 x i8], [4 x i8]* %s, i32 0, i32 0\n", temporary, FORMAT_STRLIT);
@@ -892,11 +889,8 @@ void codegen_string_literals(struct node_t *parent) {
     while (children != NULL) {
         struct node_t *node = children->node;
         if (node->category == StrLit) {
-            char *strlit = strdup(node->token);
-            int len = strlen(strlit);
-            memmove(strlit, strlit + 1, len - 1);
-            strlit[len -2] = '\0';
-            len -= 1; // retirar as duas " e adicionar o \00
+            char *strlit = NULL;
+            int len = get_logical_strlit(node->token, &strlit);
             unsigned int hash = get_strlit_hash(strlit);
             if (is_strlit_declared(global_program, hash) == 0) {
                 printf("@.strlit_%u = private constant [%d x i8] c\"%s\\00\"\n", get_strlit_hash(strlit), len, strlit);
@@ -960,7 +954,8 @@ void print_label(unsigned int num, enum label_type_t label_type) {
 void print_type_zero(enum type_t type) {
     switch (type) {
         case None:
-        case TypeInteger: {
+        case TypeInteger: 
+        case TypeBool: {
             printf("0");
         } break;
         case TypeFloat32: {
@@ -999,21 +994,6 @@ int is_strlit_declared(struct node_t *parent, unsigned int hash) {
         children = children->next;
     }
     return 0;
-}
-
-int logical_strlen(const char *str) {
-    int len = 0;
-    int escape = 0;
-    while (*str) {
-        if (*str == '\\' && escape == 0) {
-            escape = 1;
-        } else {
-            escape = 0;
-            len++;
-        }
-        str++;
-    }
-    return len;
 }
 
 int octal_natural(const char *token, int *value) {
@@ -1105,4 +1085,58 @@ int expoent_decimal(const char *token, float *value) {
         *value = atof(token);
         return 0;
     }
+}
+
+int get_logical_strlit(const char *token, char **strlit) {
+    if (token == NULL) return 0;
+
+    int len = 0;
+    *strlit = (char*)malloc(strlen(token) * 2);
+    if (strlit == NULL) return 0;
+
+    const char *ch = token + 1;
+    char *out = *strlit;
+
+    while (*ch) {
+        if (*ch == '\\') {
+            ch++;
+            switch (*ch) {
+                case 'f': {
+                    *out++ = '\\';
+                    *out++ = '0';
+                    *out++ = 'C';
+                } break;
+                case 'n': {
+                    *out++ = '\\';
+                    *out++ = '0';
+                    *out++ = 'A';
+                } break;
+                case 'r': {
+                    *out++ = '\\';
+                    *out++ = '0';
+                    *out++ = 'D';
+                } break;
+                case 't': {
+                    *out++ = '\\';
+                    *out++ = '0';
+                    *out++ = '9';
+                } break;
+                case '\\': {
+                    *out++ = '\\';
+                    *out++ = '\\';
+                } break;
+                case '\"': {
+                    *out++ = '\\';
+                    *out++ = '2';
+                    *out++ = '2';
+                } break;
+            }            
+        } else {
+            *out++ = *ch;
+        }
+        len++;
+        ch++;
+    }
+    *(out - 1) = '\0';
+    return len;
 }
