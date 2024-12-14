@@ -409,13 +409,13 @@ void check_function_body(struct symbol_list_t *scope, struct node_t *function_bo
                 break;
             case Block:
             case If: {
-                struct node_t *condition = getchild(node, 0);
+                /*struct node_t *condition = getchild(node, 0);
                 struct node_t *block1 = getchild(node, 1);
                 struct node_t *block2 = getchild(node, 2);
                 check_expressions(scope, condition, 0);
                 check_statement(scope, block1, function_return_type);
                 check_statement(scope, block2, function_return_type);
-                break;
+                break;*/
             }
             case For:
             case Return:
@@ -516,7 +516,20 @@ void check_statement(struct symbol_list_t *scope, struct node_t *parent, enum ty
                 }
                
             } else {
+                check_expressions(scope, node1,0);
                 check_statement(scope, node1, function_return_type);
+                if(node1->type != TypeBool){
+                    if(/*dontCheckIncorrectType == 0 && notIncorrectlyApplied == 0*/ node1->type == Undefined){
+                    printf("Line %d, column %d: Incompatible type ",  node1->line, node1->column);
+                    print_type(node1->type);
+                    printf(" in if statement");//FAZER FUNCAO PARA BUSCAR CATEGORY
+                    printf("\n");
+                     parent->type = Undefined;
+                    semantic_errors++;
+                    }
+                    parent->type = Undefined;
+                    semantic_errors++;
+                }
             }
         break;
         }
@@ -527,16 +540,16 @@ void check_statement(struct symbol_list_t *scope, struct node_t *parent, enum ty
                     check_expressions(scope, node1,0);
                     check_statement(scope, node2, function_return_type);
                     if(node1->type != TypeBool){
-                        if(dontCheckIncorrectType == 0 && notIncorrectlyApplied == 0 && node1->errorOccurred == 0){
+                        //if(/*dontCheckIncorrectType == 0 && notIncorrectlyApplied == 0 && */node1->type == Undefined){
                             printf("Line %d, column %d: Incompatible type ",node1->line, node1->column);
                             print_type(node1->type);
                             printf(" in for statement");
                             printf("\n");
                             parent->type = Undefined;
                             semantic_errors++;
-                        }
+                        /*}
                         parent->type = Undefined;
-                        semantic_errors++;
+                        semantic_errors++;*/
                     }
                 } else {
                     check_statement(scope, node1, function_return_type);
@@ -580,11 +593,11 @@ void check_statement(struct symbol_list_t *scope, struct node_t *parent, enum ty
                 check_expressions(scope, node1,0);
                 check_expressions(scope, node2,0);
                 // Skip type checking if a prior error occurred in the assignment expression
-                if (node1->errorOccurred || node2->errorOccurred) {
+                /*if (node1->errorOccurred || node2->errorOccurred) {
                     parent->errorOccurred = 1;
                     parent->type = node1->type;
                     break;
-                }
+                }*/
 
                 if ((node1->type == node2->type)) {
                     parent->type = node1->type;
@@ -725,20 +738,22 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                     printf("Line %d, column %d: Cannot find symbol %s\n", parent->line, parent->column, parent->token);
                     semantic_errors++;
                     parent->type = Undefined; // Mark the type as Undefined for consistency
+                    parent->errorOccurred = 1;
                 } else {
                     parent->type = symbol->type;
                     symbol->used = 1; // Símbolo foi usado
                 }
             } else {
                 // Erro: Undefined type
+                semantic_errors++;
+                parent->type = Undefined;
+                parent->errorOccurred = 1;
                 if(callFunction == 1){
                     printf("Line %d, column %d: Cannot find symbol %s()\n", parent->line, parent->column, parent->token);
                 }
                 else{
                      printf("Line %d, column %d: Cannot find symbol %s\n", parent->line, parent->column, parent->token);
                 }
-                semantic_errors++;
-                parent->type = Undefined;
             }
             break;
         }
@@ -756,12 +771,14 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                 struct symbol_list_t *symbol = search_symbol(global_symbol_table, node1->token);
                 if(symbol != NULL && symbol->node->category == FuncDecl){
                     node1->type = Undefined;
+                    parent->errorOccurred = 1;
                 }
             }
              if(node2->category == Identifier){
                 struct symbol_list_t *symbol = search_symbol(global_symbol_table, node2->token);
                 if(symbol != NULL && symbol->node->category == FuncDecl){
                     node2->type = Undefined;
+                    parent->errorOccurred = 1;
                 }
             }
             parent->type = TypeBool;
@@ -769,7 +786,7 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                 (node1->type == TypeBool)) {
                 
             } else {
-                if(parent->errorOccurred == 0){
+                if(parent->errorOccurred == 0 || (node1->type == Undefined || node2->type == Undefined)){
                     printf("Line %d, column %d: Operator %s cannot be applied to types ", 
                     parent->line, parent->column, get_operator_token(parent->category));
                     print_type(node1->type);
@@ -794,12 +811,14 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                 struct symbol_list_t *symbol = search_symbol(global_symbol_table, node1->token);
                 if(symbol != NULL && symbol->node->category == FuncDecl){
                     node1->type = Undefined;
+                    parent->errorOccurred = 1;
                 }
             }
              if(node2->category == Identifier){
                 struct symbol_list_t *symbol = search_symbol(global_symbol_table, node2->token);
                 if(symbol != NULL && symbol->node->category == FuncDecl){
                     node2->type = Undefined;
+                    parent->errorOccurred = 1;
                 }
             }
             parent->type = TypeBool;
@@ -807,7 +826,7 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                 (node1->type == TypeBool)) {
                
             } else {
-                if(parent->errorOccurred == 0){
+                if(parent->errorOccurred == 0 || (node1->type == Undefined || node2->type == Undefined)){
                     printf("Line %d, column %d: Operator %s cannot be applied to types ", 
                     parent->line, parent->column, get_operator_token(parent->category));
                     print_type(node1->type);
@@ -834,19 +853,19 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                 struct symbol_list_t *symbol = search_symbol(global_symbol_table, node1->token);
                 if(symbol != NULL && symbol->node->category == FuncDecl){
                     node1->type = Undefined;
+                    parent->errorOccurred = 1;
                 }
             }
              if(node2->category == Identifier){
                 struct symbol_list_t *symbol = search_symbol(global_symbol_table, node2->token);
                 if(symbol != NULL && symbol->node->category == FuncDecl){
                     node2->type = Undefined;
+                    parent->errorOccurred = 1;
                 }
             }
             parent->type = TypeBool;
-            if (node1->type == node2->type) {
-                
-            } else {
-                if(parent->errorOccurred){
+            
+                if(parent->errorOccurred == 1 || (node1->type == Undefined || node2->type == Undefined)){
                     printf("Line %d, column %d: Operator %s cannot be applied to types ", 
                     parent->line, parent->column, get_operator_token(parent->category));
                     print_type(node1->type);
@@ -858,12 +877,8 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                     dontCheckIncorrectType = 1;
                     notIncorrectlyApplied = 1;
                 }
-                semantic_errors++;
-                    parent->errorOccurred = 1;
-                    dontCheckIncorrectType = 1;
-                    notIncorrectlyApplied = 1;
                
-            }
+            
             break;
         }
         case Ne: {
@@ -876,19 +891,21 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                 struct symbol_list_t *symbol = search_symbol(global_symbol_table, node1->token);
                 if(symbol != NULL && symbol->node->category == FuncDecl){
                     node1->type = Undefined;
+                    parent->errorOccurred = 1;
                 }
             }
              if(node2->category == Identifier){
                 struct symbol_list_t *symbol = search_symbol(global_symbol_table, node2->token);
                 if(symbol != NULL && symbol->node->category == FuncDecl){
                     node2->type = Undefined;
+                    parent->errorOccurred = 1;
                 }
             }
             parent->type = TypeBool;
             if (node1->type == node2->type) {
                
             } else {
-                if(parent->errorOccurred == 0){
+                if(parent->errorOccurred == 0 || (node1->type == Undefined || node2->type == Undefined)){
                     printf("Line %d, column %d: Operator %s cannot be applied to types ", 
                     parent->line, parent->column, get_operator_token(parent->category));
                     print_type(node1->type);
@@ -917,12 +934,14 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                 struct symbol_list_t *symbol = search_symbol(global_symbol_table, node1->token);
                 if(symbol != NULL && symbol->node->category == FuncDecl){
                     node1->type = Undefined;
+                    parent->errorOccurred = 1;
                 }
             }
              if(node2->category == Identifier){
                 struct symbol_list_t *symbol = search_symbol(global_symbol_table, node2->token);
                 if(symbol != NULL && symbol->node->category == FuncDecl){
                     node2->type = Undefined;
+                    parent->errorOccurred = 1;
                 }
             }
             parent->type = TypeBool;
@@ -930,7 +949,7 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                 (node1->type == TypeInteger || node1->type == TypeFloat32)) {
                
             } else {
-                if(parent->errorOccurred == 0){
+                if(parent->errorOccurred == 0 || (node1->type == Undefined || node2->type == Undefined)){
                     printf("Line %d, column %d: Operator %s cannot be applied to types ", 
                     parent->line, parent->column, get_operator_token(parent->category));
                     print_type(node1->type);
@@ -959,12 +978,14 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                 struct symbol_list_t *symbol = search_symbol(global_symbol_table, node1->token);
                 if(symbol != NULL && symbol->node->category == FuncDecl){
                     node1->type = Undefined;
+                    parent->errorOccurred = 1;
                 }
             }
              if(node2->category == Identifier){
                 struct symbol_list_t *symbol = search_symbol(global_symbol_table, node2->token);
                 if(symbol != NULL && symbol->node->category == FuncDecl){
                     node2->type = Undefined;
+                    parent->errorOccurred = 1;
                 }
             }
             parent->type = TypeBool;
@@ -972,7 +993,7 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                 (node1->type == TypeInteger || node1->type == TypeFloat32)) {
                 
             } else {
-                if(parent->errorOccurred == 0){
+                if(parent->errorOccurred == 0 || (node1->type == Undefined || node2->type == Undefined)){
                     printf("Line %d, column %d: Operator %s cannot be applied to types ", 
                     parent->line, parent->column, get_operator_token(parent->category));
                     print_type(node1->type);
@@ -1001,12 +1022,14 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                 struct symbol_list_t *symbol = search_symbol(global_symbol_table, node1->token);
                 if(symbol != NULL && symbol->node->category == FuncDecl){
                     node1->type = Undefined;
+                    parent->errorOccurred = 1;
                 }
             }
              if(node2->category == Identifier){
                 struct symbol_list_t *symbol = search_symbol(global_symbol_table, node2->token);
                 if(symbol != NULL && symbol->node->category == FuncDecl){
                     node2->type = Undefined;
+                    parent->errorOccurred = 1;
                 }
             }
             parent->type = TypeBool;
@@ -1014,7 +1037,7 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                 (node1->type == TypeInteger || node1->type == TypeFloat32)) {
                 
             } else {
-                if(parent->errorOccurred == 0){
+                if(parent->errorOccurred == 0 || (node1->type == Undefined || node2->type == Undefined)){
                      printf("Line %d, column %d: Operator %s cannot be applied to types ", 
                     parent->line, parent->column, get_operator_token(parent->category));
                     print_type(node1->type);
@@ -1043,12 +1066,14 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                 struct symbol_list_t *symbol = search_symbol(global_symbol_table, node1->token);
                 if(symbol != NULL && symbol->node->category == FuncDecl){
                     node1->type = Undefined;
+                    parent->errorOccurred = 1;
                 }
             }
              if(node2->category == Identifier){
                 struct symbol_list_t *symbol = search_symbol(global_symbol_table, node2->token);
                 if(symbol != NULL && symbol->node->category == FuncDecl){
                     node2->type = Undefined;
+                    parent->errorOccurred = 1;
                 }
             }
 
@@ -1057,7 +1082,7 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                 (node1->type == TypeInteger || node1->type == TypeFloat32)) {
                 
             } else {
-                if(parent->errorOccurred == 0){
+                if(parent->errorOccurred == 0 || (node1->type == Undefined || node2->type == Undefined)){
                     printf("Line %d, column %d: Operator %s cannot be applied to types ", 
                     parent->line, parent->column, get_operator_token(parent->category));
                     print_type(node1->type);
@@ -1285,6 +1310,7 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                 struct symbol_list_t *symbol = search_symbol(global_symbol_table, node1->token);
                 if(symbol != NULL && symbol->node->category == FuncDecl){
                     node1->type = Undefined;
+                    parent->errorOccurred = 1;
                 }
             }
             parent->type = TypeBool;

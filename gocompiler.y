@@ -472,7 +472,7 @@ func_invocation
     pass.column = @1.first_column;
     //struct node_t *aux_node = newnode(Intermediate, pass);
     pass = $1;
-    pass.line = pass.line -1;
+    pass.line = pass.line ;
     
     $$ = newcategory(Call,pass);
     addchild($$, newnode(Identifier, $1));

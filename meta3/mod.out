@@ -1,0 +1,21 @@
+Line 4, column 1: Cannot find symbol x
+Line 4, column 5: Cannot find symbol y
+Line 4, column 9: Cannot find symbol p
+Line 4, column 3: Operator = cannot be applied to types undef, undef
+===== Global Symbol Table =====
+f () none
+
+===== Function f() Symbol Table =====
+return none
+
+Program
+..FuncDecl
+....FuncHeader
+......Identifier(f)
+......FuncParams
+....FuncBody
+......Assign - undef
+........Identifier(x) - undef
+........Mod - undef
+..........Identifier(y) - undef
+..........Identifier(p) - undef

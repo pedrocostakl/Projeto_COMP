@@ -37,6 +37,8 @@
     int semicolon = 0;                /* Used to know when to emit semicolons */
     int print_tokens = 0;             /* Global flag to print tokens if -l is passed */
     int parse = 0;                    /* Enables the returning of token values to the parser */
+
+    int white_space_counter = 0;  /*to count white spces and convert them to tab */
     char temp_string[BUF_SIZE];
 
     extern struct node_t *program;
@@ -118,8 +120,11 @@ os.Args                                     { print_token("CMDARGS"); semicolon 
 {digit}*"."{digit}*[eE][-+]?{digit}+        { print_token("DECIMAL(%s)", yytext); semicolon = 1; PASS_TOKEN(); if (parse) return DECIMAL; }
 {digit}+[eE][-+]?{digit}+                   { print_token("DECIMAL(%s)", yytext); semicolon = 1; PASS_TOKEN(); if (parse) return DECIMAL; }
 
-" "+                                        { ; }
+
+" "+                                        { ;}
+
 "\t"+                                       { ; }
+
 "\r"                                        { ; }
 "\n"                                        { newline(); if (emit_semicolon()) { if (parse) return SEMICOLON; } }
 
@@ -256,11 +261,13 @@ int yywrap() {  /* called on EOF, return 1 to terminate */
 void user_action() {
     tok_column = column;
     column += yyleng;
+
     last_action_newline = 0;
-    
+
     yylval.pass.token = NULL;
     yylval.pass.line = tok_line;
     yylval.pass.column = tok_column;
+    
 }
 
 void print_token(const char *tok, ...) {
@@ -290,6 +297,7 @@ void newline() {
     column = 1;
     tok_column = 1;
     last_action_newline = 1;
+    white_space_counter = 0;
 }
 
 void reserved(){

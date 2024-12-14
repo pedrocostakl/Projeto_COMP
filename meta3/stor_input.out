@@ -1,0 +1,84 @@
+Line 5, column 2: Cannot find symbol naoexiste
+Line 5, column 19: Cannot find symbol naoexiste
+Line 5, column 16: Operator && cannot be applied to types bool, undef
+Line 5, column 12: Operator = cannot be applied to types undef, bool
+Line 6, column 2: Cannot find symbol naoexiste
+Line 6, column 19: Cannot find symbol naoexiste
+Line 6, column 16: Operator == cannot be applied to types bool, undef
+Line 6, column 12: Operator = cannot be applied to types undef, bool
+Line 7, column 2: Cannot find symbol naoexiste
+Line 7, column 19: Cannot find symbol naoexiste
+Line 7, column 16: Operator != cannot be applied to types bool, undef
+Line 7, column 12: Operator = cannot be applied to types undef, bool
+Line 8, column 2: Cannot find symbol naoexiste
+Line 8, column 12: Operator = cannot be applied to types undef, int
+Line 9, column 6: Cannot find symbol naoexiste
+Line 9, column 6: Incompatible type undef in if statement
+Line 10, column 7: Cannot find symbol naoexiste
+Line 10, column 7: Incompatible type undef in for statement
+Line 11, column 9: Cannot find symbol naoexiste
+Line 11, column 9: Incompatible type undef in return statement
+Line 12, column 9: Cannot find symbol naoexiste()
+Line 12, column 9: Incompatible type undef in return statement
+Line 14, column 6: Incompatible type int in if statement
+Line 15, column 7: Incompatible type int in for statement
+Line 16, column 9: Incompatible type int in return statement
+===== Global Symbol Table =====
+f    ()    none
+
+===== Function f() Symbol Table =====
+return        none
+a        int
+b        bool
+
+Program
+..FuncDecl
+....FuncHeader
+......Identifier(f)
+......FuncParams
+....FuncBody
+......VarDecl
+........Int
+........Identifier(a)
+......VarDecl
+........Bool
+........Identifier(b)
+......Assign - undef
+........Identifier(naoexiste) - undef
+........And - bool
+..........Identifier(b) - bool
+..........Identifier(naoexiste) - undef
+......Assign - undef
+........Identifier(naoexiste) - undef
+........Eq - bool
+..........Identifier(b) - bool
+..........Identifier(naoexiste) - undef
+......Assign - undef
+........Identifier(naoexiste) - undef
+........Ne - bool
+..........Identifier(b) - bool
+..........Identifier(naoexiste) - undef
+......Assign - undef
+........Identifier(naoexiste) - undef
+........Natural(1) - int
+......If
+........Identifier(naoexiste) - undef
+........Block
+........Block
+......For
+........Identifier(naoexiste) - undef
+........Block
+......Return
+........Identifier(naoexiste) - undef
+......Return
+........Call - undef
+..........Identifier(naoexiste) - undef
+......If
+........Identifier(a) - int
+........Block
+........Block
+......For
+........Identifier(a) - int
+........Block
+......Return
+........Identifier(a) - int
