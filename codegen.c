@@ -8,6 +8,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
+#include <errno.h>
+#include <float.h>
 
 #include "semantics.h"
 
@@ -55,7 +58,9 @@ static void print_type_zero(enum type_t type);
 static void print_tab();
 static int octal_natural(const char *token, int *value);
 static int hexadecimal_natural(const char *token, int *value);
+static int get_natural(const char *token);
 static int expoent_decimal(const char *token, float *value);
+static double get_decimal(const char *token);
 static char *get_decimal_token(const char *token);
 static int get_logical_strlit(const char *token, char **strlit);
 static struct symbol_list_t *get_id_symbol(struct node_t *expression, struct symbol_list_t *scope);
@@ -572,7 +577,7 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             } else if (hexadecimal_natural(expression->token, &value) == 1) {
                 printf("%%%d = add i32 %d, 0\n", temporary, value);
             } else {
-                printf("%%%d = add i32 %s, 0\n", temporary, expression->token);
+                printf("%%%d = add i32 %d, 0\n", temporary, get_natural(expression->token));
             }
             tmp = temporary;
             temporary++;
@@ -582,9 +587,9 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             float value = 0;
             char *decimal_token = get_decimal_token(expression->token);
             if (expoent_decimal(decimal_token, &value) == 0) {
-                printf("%%%d = fadd double %s, 0.0\n", temporary, decimal_token);
+                printf("%%%d = fadd double %.08f, 0.0\n", temporary, get_decimal(decimal_token));
             } else {
-                printf("%%%d = fadd double %f, 0.0\n", temporary, value);
+                printf("%%%d = fadd double %.08f, 0.0\n", temporary, value);
             }
             free(decimal_token);
             tmp = temporary;
@@ -1074,6 +1079,24 @@ int hexadecimal_natural(const char *token, int *value) {
     return 0;
 }
 
+int get_natural(const char *token) {
+    long min = INT_MIN;
+    long max = INT_MAX;
+
+    errno = 0;
+    char *end = NULL;
+
+    long value = strtol(token, &end, 10);
+
+    if (errno == ERANGE || value < min) {
+        return INT_MIN;
+    }
+    if (value > max) {
+        return INT_MAX;
+    }
+    return (int)value;
+}
+
 int expoent_decimal(const char *token, float *value) {
     if (value == NULL) return 0;
 
@@ -1129,6 +1152,24 @@ char *get_decimal_token(const char *token) {
     }
     *out = '\0';
     return str;
+}
+
+double get_decimal(const char *token) {
+    double min = -FLT_MAX;
+    double max = FLT_MAX;
+
+    errno = 0;
+    char *end = NULL;
+
+    double value = strtod(token, &end);    
+
+    if (errno == ERANGE || value < min) {
+        return -FLT_MAX;
+    }
+    if (value > max) {
+        return FLT_MAX;
+    }
+    return value;
 }
 
 int get_logical_strlit(const char *token, char **strlit) {

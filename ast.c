@@ -12,7 +12,7 @@
 int show_ast_type = 0;
 extern struct symbol_list_t *global_symbol_table;
 
-static void show_node(struct node_t *root, enum category_t prev_category, int depth, int forceblock, int anotate);
+static void show_node(struct node_t *root, struct symbol_list_t *scope, enum category_t prev_category, int depth, int forceblock, int anotate);
 static int numchildren(struct node_t *root);
 static void print_category(const enum category_t category);
 
@@ -84,8 +84,8 @@ struct node_t *getchild(struct node_t *parent, int position) {
     return NULL;
 }
 
-void show(struct node_t *root, int anotate) {
-    show_node(root, root->category, 0, 0, anotate);
+void show(struct node_t *root, int anotate) {    
+    show_node(root, NULL, root->category, 0, 0, anotate);
 }
 
 void clean(struct node_t *root) {
@@ -104,7 +104,7 @@ void clean(struct node_t *root) {
     free(root);
 }
 
-void show_node(struct node_t *root, enum category_t prev_category, int depth, int forceblock, int anotate) {
+void show_node(struct node_t *root, struct symbol_list_t *scope, enum category_t prev_category, int depth, int forceblock, int anotate) {
     // controlo do print do node e do seu token
     switch (root->category) {
         case Intermediate:
@@ -130,26 +130,30 @@ void show_node(struct node_t *root, enum category_t prev_category, int depth, in
                 }
                 // anotação da árvore
                 if (root->type > None && root->category != ParamDecl && root->category != VarDecl
-                &&root->category != For && root->category!=If) {
+                && root->category != For && root->category != If) {
                     printf(" - ");
-                    if (root->category == Identifier) {
-                        struct symbol_list_t *symbol = search_symbol(global_symbol_table, root->token);
+                    if (root->category == Identifier) {  
+                        // procurar o simbolo primeiro no scope e depois no global table
+                        struct symbol_list_t *symbol = NULL;
+                        if (scope != NULL) {
+                            symbol = search_symbol(scope, root->token);
+                        }
+                        if (symbol == NULL) {
+                            symbol = search_symbol(global_symbol_table, root->token);
+                        }                      
                         if (symbol != NULL) {
-                           
-                            // evitar dar print params da func como -()
+                            // evitar dar print params da func como - ()
                             if (symbol->node->category == FuncDecl && prev_category != FuncHeader 
                             && prev_category != ParamDecl && prev_category != VarDecl && prev_category != Call) {
                                if (root->type == Undefined) {
-                                // If type is Undefined, prioritize printing the type
-                                print_type(root->type);
-                                } 
-                                else {
+                                    // If type is Undefined, prioritize printing the type
+                                    print_type(root->type);
+                                } else {
                                     // Print function parameters if valid
                                     printf("(");
                                     print_parameters(symbol->node);
                                     printf(")");
                                 }
-
                             } else {
                                 print_type(root->type);
                             }
@@ -160,19 +164,21 @@ void show_node(struct node_t *root, enum category_t prev_category, int depth, in
                         print_type(root->type);
                     }
                 } else if (root->category == Identifier) {
-                    struct symbol_list_t *symbol = search_symbol(global_symbol_table, root->token);
+                    // procurar o simbolo primeiro no scope e depois no global table
+                    struct symbol_list_t *symbol = NULL;                    
+                    symbol = search_symbol(global_symbol_table, root->token);
                     if (symbol != NULL && symbol->node->category == FuncDecl && prev_category != FuncHeader
                     && prev_category != ParamDecl && prev_category != VarDecl) {
-                          printf(" - ");
-                      if (root->type == Undefined) {
-                        // Print undefined type
-                        print_type(root->type);
-                    } else {
-                        // Print function parameters
-                        printf("(");
-                        print_parameters(symbol->node);
-                        printf(")");
-                    }
+                        printf(" - ");
+                        if (root->type == Undefined) {
+                            // Print undefined type
+                            print_type(root->type);
+                        } else {
+                            // Print function parameters
+                            printf("(");                            
+                            print_parameters(symbol->node);
+                            printf(")");
+                        }
                     }
                 }
                 printf("\n");
@@ -185,10 +191,18 @@ void show_node(struct node_t *root, enum category_t prev_category, int depth, in
     } else {
         forceblock = 0;
     }
+    if (root->category == FuncDecl) {
+        struct node_t *id = getchild(getchild(root, 0), 0);
+        if (id == NULL) printf("dadaw\n");
+        struct symbol_list_t *function_symbol = search_symbol(global_symbol_table, id->token);
+        if (function_symbol) {
+            scope = function_symbol->scope;
+        }
+    }
     // iterar children
     struct node_list_t *children = root->children;
     while (children->next != NULL) {
-        show_node(children->next->node, root->category, depth, forceblock, anotate);
+        show_node(children->next->node, scope, root->category, depth, forceblock, anotate);
         children = children->next;
     }
 }
