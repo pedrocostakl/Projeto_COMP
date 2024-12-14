@@ -311,7 +311,9 @@ statement
 }
 | RETURN
 {
-    $$ = newnode(Return, $1);
+    struct pass_t pass = $1;
+    pass.token = NULL;
+    $$ = newnode(Return, pass);
 }
 | func_invocation
 {
@@ -324,8 +326,10 @@ statement
 | PRINT LPAR expr RPAR
 {
     struct pass_t pass;
-    pass.line = $3->line;
-    pass.column = $3->column;
+    pass.token = NULL;
+    struct node_t *aux_node = $3;
+    pass.line = aux_node->line;
+    pass.column = aux_node->column;
 
     $$ = newnode(Print, pass);
     addchild($$, $3);
@@ -383,12 +387,16 @@ parse_args
 func_invocation
 : IDENTIFIER LPAR RPAR
 {
-    $$ = newnode(Call, $1);
+    struct pass_t pass = $1;
+    pass.token = NULL;
+    $$ = newnode(Call, pass);
     addchild($$, newnode(Identifier, $1));
 }
 | IDENTIFIER LPAR func_invocation_exprs RPAR
-{    
-    $$ = newnode(Call, $1);
+{
+    struct pass_t pass = $1;
+    pass.token = NULL;
+    $$ = newnode(Call, pass);
     addchild($$, newnode(Identifier, $1));
     addchild($$, $3);
 }

@@ -45,6 +45,8 @@ struct node_t *newcategory(enum category_t category) {
     new->category = category;
     new->type = None;
     new->token = NULL;
+    new->line = 0;
+    new->column = 0;
     new->children = malloc(sizeof(struct node_list_t));
     new->children->next = NULL;
     new->children->node = NULL;
