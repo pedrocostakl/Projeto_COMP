@@ -96,7 +96,7 @@ struct pass_t {
 
 struct node_t *newnode(enum category_t category, struct pass_t pass);
 struct node_t *newintermediate();
-struct node_t *newcategory(enum category_t category, struct pass_t pass);
+struct node_t *newcategory(enum category_t category);
 void addchild(struct node_t *parent, struct node_t *child);
 struct node_t *getchild(struct node_t *parent, int position);
 void show(struct node_t *root, int anotate);

@@ -40,13 +40,11 @@ struct node_t *newintermediate() {
     return new;
 }
 
-struct node_t *newcategory(enum category_t category, struct pass_t pass) {
+struct node_t *newcategory(enum category_t category) {
     struct node_t *new = malloc(sizeof(struct node_t));
     new->category = category;
     new->type = None;
     new->token = NULL;
-    new->line = pass.line + 1;
-    new->column = pass.column;
     new->children = malloc(sizeof(struct node_list_t));
     new->children->next = NULL;
     new->children->node = NULL;

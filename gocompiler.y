@@ -95,20 +95,16 @@
 program
 : PACKAGE IDENTIFIER SEMICOLON declarations
 {
-    struct pass_t pass;
-    pass.token = strdup("return");  // Optionally set the token to "return"
-    pass.line = @1.first_line;      // Use the position of the RETURN keyword
-    pass.column = @1.first_column;
-    $$ = program = newcategory(Program,pass);
+    $$ = program = newcategory(Program);
     addchild(program, $4);
 }
 | PACKAGE IDENTIFIER SEMICOLON
 {
-    struct pass_t pass;
-    pass.token = strdup("return");  // Optionally set the token to "return"
-    pass.line = @1.first_line;      // Use the position of the RETURN keyword
-    pass.column = @1.first_column;
-    $$ = program = newcategory(Program,pass);
+    $$ = program = newcategory(Program);
+}
+|
+{    
+    $$ = program = newcategory(Program);
 }
 ;
 

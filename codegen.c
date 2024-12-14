@@ -38,6 +38,7 @@ static unsigned int strlit_num;
 static enum category_t prev_category;
 static struct node_t *global_program;
 static struct strlit_node_t *strlit_list;
+static struct node_t *function_node;
 
 extern struct symbol_list_t *global_symbol_table;
 
@@ -55,7 +56,9 @@ static void print_tab();
 static int octal_natural(const char *token, int *value);
 static int hexadecimal_natural(const char *token, int *value);
 static int expoent_decimal(const char *token, float *value);
+static char *get_decimal_token(const char *token);
 static int get_logical_strlit(const char *token, char **strlit);
+static struct symbol_list_t *get_id_symbol(struct node_t *expression, struct symbol_list_t *scope);
 
 void codegen_program(struct node_t *program) {
     global_program = program;
@@ -71,7 +74,7 @@ void codegen_program(struct node_t *program) {
     // declarar formatos de print
     printf("; global string literals responsible for the printf formats\n");
     printf("%s = private constant [4 x i8] c\"%%d\\0A\\00\"\n", FORMAT_INT);
-    printf("%s = private constant [6 x i8] c\"%%.8f\\0A\\00\"\n", FORMAT_FLOAT32);
+    printf("%s = private constant [7 x i8] c\"%%.08f\\0A\\00\"\n", FORMAT_FLOAT32);
     printf("%s = private constant [6 x i8] c\"true\\0A\\00\"\n", FORMAT_BOOL_TRUE);
     printf("%s = private constant [7 x i8] c\"false\\0A\\00\"\n", FORMAT_BOOL_FALSE);
     printf("%s = private constant [4 x i8] c\"%%s\\0A\\00\"\n", FORMAT_STRLIT);
@@ -157,6 +160,7 @@ void codegen_var(struct node_t *var, struct symbol_list_t *scope, int global) {
 }
 
 void codegen_function(struct node_t *function) {
+    function_node = function;
     temporary = 1;
     struct node_t *header = getchild(function, 0);
     struct node_list_t *children;
@@ -340,6 +344,14 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
             label_num++;
 
             struct node_list_t *children = statement->children->next;
+            struct node_t *expr, *block;
+            expr = children->node;
+            if (expr->category == Block) {
+                block = expr;
+                expr = NULL;
+            } else {
+                block = children->next->node;
+            }
 
             print_tab();
             printf("br label %%");
@@ -348,29 +360,30 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
             print_label(for_label_num, LabelFor);
             printf(":\n");
 
-            int tmp1 = codegen_expression(children->node, scope);
+            // expression
+            if (expr != NULL) {
+                int tmp1 = codegen_expression(expr, scope);
+                // branch
+                print_tab();
+                printf("br i1 %%%d", tmp1);
+                printf(", label %%");
+                print_label(for_label_num, LabelThen);
+                printf(", label %%");
+                print_label(for_label_num, LabelEnd);
+                printf("\n");
 
-            // branch
-            print_tab();
-            printf("br i1 %%%d", tmp1);
-            printf(", label %%");
-            print_label(for_label_num, LabelThen);
-            printf(", label %%");
-            print_label(for_label_num, LabelEnd);
-            printf("\n");
+                print_label(for_label_num, LabelThen);
+                printf(":\n");
+            }
 
-            print_label(for_label_num, LabelThen);
-            printf(":\n");
-
-            codegen_statement(children->next->node, scope);
-
+            // block
+            codegen_statement(block, scope);
             if (prev_category != Return) {
                 print_tab();
                 printf("br label %%");
                 print_label(for_label_num, LabelFor);
                 printf("\n");
             }
-
             print_label(for_label_num, LabelEnd);
             printf(":\n");
         } break;
@@ -395,7 +408,7 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
                 } break;
                 case TypeFloat32: {
                     print_tab();
-                    printf("%%%d = getelementptr [6 x i8], [6 x i8]* %s, i32 0, i32 0\n", temporary, FORMAT_FLOAT32);
+                    printf("%%%d = getelementptr [7 x i8], [7 x i8]* %s, i32 0, i32 0\n", temporary, FORMAT_FLOAT32);
                     print_tab();
                     temporary++;
                     printf("%%%d = call i32 (i8*, ...) @printf(i8* %%%d, double %%%d)\n", temporary, temporary - 1, tmp1);
@@ -510,10 +523,7 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
         } break;
         case Assign: {
             struct node_t *id = getchild(statement, 0);
-            struct symbol_list_t *symbol = search_symbol(scope, id->token);
-            if (symbol == NULL) {
-                symbol = search_symbol(global_symbol_table, id->token);
-            }
+            struct symbol_list_t *symbol = get_id_symbol(id, scope);
             int tmp1 = codegen_expression(getchild(statement, 1), scope);
             print_tab();
             switch (symbol->symbol_type) {
@@ -570,19 +580,18 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
         case Decimal: {
             print_tab();
             float value = 0;
-            if (expoent_decimal(expression->token, &value) == 0) {
-                printf("%%%d = fadd double %s, 0.0\n", temporary, expression->token);
+            char *decimal_token = get_decimal_token(expression->token);
+            if (expoent_decimal(decimal_token, &value) == 0) {
+                printf("%%%d = fadd double %s, 0.0\n", temporary, decimal_token);
             } else {
                 printf("%%%d = fadd double %f, 0.0\n", temporary, value);
             }
+            free(decimal_token);
             tmp = temporary;
             temporary++;
         } break;
         case Identifier: {
-            struct symbol_list_t *symbol = search_symbol(scope, expression->token);
-            if (symbol == NULL) {
-                symbol = search_symbol(global_symbol_table, expression->token);
-            }
+            struct symbol_list_t *symbol = get_id_symbol(expression, scope);
             print_tab();
             switch (symbol->symbol_type) {
                 case SymbolGlobalVar: {
@@ -1105,6 +1114,23 @@ int expoent_decimal(const char *token, float *value) {
     }
 }
 
+char *get_decimal_token(const char *token) {
+    char *str = (char*)malloc(strlen(token) + 2);
+    char *out = str;
+    const char *ch = token;
+    if (*ch == '.') {
+        *out++ = '0';
+        *out++ = '.';
+        ch++;
+    }
+    while (*ch) {
+        *out++ = *ch;
+        ch++;
+    }
+    *out = '\0';
+    return str;
+}
+
 int get_logical_strlit(const char *token, char **strlit) {
     if (token == NULL) return 0;
 
@@ -1157,4 +1183,33 @@ int get_logical_strlit(const char *token, char **strlit) {
     }
     *(out - 1) = '\0';
     return len;
+}
+
+struct symbol_list_t *get_id_symbol(struct node_t *expression, struct symbol_list_t *scope) {
+    enum symbol_type_t id_symbol_type;
+    struct symbol_list_t *scope_symbol = search_symbol(scope, expression->token);
+    struct symbol_list_t *global_symbol = search_symbol(global_symbol_table, expression->token);
+    if (scope_symbol != NULL && global_symbol != NULL) {
+        // find priority
+        struct node_t *id_scope_node = getchild(scope_symbol->node, 1);
+        if (id_scope_node->line < expression->line ||
+            (id_scope_node->line == expression->line && id_scope_node->column < expression->column)) {
+            id_symbol_type = SymbolLocalVar;
+        } else {
+            id_symbol_type = SymbolGlobalVar;
+        }
+        switch (id_symbol_type) {
+            case SymbolGlobalVar: {
+                return global_symbol;
+            } break;
+            case SymbolLocalVar: {
+                return scope_symbol;
+            } break;
+            default:
+                break;
+        }
+    } else if (scope_symbol == NULL) {
+        return global_symbol;
+    }
+    return scope_symbol;
 }
