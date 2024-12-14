@@ -82,7 +82,6 @@ struct node_t {
     int errorOccurred;
     int errorOperationOccurred; // assign undef só em resultados de operações
     struct node_list_t *children;
-    unsigned int hash; // usado para verificar se uma strlit já foi declarada (codegen)
 };
 
 struct node_list_t {

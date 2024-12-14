@@ -17,13 +17,6 @@
 #define FORMAT_BOOL_FALSE      "@.format_bool_false"
 #define FORMAT_STRLIT          "@.format_strlit"
 
-static int temporary;
-static unsigned int label_num;
-static enum category_t prev_category;
-static struct node_t *global_program;
-
-extern struct symbol_list_t *global_symbol_table;
-
 enum label_type_t {
     LabelThen = 0,
     LabelElse,
@@ -32,6 +25,21 @@ enum label_type_t {
     LabelPrintTrue,
     LabelPrintFalse
 };
+
+struct strlit_node_t {
+    unsigned int index;
+    char *token;
+    struct strlit_node_t *next;
+};
+
+static int temporary;
+static unsigned int label_num;
+static unsigned int strlit_num;
+static enum category_t prev_category;
+static struct node_t *global_program;
+static struct strlit_node_t *strlit_list;
+
+extern struct symbol_list_t *global_symbol_table;
 
 static void codegen_var(struct node_t *var, struct symbol_list_t *scope, int global);
 static void codegen_function(struct node_t *function);
@@ -44,8 +52,6 @@ static void print_codegen_type(enum type_t type);
 static void print_label(unsigned int num, enum label_type_t label_type);
 static void print_type_zero(enum type_t type);
 static void print_tab();
-static unsigned int get_strlit_hash(const char *strlit);
-static int is_strlit_declared(struct node_t *parent, unsigned int hash);
 static int octal_natural(const char *token, int *value);
 static int hexadecimal_natural(const char *token, int *value);
 static int expoent_decimal(const char *token, float *value);
@@ -54,6 +60,8 @@ static int get_logical_strlit(const char *token, char **strlit);
 void codegen_program(struct node_t *program) {
     global_program = program;
     label_num = 0;
+    strlit_num = 1;
+    strlit_list = NULL;
 
     // declarar funções I/O
     printf("; C language I/O functions\n");
@@ -437,6 +445,16 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
                     printf(":\n");
                 } break;
                 case TypeString: {
+                    // procurar a strlit index
+                    unsigned int num = 0;
+                    struct strlit_node_t *strlit_node = strlit_list;
+                    while (strlit_node != NULL) {
+                        if (strcmp(strlit_node->token, expr->token) == 0) {
+                            num = strlit_node->index;
+                            break;
+                        }
+                        strlit_node = strlit_node->next;
+                    }
                     char *strlit = NULL;
                     int len = get_logical_strlit(expr->token, &strlit);
 
@@ -444,7 +462,7 @@ int codegen_statement(struct node_t *statement, struct symbol_list_t *scope) {
                     printf("%%%d = getelementptr [4 x i8], [4 x i8]* %s, i32 0, i32 0\n", temporary, FORMAT_STRLIT);
                     print_tab();
                     temporary++;
-                    printf("%%%d = getelementptr [%d x i8], [%d x i8]* @.strlit_%u, i32 0, i32 0\n", temporary, len, len, get_strlit_hash(strlit));
+                    printf("%%%d = getelementptr [%d x i8], [%d x i8]* @.strlit_%u, i32 0, i32 0\n", temporary, len, len, num);
                     print_tab();
                     temporary++;
                     printf("%%%d = call i32 (i8*, ...) @printf(i8* %%%d, i8* %%%d)\n", temporary, temporary - 2, temporary - 1);
@@ -889,14 +907,40 @@ void codegen_string_literals(struct node_t *parent) {
     while (children != NULL) {
         struct node_t *node = children->node;
         if (node->category == StrLit) {
-            char *strlit = NULL;
-            int len = get_logical_strlit(node->token, &strlit);
-            unsigned int hash = get_strlit_hash(strlit);
-            if (is_strlit_declared(global_program, hash) == 0) {
-                printf("@.strlit_%u = private constant [%d x i8] c\"%s\\00\"\n", get_strlit_hash(strlit), len, strlit);
+            unsigned int num = strlit_num;
+            // procurar a strlit
+            struct strlit_node_t *strlit_node = strlit_list;
+            struct strlit_node_t *prev_node = NULL;
+            while (strlit_node != NULL) {
+                if (strcmp(strlit_node->token, node->token) == 0) {
+                    num = 0;
+                    break;
+                }
+                prev_node = strlit_node;
+                strlit_node = strlit_node->next;
             }
-            node->hash = hash;
-            free(strlit);
+            // adicionar a strlit a lista caso não seja encontrada
+            if (strlit_node == NULL) {
+                num = strlit_num;
+                struct strlit_node_t *new = (struct strlit_node_t*)malloc(sizeof(struct strlit_node_t));
+                new->next = NULL;
+                new->index = strlit_num;
+                new->token = node->token;
+                strlit_num++;
+                if (prev_node != NULL) {
+                    prev_node->next = new;
+                } else {
+                    strlit_list = new;
+                }
+            }
+            // declarar
+            if (num > 0) {
+                char *strlit = NULL;
+                int len = get_logical_strlit(node->token, &strlit);
+                printf("@.strlit_%u = private constant [%d x i8] c\"%s\\00\"\n", num, len, strlit);
+                free(strlit);
+            }
+            
         } else {
             codegen_string_literals(node);
         }
@@ -968,32 +1012,6 @@ void print_type_zero(enum type_t type) {
 
 void print_tab() {
     printf("  ");
-}
-
-unsigned int get_strlit_hash(const char *strlit) {
-    unsigned int hash = 0;
-    while (*strlit) {
-        hash = hash * 31 + (unsigned char)(*strlit);
-        strlit++;
-    }
-    return hash;
-}
-
-int is_strlit_declared(struct node_t *parent, unsigned int hash) {
-    struct node_list_t *children = parent->children->next;
-    while (children != NULL) {
-        struct node_t *node = children->node;
-        if (node->category == StrLit) {
-            if (node->hash == hash) {
-                return 1;
-            }
-        } else {
-            int res = is_strlit_declared(node, hash);
-            if (res == 1) return 1;
-        }
-        children = children->next;
-    }
-    return 0;
 }
 
 int octal_natural(const char *token, int *value) {
