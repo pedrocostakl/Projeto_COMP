@@ -1,0 +1,17 @@
+package main;
+func f() {
+      var a int;
+      var b bool;
+      naoexiste = b && naoexiste;
+      naoexiste = b == naoexiste;
+      naoexiste = b != naoexiste;
+      naoexiste = 1;
+      if (naoexiste) {}
+      for (naoexiste) {}
+      return naoexiste;
+      return naoexiste();
+
+      if (a) {}
+      for (a) {}
+      return a;
+}
