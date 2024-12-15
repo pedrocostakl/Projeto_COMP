@@ -42,6 +42,7 @@ static enum category_t prev_category;
 static struct node_t *global_program;
 static struct strlit_node_t *strlit_list;
 static struct node_t *function_node;
+static struct node_t *parent_node;
 
 extern struct symbol_list_t *global_symbol_table;
 
@@ -56,10 +57,7 @@ static void print_codegen_type(enum type_t type);
 static void print_label(unsigned int num, enum label_type_t label_type);
 static void print_type_zero(enum type_t type);
 static void print_tab();
-static int octal_natural(const char *token, int *value);
-static int hexadecimal_natural(const char *token, int *value);
 static int get_natural(const char *token);
-static int expoent_decimal(const char *token, float *value);
 static double get_decimal(const char *token);
 static char *get_decimal_token(const char *token);
 static int get_logical_strlit(const char *token, char **strlit);
@@ -571,26 +569,26 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
     switch (expression->category) {
         case Natural: {
             print_tab();
-            int value = 0;
-            if (octal_natural(expression->token, &value) == 1) {
-                printf("%%%d = add i32 %d, 0\n", temporary, value);
-            } else if (hexadecimal_natural(expression->token, &value) == 1) {
-                printf("%%%d = add i32 %d, 0\n", temporary, value);
-            } else {
-                printf("%%%d = add i32 %d, 0\n", temporary, get_natural(expression->token));
+            char *tok = expression->token;
+            if (parent_node != NULL && parent_node->category == Minus) {
+                const char *original = expression->token;
+                tok = (char*)malloc(strlen(original) + 3);
+                char *it = tok;
+                *it++ = '-';
+                while (*original) {
+                    *it++ = *original;
+                    original++;
+                }
+                *it = '\0';
             }
+            printf("%%%d = add i32 %d, 0\n", temporary, get_natural(tok));
             tmp = temporary;
             temporary++;
         } break;
         case Decimal: {
             print_tab();
-            float value = 0;
             char *decimal_token = get_decimal_token(expression->token);
-            if (expoent_decimal(decimal_token, &value) == 0) {
-                printf("%%%d = fadd double %.08f, 0.0\n", temporary, get_decimal(decimal_token));
-            } else {
-                printf("%%%d = fadd double %.08f, 0.0\n", temporary, value);
-            }
+            printf("%%%d = fadd double %.08f, 0.0\n", temporary, get_decimal(decimal_token));
             free(decimal_token);
             tmp = temporary;
             temporary++;
@@ -889,7 +887,14 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             temporary++;
         } break;
         case Minus: {
-            int tmp1 = codegen_expression(getchild(expression, 0), scope);
+            parent_node = expression;
+            struct node_t *expr = getchild(expression, 0);
+            int tmp1 = codegen_expression(expr, scope);
+            if (expr->category == Natural) {
+                parent_node = NULL;   
+                tmp = tmp1;           
+                break;
+            }
             print_tab();
             printf("%%%d = ", temporary);
             switch (expression->type) {
@@ -905,6 +910,7 @@ int codegen_expression(struct node_t *expression, struct symbol_list_t *scope) {
             printf("%%%d\n", tmp1);
             tmp = temporary;
             temporary++;
+            parent_node = NULL;
         } break;
         case Plus: {
             tmp = codegen_expression(getchild(expression, 0), scope);
@@ -1028,57 +1034,6 @@ void print_tab() {
     printf("  ");
 }
 
-int octal_natural(const char *token, int *value) {
-    if (value == NULL) return 0;
-
-    int pos = strlen(token) - 2;
-    if (*token == '0' && *(token + 1) != 'x' && *(token + 1) != 'X') {
-        const char *ch = token + 1;
-        while (pos >= 0) {
-            int val = 0;
-            int octal = 1;
-            for (int i = 0; i < pos; i++) {
-                octal *= 8;
-            }
-            val = *ch - 48;
-            *value += val * octal;
-            ch++;
-            pos--;
-        }
-        return 1;
-    }
-    return 0;
-}
-
-int hexadecimal_natural(const char *token, int *value) {
-    if (value == NULL) return 0;
-
-    *value = 0;
-    int pos = strlen(token) - 3;
-    if (*token == '0' && (*(token + 1) == 'x' || *(token + 1) == 'X')) {
-        const char *ch = token + 2;
-        while (pos >= 0) {
-            int val = 0;
-            int hex = 1;
-            for (int i = 0; i < pos; i++) {
-                hex *= 16;
-            }
-            if (*ch >= 48 && *ch <= 57) {
-                val = *ch - 48;
-            } else if (*ch >= 65 && *ch <= 70) {
-                val = *ch - 65 + 10;
-            } else if (*ch >= 97 && *ch <= 102) {
-                val = *ch - 97 + 10;
-            }
-            *value += val * hex;            
-            ch++;
-            pos--;
-        }
-        return 1;
-    }
-    return 0;
-}
-
 int get_natural(const char *token) {
     long min = INT_MIN;
     long max = INT_MAX;
@@ -1086,7 +1041,7 @@ int get_natural(const char *token) {
     errno = 0;
     char *end = NULL;
 
-    long value = strtol(token, &end, 10);
+    long value = strtol(token, &end, 0);
 
     if (errno == ERANGE || value < min) {
         return INT_MIN;
@@ -1095,46 +1050,6 @@ int get_natural(const char *token) {
         return INT_MAX;
     }
     return (int)value;
-}
-
-int expoent_decimal(const char *token, float *value) {
-    if (value == NULL) return 0;
-
-    *value = 0.0;
-    const char *ch = token;
-    const char *exp_pos = NULL;
-    while (*ch) {
-        if (*ch == 'e' || *ch == 'E') {
-            exp_pos = ch;
-            break;
-        }
-        ch++;
-    }
-    if (exp_pos != NULL) {
-        float base;
-        int exp;
-        char base_str[32];
-        char exp_str[32];
-
-        size_t base_len = exp_pos - token;
-        snprintf(base_str, base_len + 1, "%s", token);
-        snprintf(exp_str, sizeof(exp_str), "%s", exp_pos + 1);
-
-        base = atof(base_str);
-        exp = atoi(exp_str);
-
-        int power = 1 * (exp / abs(exp));
-        exp = abs(exp);
-        while (exp != 0) {
-            power *= 10;
-            exp--;
-        }
-        *value = base * power;
-        return 1;
-    } else {
-        *value = atof(token);
-        return 0;
-    }
 }
 
 char *get_decimal_token(const char *token) {
@@ -1161,7 +1076,7 @@ double get_decimal(const char *token) {
     errno = 0;
     char *end = NULL;
 
-    double value = strtod(token, &end);    
+    double value = strtod(token, &end);
 
     if (errno == ERANGE || value < min) {
         return -FLT_MAX;
