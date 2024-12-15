@@ -8,9 +8,18 @@ Autores:
 
 400 palavras.
 
-### Estrututas de Dados (AST e tabela de símbolos)
+### Estruturas de Dados (AST e tabela de símbolos)
 
 400 palavras.
+
+A AST é principalmente composta por nós *node_t*. Estes nós possuem campos que guardam informações importantes sobre o token passado pelo lexer tais como linha, coluna, etc. Cada nó possui como campo uma lista ligada *node_list_t* que permite iterar sobre os seus filhos, caso estes existam.
+As principais funções usadas para a criação da AST são a função *newnode* que é tipicamente usada para nós folha e que usa uma estrutura auxiliar pass para guardar informações como linha e coluna do token. A função *newcategory* cria nós com uma categoria específica e é tipicamente usado para statements. A função *newintermediate* cria nós intermédios que são usados para ligar vários nós, estes nós depois não serão impressos na impressão da AST.
+
+Através da gramática é possível construir a AST ao usar a função addchild que adiciona um nó filho a um nó pai, se o nó filho é um intermediate node, os seus filhos são adicionados ao nó pai diretamente.
+
+As tabelas de símbolos usam a estrutura de dados *symbol_list_t*  que é uma lista ligada que possui informações sobre os símbolos e a sua scope. A *global_symbol_table* é inicializada na função *check_program*. As tabelas de símbolos locais são creadas pela função *enter_scope*. Para adicionarmos novos símbolos usa-se *insert_symbol* que retorna NULL se o símbolo já existe. Iniciamos pela função *check_program* que itera pela AST para encontrar variáveis globais e funções. De seguida preenche-se a *global_symbol_table* e processamos cada função recursivamente para preencher a sua tabela de símbolos locais e averiguar a existência de erros semânticos.
+
+De seguida é usada a função *show_symbol_table* para imprimir as tabelas e a função *show_node* que percorre a AST desde a raiz até às suas folhas, anotando-a (caso a flag esteja ativa) e ignorando os intermediate_nodes.
 
 ### Geração de Código
 
