@@ -1,0 +1,13 @@
+package main; 
+
+func main(){
+	var (x,y,z float32;);
+	{
+		x =-.01;
+		y = x + 1.0; 
+		z = 1e2;
+		x = x + z;
+		fmt.Println(x);
+	};
+
+};

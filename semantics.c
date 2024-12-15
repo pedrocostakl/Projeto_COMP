@@ -400,12 +400,7 @@ void check_function_body(struct symbol_list_t *scope, struct node_t *function_bo
                 break;
             case Block:
             case If: {
-                struct node_t *condition = getchild(node, 0);
-                struct node_t *block1 = getchild(node, 1);
-                struct node_t *block2 = getchild(node, 2);
-                check_expressions(scope, condition, 0);
-                check_statement(scope, block1, function_return_type);
-                check_statement(scope, block2, function_return_type);
+                check_statement(scope, node, function_return_type);
                 break;
             }
             case For:
@@ -484,31 +479,34 @@ void check_statement(struct symbol_list_t *scope, struct node_t *parent, enum ty
             break;
         }
         case If: {
-            struct node_t *node1 = getchild(parent, 0);
-            struct node_t *node2 = getchild(parent, 1);
-            struct node_t *else_block = getchild(parent, 2);
-            if (node2 != NULL) {
-                check_expressions(scope, node1,0);
-                check_statement(scope, node2,function_return_type);
-                if (else_block != NULL) {
-                    check_statement(scope, else_block, function_return_type);
-                }
-                if(node1->type != TypeBool){
-                    if(dontCheckIncorrectType == 0 && notIncorrectlyApplied == 0){
-                    printf("Line %d, column %d: Incompatible type ",  node1->line, node1->column);
+            struct node_t *node1 = getchild(parent, 0); // Condition
+            struct node_t *node2 = getchild(parent, 1); // If body
+            struct node_t *else_block = getchild(parent, 2); // Else body
+
+            // Always check the condition
+            
+            check_expressions(scope, node1, 0);
+
+            // If the condition is not a boolean, report an error
+            if (node1->type != TypeBool) {
+                    printf("Line %d, column %d: Incompatible type ", node1->line, node1->column);
                     print_type(node1->type);
-                    printf(" in if statement");//FAZER FUNCAO PARA BUSCAR CATEGORY
+                    printf(" in if statement");
                     printf("\n");
-                     parent->type = Undefined;
-                    semantic_errors++;
-                    }
                     parent->type = Undefined;
                     semantic_errors++;
-                }
-               
-            } else {
-                check_statement(scope, node1, function_return_type);
             }
+
+            // Check the If body
+            if (node2 != NULL) {
+                check_statement(scope, node2, function_return_type);
+            }
+
+            // Check the Else body
+            if (else_block != NULL) {
+                check_statement(scope, else_block, function_return_type);
+            }
+            break;
         break;
         }
         case For: {
@@ -518,14 +516,14 @@ void check_statement(struct symbol_list_t *scope, struct node_t *parent, enum ty
                     check_expressions(scope, node1,0);
                     check_statement(scope, node2, function_return_type);
                     if(node1->type != TypeBool){
-                        if(dontCheckIncorrectType == 0 && notIncorrectlyApplied == 0 && node1->errorOccurred == 0){
+                        //if(dontCheckIncorrectType == 0 && notIncorrectlyApplied == 0 && node1->errorOccurred == 0){
                             printf("Line %d, column %d: Incompatible type ",node1->line, node1->column);
                             print_type(node1->type);
                             printf(" in for statement");
                             printf("\n");
                             parent->type = Undefined;
                             semantic_errors++;
-                        }
+                        //}
                         parent->type = Undefined;
                         semantic_errors++;
                     }
@@ -564,18 +562,17 @@ void check_statement(struct symbol_list_t *scope, struct node_t *parent, enum ty
                 }
             } break;
         case Assign: {
-                /*print_type(parent->type);
-                printf("\n");*/
+                
                 struct node_t *node1 = getchild(parent, 0);
                 struct node_t *node2 = getchild(parent, 1);
                 check_expressions(scope, node1,0);
                 check_expressions(scope, node2,0);
                 // Skip type checking if a prior error occurred in the assignment expression
-                if (node1->errorOccurred || node2->errorOccurred) {
+                /*if (node2->errorOperationOccurred) {
                     parent->errorOccurred = 1;
                     parent->type = node1->type;
                     break;
-                }
+                }*/
 
                 if ((node1->type == node2->type)) {
                     parent->type = node1->type;
@@ -731,6 +728,7 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                 semantic_errors++;
                 parent->type = Undefined;
             }
+            
             break;
         }
         case StrLit: {
@@ -837,7 +835,6 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
             if (node1->type == node2->type) {
                 
             } else {
-                if(parent->errorOccurred){
                     printf("Line %d, column %d: Operator %s cannot be applied to types ", 
                     parent->line, parent->column, get_operator_token(parent->category));
                     print_type(node1->type);
@@ -848,12 +845,6 @@ void check_expressions(struct symbol_list_t *scope, struct node_t *parent, int c
                     parent->errorOccurred = 1;
                     dontCheckIncorrectType = 1;
                     notIncorrectlyApplied = 1;
-                }
-                semantic_errors++;
-                    parent->errorOccurred = 1;
-                    dontCheckIncorrectType = 1;
-                    notIncorrectlyApplied = 1;
-               
             }
             break;
         }

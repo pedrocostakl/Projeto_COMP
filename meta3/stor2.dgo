@@ -1,0 +1,9 @@
+package main
+func f() {
+    var p int;
+
+    p = 1;
+    p(p);
+}
+func p(p int) int{}
+

@@ -1,0 +1,31 @@
+Line 4, column 6: Incompatible type int in if statement
+Line 5, column 6: Incompatible type float32 in if statement
+Line 6, column 2: Cannot find symbol f
+Line 6, column 4: Operator = cannot be applied to types undef, undef
+Line 6, column 6: Cannot find symbol f
+Line 6, column 8: Operator + cannot be applied to types undef, int
+===== Global Symbol Table =====
+f	()	none
+
+===== Function f() Symbol Table =====
+return		none
+
+Program
+..FuncDecl
+....FuncHeader
+......Identifier(f)
+......FuncParams
+....FuncBody
+......If
+........Natural(1) - int
+........Block
+........Block
+......If
+........Decimal(1.0) - float32
+........Block
+........Block
+......Assign - undef
+........Identifier(f) - undef
+........Add - undef
+..........Identifier(f) - undef
+..........Natural(1) - int

@@ -1,0 +1,16 @@
+package main
+
+func main() {
+	// Simulating thousands of iterations
+    var i int; 
+	i = 0;
+	for i < 1000000 {
+		// Logical expressions in the 'if' statement
+		if (i%2 == 0 ||i%3 == 0|| i%5 == 0 ||i%7 == 0) {
+			fmt.Println("Iteration passed the condition\n");
+		}
+        i = i + 1;
+	}
+
+	fmt.Println("Test completed without segfault!")
+} 
